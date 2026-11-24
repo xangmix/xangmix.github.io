@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>GRPO 논문 해설</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column, same schematic language as the AWR and PPO pages: teal = data (questions, answers), rose = reward / V side, indigo = policy, orange = what GRPO changes / my inference. The paper is a story (data -> SFT -> RL), so the page tells that story first and hangs each equation on the step that needs it. */
+  :root {
+    --bg: #f3f5f6;
+    --surface: #ffffff;
+    --ink: #17202b;
+    --muted: #5b6672;
+    --line: #c9d1d8;
+    --env: #0f766e;
+    --env-soft: #e3f2f0;
+    --value: #be185d;
+    --value-soft: #fbe7f0;
+    --policy: #3b4cca;
+    --policy-soft: #e8eafb;
+    --update: #c2410c;
+    --update-soft: #fcebe1;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --display: "IBM Plex Sans KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+      --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+      --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+      --good: #4ade80; --bad: #f87171; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+    --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+    --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+    --good: #4ade80; --bad: #f87171; color-scheme: dark;
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.75; }
+  .wrap { max-width: 920px; margin: 0 auto; padding-block: 40px 72px;
+          padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+          display: grid; gap: 52px; }
+  header { display: grid; gap: 14px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5.5vw, 42px); line-height: 1.2; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1.35; margin: 0; text-wrap: balance; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  h2 .sec { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--policy); }
+  h3 { font-family: var(--display); font-weight: 600; font-size: 17px; line-height: 1.4; margin: 0; }
+  p { margin: 0; max-width: 70ch; }
+  .lede { font-size: 17px; }
+  .muted { color: var(--muted); }
+  .m { font-family: var(--mono); font-size: .9em; }
+  a { color: var(--policy); }
+  a:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--policy); outline-offset: 2px; border-radius: 3px; }
+  section { display: grid; gap: 16px; scroll-margin-top: 16px; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: center; font-size: 14px; }
+  nav.toc a { text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+  nav.toc a:hover { border-color: var(--policy); color: var(--policy); }
+  nav.toc .arw { color: var(--muted); font-size: 12px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+  .sw.env { border-color: var(--env); background: var(--env-soft); }
+  .sw.value { border-color: var(--value); background: var(--value-soft); }
+  .sw.policy { border-color: var(--policy); background: var(--policy-soft); }
+  .sw.update { border-color: var(--update); background: var(--update-soft); }
+
+  .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .trio > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .trio .k { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .trio .k.p { color: var(--bad); } .trio .k.i { color: var(--policy); } .trio .k.r { color: var(--good); }
+  .trio ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
+
+  .abs { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; }
+  .abs ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+  .abs .en { font-family: var(--mono); font-size: 12.5px; color: var(--muted); display: block; line-height: 1.55; }
+
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .scroll { overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 760px; height: auto; color: var(--ink); font-family: var(--body); }
+  figcaption { font-size: 14.5px; color: var(--muted); max-width: 74ch; }
+  svg text { fill: currentColor; }
+  svg .t { font-size: 13px; font-weight: 700; }
+  svg .s { font-size: 11.5px; fill: var(--muted); }
+  svg .h { font-family: var(--display); font-size: 15px; font-weight: 700; }
+  svg .mono { font-family: var(--mono); font-size: 12px; }
+  svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  svg .env { fill: var(--env-soft); stroke: var(--env); stroke-width: 2; }
+  svg .val { fill: var(--value-soft); stroke: var(--value); stroke-width: 2; }
+  svg .policy { fill: var(--policy-soft); stroke: var(--policy); stroke-width: 2; }
+  svg .upd { fill: var(--update-soft); stroke: var(--update); stroke-width: 2; }
+  svg .ghost { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  svg .ar { stroke: currentColor; stroke-width: 1.6; fill: none; }
+
+  .tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--display); font-weight: 600; font-size: 13.5px; color: var(--muted); background: var(--bg); white-space: nowrap; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+  tbody th { font-weight: 500; white-space: nowrap; }
+  .sym { min-width: 720px; }
+  .sym td:first-child { white-space: nowrap; }
+  .wide { min-width: 640px; }
+  .num td, .num th { font-variant-numeric: tabular-nums; }
+  .num td { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  .num .best { color: var(--policy); font-weight: 600; }
+  .num .hl { background: var(--policy-soft); }
+
+  .eqs { display: grid; gap: 14px; }
+  .eqc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 4px 12px; scroll-margin-top: 16px; }
+  .no { font-family: var(--mono); font-size: 13px; color: var(--policy); font-weight: 500; padding-top: 10px; }
+  .eqc .body { display: grid; gap: 8px; min-width: 0; }
+  .tex { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+  .tag { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); margin-right: 6px; white-space: nowrap; }
+  .tag.r { color: var(--policy); border-color: var(--policy); }
+  .tag.w { color: var(--env); border-color: var(--env); }
+  .tag.e { color: var(--update); border-color: var(--update); }
+  .eqc p { font-size: 15.5px; }
+  .ex { background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: 15px; display: grid; gap: 6px; }
+  .ex p { font-size: 15px; }
+
+  .call { border-left: 3px solid var(--policy); background: var(--policy-soft); border-radius: 0 10px 10px 0; padding: 12px 16px; display: grid; gap: 8px; }
+  .call.val { border-color: var(--value); background: var(--value-soft); }
+  .call.inf { border-color: var(--update); background: var(--update-soft); }
+  .call h3 { font-size: 16px; }
+  .call ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+  .mini { border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; width: auto; background: var(--surface); border-radius: 6px; }
+  .mini td, .mini th { padding: 4px 12px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  .mini th { font-family: var(--body); font-weight: 500; color: var(--muted); }
+  .mini .hit { color: var(--value); font-weight: 600; }
+  .mini .ok { color: var(--good); font-weight: 600; }
+  .mini-wrap { overflow-x: auto; }
+
+  .stage { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; }
+  .stage > div { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--env); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .stage > div.rl { border-top-color: var(--policy); }
+  .stage > div.sft { border-top-color: var(--value); }
+  .stage .k { font-family: var(--mono); font-size: 12px; letter-spacing: .05em; color: var(--muted); }
+  .stage ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14.5px; }
+
+  .ctl { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 18px; }
+  .ctl > div { display: grid; gap: 4px; min-width: 0; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .ctl output { font-family: var(--mono); color: var(--ink); font-size: 13.5px; }
+  .ctl input[type=range] { width: 100%; accent-color: var(--policy); }
+  .ctl select { font-family: var(--mono); font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+  .read { background: var(--bg); border-radius: 8px; padding: 10px 14px; font-size: 15px; display: grid; gap: 4px; }
+  .read b.go { color: var(--good); } .read b.stop { color: var(--bad); }
+  .dots { display: flex; flex-wrap: wrap; gap: 4px; }
+  .dot { width: 22px; height: 22px; border-radius: 4px; background: var(--bad); }
+  .dot.ok { background: var(--good); }
+
+  .bars { display: grid; gap: 8px; }
+  .bar { display: grid; grid-template-columns: 190px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .bar .lab { min-width: 0; }
+  .bar .trk { height: 14px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--policy); border-radius: 3px; min-width: 2px; }
+  .bar .fill.mute { background: var(--muted); opacity: .55; }
+  .bar .pct { font-family: var(--mono); text-align: right; font-size: 13px; }
+  .bargap { height: 6px; }
+  @media (max-width: 560px) { .bar { grid-template-columns: 1fr 58px; } .bar .trk { grid-column: 1 / -1; grid-row: 2; } }
+
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0; }
+  .nums div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 2px; }
+  .nums dt { font-size: 13px; color: var(--muted); }
+  .nums dd { margin: 0; font-family: var(--mono); font-size: 15.5px; font-variant-numeric: tabular-nums; }
+
+  pre.alg { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  pre.alg .c { color: var(--muted); }
+  pre.alg .n { color: var(--update); font-weight: 500; }
+
+  ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 74ch; }
+
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; }
+  details + details { margin-top: 8px; }
+  summary { cursor: pointer; font-weight: 500; }
+  details[open] summary { margin-bottom: 8px; color: var(--policy); }
+
+  footer { font-size: 13.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+  @media (max-width: 560px) {
+    .eqc { grid-template-columns: 1fr; }
+    .no { padding-top: 0; }
+  }
+
+  mjx-container { color: var(--ink); }
+  mjx-container[display="true"] { margin: 4px 0 !important; text-align: left !important; }
+  mjx-container[jax="SVG"][display="true"] { display: block; overflow-x: auto; overflow-y: hidden; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">RL Part2 준비 · Shao 외, DeepSeek-AI · arXiv 2402.03300v3 (2024) · DeepSeekMath</div>
+  <h1>GRPO 논문 해설</h1>
+  <p class="lede">논문 제목은 <b>DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</b>예요. 이 논문의 주인공은 GRPO가 아니라 <b>"작은 오픈소스 모델(7B)이 수학에서 GPT-4 근처까지 가는 과정"</b>이고, GRPO는 그 마지막 단계(강화학습)에서 쓴 도구예요. 그래서 이 페이지는 <b>이야기(데이터 → SFT → RL)를 먼저</b> 풀고, 식 (1)~(5), (19)~(21)은 그 이야기가 필요로 하는 자리에서 설명해요.</p>
+  <nav class="toc" aria-label="읽는 순서">
+    <a href="#s-sum">한 장 요약</a><span class="arw">→</span>
+    <a href="#s-sym">기호 사전</a><span class="arw">→</span>
+    <a href="#s-story">이야기 §1~3, §5.1</a><span class="arw">→</span>
+    <a href="#s-map">PPO vs GRPO 그림</a><span class="arw">→</span>
+    <a href="#s-rl">§4.1 식 1–4</a><span class="arw">→</span>
+    <a href="#s-adv">그룹 Â·직접 만져 보기</a><span class="arw">→</span>
+    <a href="#s-alg">알고리즘 1·§4.2 결과</a><span class="arw">→</span>
+    <a href="#s-uni">§5.2 통합 틀</a><span class="arw">→</span>
+    <a href="#s-lim">한계</a><span class="arw">→</span>
+    <a href="#s-quiz">점검 질문</a>
+  </nav>
+  <div class="legend">
+    <span><i class="sw env"></i>데이터 (질문·답)</span>
+    <span><i class="sw value"></i>보상 쪽</span>
+    <span><i class="sw policy"></i>정책 π</span>
+    <span><i class="sw update"></i>GRPO가 바꾼 곳 · 논문 밖 추론</span>
+  </div>
+</header>
+
+<!-- ============ SUMMARY ============ -->
+<section id="s-sum">
+  <h2>한 장 요약 <span class="sec">Abstract · §1 · §6</span></h2>
+  <div class="trio">
+    <div>
+      <span class="k p">문제</span>
+      <ul>
+        <li>GPT-4, Gemini-Ultra는 수학을 잘하지만 <b>공개돼 있지 않고</b>, 공개된 오픈소스 모델은 한참 뒤처져 있어요(§1).</li>
+        <li>SFT까지 끝난 모델을 RL로 더 올리려면 보통 <b>PPO</b>를 쓰는데, PPO는 <b>정책만 한 크기의 V(가치) 모델</b>을 하나 더 학습해야 해서 메모리와 계산이 커요(§4.1.1).</li>
+        <li>LLM은 보상이 <b>마지막 토큰에만</b> 주어져서, 토큰마다 정확한 V를 학습하기도 어려워요.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k i">아이디어</span>
+      <ul>
+        <li>① <b>데이터:</b> Common Crawl에서 수학 웹페이지 <b>120B 토큰</b>을 골라 사전학습.</li>
+        <li>② <b>SFT:</b> 풀이 77.6만 개로 지도학습.</li>
+        <li>③ <b>GRPO:</b> 같은 문제를 <b>G번</b> 풀게 해서 <b>그 평균을 기준선</b>으로 써요. V 모델이 필요 없어요.</li>
+        <li>PPO의 clip 구조는 그대로 두고, KL 벌점은 보상이 아니라 <b>손실에 직접</b> 더해요.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k r">결과</span>
+      <ul>
+        <li>SFT 모델(Instruct 7B) → RL 모델: GSM8K <b>82.9 → 88.2</b>, MATH <b>46.8 → 51.7</b>(체인오브소트, Table 5).</li>
+        <li>RL에 쓴 건 GSM8K·MATH 계열 질문뿐인데 중국어 벤치(CMATH 84.6 → 88.8)도 올랐어요.</li>
+        <li>다만 RL은 <b>Maj@K는 올리고 Pass@K는 못 올렸어요</b>. 논문 해석은 "근본 능력이 늘기보다 분포가 견고해진다"예요.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="abs">
+    <h3>Abstract 한 문장씩</h3>
+    <ol>
+      <li><b>모델과 점수.</b> DeepSeekMath 7B는 DeepSeek-Coder-Base-v1.5 7B에서 시작해 <b>수학 관련 토큰 120B</b>(자연어·코드도 섞음)로 계속 사전학습한 모델이에요. 외부 도구와 투표 없이 MATH에서 <b>51.7%</b>, 64개 샘플의 self-consistency로 <b>60.9%</b>예요.
+        <span class="en">continues pre-training DeepSeek-Coder-Base-v1.5 7B with 120B math-related tokens ... 51.7% on the competition-level MATH benchmark ... Self-consistency over 64 samples achieves 60.9%</span></li>
+      <li><b>성능의 두 가지 원인.</b> ① 공개 웹 데이터를 잘 골라낸 파이프라인, ② <b>GRPO</b>.
+        <span class="en">attributed to two key factors: ... a meticulously engineered data selection pipeline. Second, ... Group Relative Policy Optimization (GRPO)</span></li>
+      <li><b>GRPO의 정체.</b> PPO의 변형(variant)이고, 수학 추론을 올리면서 PPO의 <b>메모리 사용을 동시에 줄인다</b>고 써요.
+        <span class="en">a variant of Proximal Policy Optimization (PPO), that enhances mathematical reasoning abilities while concurrently optimizing the memory usage of PPO</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ SYMBOLS ============ -->
+<section id="s-sym">
+  <h2>기호 사전 <span class="sec">식 읽기 전에</span></h2>
+  <p>PPO 논문에서 쓰던 글자가 LLM 쪽 표기로 바뀌어요. <b>"시간 t의 (상태, 행동)"이 "질문 q에 대한 답 o의 t번째 토큰"</b>이 된다고 생각하면 돼요. 노란 줄(★)이 헷갈리기 쉬운 곳이에요.</p>
+  <div class="tbl">
+    <table class="sym">
+      <thead><tr><th>기호</th><th>이름</th><th>뜻</th><th>PPO 때 말로 / 우리 말로</th></tr></thead>
+      <tbody>
+        <tr><td>\(q\)</td><td>질문</td><td>수학 문제 하나. 데이터셋 \(P(Q)\)에서 뽑아요</td><td>상태 s (로봇이라면 장면+지시문)</td></tr>
+        <tr><td>\(o\), \(o_i\)</td><td>출력(답)</td><td>모델이 쓴 풀이 한 편. \(o_t\)는 그중 t번째 토큰</td><td>행동 a의 나열 (로봇이라면 한 에피소드)</td></tr>
+        <tr><td>\(G\)</td><td>그룹 크기</td><td>같은 질문에서 뽑는 답의 개수. 논문 실험은 <b>64</b></td><td>같은 시작점에서 굴리는 판 수</td></tr>
+        <tr><td>\(\pi_\theta,\ \pi_{\theta_{\text{old}}}\)</td><td>현재 / 옛 정책</td><td>PPO와 같음. 옛 정책이 데이터(답)를 뽑아요</td><td>학습 중인 모델, 그 복사본</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(\pi_{\text{ref}}\)</td><td>기준(reference) 모델</td><td>보통 처음 SFT 모델. KL 벌점의 "원래 모습"</td><td>PPO 논문에는 없던 것. 정책이 너무 멀리 안 가게 붙잡는 닻</td></tr>
+        <tr><td>\(r_i\), \(r_\varphi\)</td><td>보상, 보상 모델</td><td>답 \(o_i\)에 보상 모델이 매긴 점수. \(r_\varphi\)는 점수를 매기는 모델</td><td>보상 (성공 1 / 실패 0)</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(\hat A_{i,t}\)</td><td>어드밴티지</td><td>i번째 답의 t번째 토큰이 평균보다 얼마나 좋았나. GRPO에서는 <b>그룹 안 상대 보상</b></td><td>PPO의 Â와 같은 역할, 계산법이 다름</td></tr>
+        <tr><td>\(\epsilon\)</td><td>엡실론</td><td>clip 폭 (PPO와 동일)</td><td>±20% 같은 허용 변화</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(\beta\)</td><td>베타</td><td><b>KL 벌점 계수</b>. 논문 실험은 <b>0.04</b></td><td>PPO 식 5의 β와 같은 자리</td></tr>
+        <tr><td>\(\mathbb D_{KL}[\pi_\theta\|\pi_{\text{ref}}]\)</td><td>KL 발산</td><td>현재 정책이 기준 모델에서 얼마나 멀어졌나 (식 4의 추정식으로 계산)</td><td>멀어진 정도</td></tr>
+        <tr><td>\(\mu\)</td><td>뮤</td><td>한 번 뽑은 샘플로 업데이트하는 횟수 (Algorithm 1). 논문 실험은 <b>1회</b></td><td>PPO의 K epoch에 해당</td></tr>
+        <tr><td>\(\mathrm{mean}(\mathbf r),\ \mathrm{std}(\mathbf r)\)</td><td>그룹 평균·표준편차</td><td>\(G\)개 보상의 평균과 표준편차</td><td>PPO의 V(s) 자리를 대신하는 기준선</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ STORY ============ -->
+<section id="s-story">
+  <h2>논문의 이야기: 데이터 → SFT → RL <span class="sec">§1 · §2 · §3 · §5.1</span></h2>
+  <p>서론에서 논문이 세운 목표는 <b>"공개된 7B 모델이 GPT-4에 가까운 수학 실력을 내게 하자"</b>예요. 그 방법이 세 단계예요.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 960 190" role="img" aria-label="DeepSeekMath를 만드는 세 단계. 코드 모델에서 시작해 수학 웹 데이터로 사전학습하고, 풀이 데이터로 SFT하고, GRPO로 강화학습한다. 단계마다 GSM8K와 MATH 점수가 오른다.">
+        <defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <rect class="env" x="12" y="30" width="196" height="96" rx="10"/>
+        <text class="t" x="110" y="54" text-anchor="middle">시작점</text>
+        <text class="s" x="110" y="76" text-anchor="middle">DeepSeek-Coder-Base</text>
+        <text class="s" x="110" y="94" text-anchor="middle">-v1.5 7B (코드 모델)</text>
+        <rect class="env" x="252" y="30" width="216" height="96" rx="10"/>
+        <text class="t" x="360" y="54" text-anchor="middle">① 수학 사전학습 (§2)</text>
+        <text class="s" x="360" y="76" text-anchor="middle">웹 120B 토큰 계속 학습</text>
+        <text class="mono" x="360" y="102" text-anchor="middle">Base: GSM8K 64.2</text>
+        <text class="mono" x="360" y="118" text-anchor="middle">MATH 36.2</text>
+        <rect class="val" x="512" y="30" width="196" height="96" rx="10"/>
+        <text class="t" x="610" y="54" text-anchor="middle">② SFT (§3)</text>
+        <text class="s" x="610" y="76" text-anchor="middle">풀이 776K 지도학습</text>
+        <text class="mono" x="610" y="102" text-anchor="middle">Instruct: GSM8K 82.9</text>
+        <text class="mono" x="610" y="118" text-anchor="middle">MATH 46.8</text>
+        <rect class="policy" x="752" y="30" width="196" height="96" rx="10"/>
+        <text class="t" x="850" y="54" text-anchor="middle">③ GRPO RL (§4)</text>
+        <text class="s" x="850" y="76" text-anchor="middle">같은 문제 G번 풀기</text>
+        <text class="mono" x="850" y="102" text-anchor="middle">RL: GSM8K 88.2</text>
+        <text class="mono" x="850" y="118" text-anchor="middle">MATH 51.7</text>
+        <line class="ar" x1="208" y1="78" x2="250" y2="78" marker-end="url(#ah1)"/>
+        <line class="ar" x1="468" y1="78" x2="510" y2="78" marker-end="url(#ah1)"/>
+        <line class="ar" x1="708" y1="78" x2="750" y2="78" marker-end="url(#ah1)"/>
+        <text class="s" x="12" y="168">점수는 체인오브소트(CoT) 기준, 외부 도구 없이 측정한 Top-1 정확도(%). Base 값은 서론, Instruct·RL 값은 Table 5.</text>
+      </svg>
+    </div>
+    <figcaption>세 단계마다 점수가 어떻게 오르는지를 한 줄로 그렸어요. 이 페이지의 대부분은 마지막 ③ 상자 안을 풀어요.</figcaption>
+  </figure>
+
+  <div class="stage">
+    <div>
+      <span class="k">① 수학 사전학습 · §2</span>
+      <h3>좋은 데이터를 어떻게 골랐나</h3>
+      <ul>
+        <li><b>씨앗(seed):</b> OpenWebMath(수학 웹 텍스트 모음)에서 50만 개를 양성, Common Crawl 일반 웹페이지 50만 개를 음성으로 놓고 <b>fastText 분류기</b>를 학습해요.</li>
+        <li>중복을 제거한 Common Crawl <b>40B개 HTML 페이지</b>에서 분류기 점수가 높은 것만 남겨요.</li>
+        <li><b>반복:</b> 수집된 비율이 10%가 넘는 도메인(예: mathoverflow.net)을 "수학 도메인"으로 보고, 사람이 그 안의 URL 경로를 표시해서 씨앗을 늘리고 분류기를 다시 학습해요. <b>4번 반복</b>해서 <b>3,550만 페이지 / 120B 토큰</b>이 됐고, 3번째까지 이미 98%가 모여서 멈췄어요.</li>
+        <li><b>시험 문제 오염 제거:</b> GSM8K·MATH 같은 벤치마크와 10-gram이 정확히 겹치는 구간은 지워요.</li>
+      </ul>
+    </div>
+    <div class="sft">
+      <span class="k">② SFT · §3</span>
+      <h3>풀이를 가르치기</h3>
+      <ul>
+        <li>영어·중국어 수학 문제 <b>776K개</b>를 CoT(생각을 글로 푸는 방식), PoT(프로그램으로 푸는 방식), 도구 통합(tool-integrated) 풀이와 함께 구성해요.</li>
+        <li>중국어는 K-12 문제 76개 소주제를 포함해요.</li>
+        <li>500 step, 배치 256, 학습률 5e-5(일정), 컨텍스트 4K 토큰으로 학습해요(§3.2).</li>
+        <li>이 결과가 <b>DeepSeekMath-Instruct 7B</b>이고, 이 모델이 RL의 출발점이에요.</li>
+      </ul>
+    </div>
+    <div class="rl">
+      <span class="k">③ RL · §4</span>
+      <h3>왜 SFT 뒤에 RL이 필요한가</h3>
+      <ul>
+        <li>SFT는 "정답 풀이를 따라 쓰게" 만들 뿐, <b>맞은 풀이/틀린 풀이의 차이</b>를 직접 쓰지는 않아요.</li>
+        <li>RL은 모델이 <b>직접 푼 답</b>에 점수를 매기고, 맞은 쪽 확률은 올리고 틀린 쪽은 내려요.</li>
+        <li>여기에 쓰는 알고리즘이 GRPO이고, 이 페이지의 나머지 부분이 그 이야기예요.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="call">
+    <h3>논문이 사전학습 실험에서 직접 확인한 것 (§1.1, §5.1)</h3>
+    <ul>
+      <li><b>데이터 규모:</b> 120B 토큰은 Minerva가 쓴 수학 웹페이지의 약 <b>7배</b>, OpenWebMath의 <b>9배</b>예요. Base 7B가 <b>Minerva 540B</b>와 비슷한 점수를 내서, "파라미터 수만이 답은 아니고 좋은 데이터로 학습한 작은 모델도 강하다"고 말해요.</li>
+      <li><b>코드를 먼저 학습하면 수학이 좋아진다:</b> 일반 LLM이 아니라 코드 모델에서 시작하는 게 낫고, 도구를 쓰든 안 쓰든 수학 풀이가 좋아져요. 논문은 이를 "코드 학습이 추론에 도움이 되는가"라는 오랜 질문에 대한 <b>부분적 답(수학 추론에 한해서는 그렇다)</b>이라고 조심스럽게 말해요.</li>
+      <li><b>arXiv 논문 데이터는 효과가 없었다:</b> 수학 논문들이 흔히 쓰는 arXiv 토큰이 이 논문이 쓴 벤치마크에서는 <b>눈에 띄는 향상이 없었어요.</b> 단, 다른 데이터와 섞었을 때나 더 큰 모델에서는 확인하지 않았고, 논문도 그 점을 한계로 적었어요(§5.1).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ MAP ============ -->
+<section id="s-map">
+  <h2>PPO vs GRPO 그림 <span class="sec">논문 그림 4를 다시 그림</span></h2>
+  <p>PPO의 clip 구조는 그대로이고, <b>"Â를 어떻게 만드느냐"</b>와 <b>"KL 벌점을 어디에 넣느냐"</b> 두 곳만 달라요.</p>
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 960 330" role="img" aria-label="PPO는 질문에서 정책이 답 하나를 만들고 보상 모델과 가치 모델의 값을 GAE로 합쳐 어드밴티지를 만든다. GRPO는 정책이 같은 질문에서 G개의 답을 만들고 보상 모델의 G개 보상을 그룹 계산으로 정규화해 어드밴티지를 만들며 가치 모델이 없다.">
+        <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <text class="h" x="16" y="20">PPO</text>
+        <rect class="env" x="16" y="30" width="112" height="44" rx="8"/><text class="t" x="72" y="57" text-anchor="middle">질문 q</text>
+        <rect class="policy" x="152" y="30" width="112" height="44" rx="8"/><text class="t" x="208" y="57" text-anchor="middle">정책 π_θ</text>
+        <rect class="env" x="288" y="30" width="112" height="44" rx="8"/><text class="t" x="344" y="57" text-anchor="middle">답 o</text>
+        <rect class="val" x="424" y="30" width="112" height="44" rx="8"/><text class="t" x="480" y="57" text-anchor="middle">보상 모델</text>
+        <rect class="box" x="560" y="30" width="112" height="44" rx="8"/><text class="t" x="616" y="57" text-anchor="middle">보상 r</text>
+        <rect class="box" x="696" y="30" width="112" height="44" rx="8"/><text class="t" x="752" y="57" text-anchor="middle">GAE</text>
+        <rect class="box" x="832" y="30" width="112" height="44" rx="8"/><text class="t" x="888" y="57" text-anchor="middle">Â</text>
+        <rect class="val" x="696" y="110" width="112" height="44" rx="8"/><text class="t" x="752" y="137" text-anchor="middle">가치 모델 V</text>
+        <line class="ar" x1="128" y1="52" x2="150" y2="52" marker-end="url(#ah2)"/>
+        <line class="ar" x1="264" y1="52" x2="286" y2="52" marker-end="url(#ah2)"/>
+        <line class="ar" x1="400" y1="52" x2="422" y2="52" marker-end="url(#ah2)"/>
+        <line class="ar" x1="536" y1="52" x2="558" y2="52" marker-end="url(#ah2)"/>
+        <line class="ar" x1="672" y1="52" x2="694" y2="52" marker-end="url(#ah2)"/>
+        <line class="ar" x1="808" y1="52" x2="830" y2="52" marker-end="url(#ah2)"/>
+        <line class="ar" x1="752" y1="110" x2="752" y2="76" marker-end="url(#ah2)"/>
+        <text class="s" x="760" y="98">v (함께 학습, 정책급 크기)</text>
+        <text class="s" x="16" y="108">KL 벌점을 보상 r에 섞어요 (식 2): r_t = 보상모델 − β·log(π_θ/π_ref)</text>
+        <text class="s" x="16" y="128">답은 질문당 1개 → 평균을 따로 알 수 없어서 V 모델이 필요해요</text>
+
+        <text class="h" x="16" y="196">GRPO</text>
+        <rect class="env" x="16" y="206" width="112" height="44" rx="8"/><text class="t" x="72" y="233" text-anchor="middle">질문 q</text>
+        <rect class="policy" x="152" y="206" width="112" height="44" rx="8"/><text class="t" x="208" y="233" text-anchor="middle">정책 π_θ</text>
+        <rect class="env" x="288" y="206" width="112" height="44" rx="8"/><text class="t" x="344" y="233" text-anchor="middle">답 o₁ … o_G</text>
+        <rect class="val" x="424" y="206" width="112" height="44" rx="8"/><text class="t" x="480" y="233" text-anchor="middle">보상 모델</text>
+        <rect class="box" x="560" y="206" width="112" height="44" rx="8"/><text class="t" x="616" y="233" text-anchor="middle">r₁ … r_G</text>
+        <rect class="upd" x="696" y="206" width="112" height="44" rx="8"/><text class="t" x="752" y="233" text-anchor="middle">그룹 계산</text>
+        <rect class="box" x="832" y="206" width="112" height="44" rx="8"/><text class="t" x="888" y="233" text-anchor="middle">Â₁ … Â_G</text>
+        <rect class="ghost" x="696" y="276" width="112" height="36" rx="8"/><text class="s" x="752" y="299" text-anchor="middle">가치 모델 없음</text>
+        <line class="ar" x1="128" y1="228" x2="150" y2="228" marker-end="url(#ah2)"/>
+        <line class="ar" x1="264" y1="228" x2="286" y2="228" marker-end="url(#ah2)"/>
+        <line class="ar" x1="400" y1="228" x2="422" y2="228" marker-end="url(#ah2)"/>
+        <line class="ar" x1="536" y1="228" x2="558" y2="228" marker-end="url(#ah2)"/>
+        <line class="ar" x1="672" y1="228" x2="694" y2="228" marker-end="url(#ah2)"/>
+        <line class="ar" x1="808" y1="228" x2="830" y2="228" marker-end="url(#ah2)"/>
+        <text class="s" x="16" y="284">KL 벌점을 손실에 직접 더해요 (식 3): − β·D_KL[π_θ ‖ π_ref]</text>
+        <text class="s" x="16" y="304">같은 질문의 G개 답을 서로 비교 → (r_i − 평균)/표준편차가 곧 Â</text>
+      </svg>
+    </div>
+    <figcaption>위쪽이 PPO, 아래쪽이 GRPO예요. 달라진 것은 주황 상자(그룹 계산)가 V 모델과 GAE를 대신한다는 점과, KL 벌점이 보상 안이 아니라 손실 식에 들어간다는 점이에요. 논문 그림 4를 제가 다시 그린 것이라 상자 이름과 배치는 원본과 달라요.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ §4.1 EQUATIONS ============ -->
+<section id="s-rl">
+  <h2>§4.1 PPO에서 GRPO로 <span class="sec">식 (1)–(4)</span></h2>
+  <div class="eqs">
+
+    <div class="eqc" id="e1">
+      <div class="no">(1)</div>
+      <div class="body">
+        <div class="tex">\[J_{PPO}(\theta)=\mathbb E_{q\sim P(Q),\,o\sim\pi_{\theta_{\text{old}}}(O|q)}\Big[\frac{1}{|o|}\sum_{t=1}^{|o|}\min\Big(\frac{\pi_\theta(o_t|q,o_{\lt t})}{\pi_{\theta_{\text{old}}}(o_t|q,o_{\lt t})}A_t,\ \mathrm{clip}\Big(\frac{\pi_\theta(o_t|q,o_{\lt t})}{\pi_{\theta_{\text{old}}}(o_t|q,o_{\lt t})},\,1-\varepsilon,\,1+\varepsilon\Big)A_t\Big)\Big]\]</div>
+        <p><span class="tag r">읽기</span>PPO 논문 식 7(L^CLIP)을 LLM 표기로 다시 쓴 거예요. 달라진 건 글자뿐이에요. ① 시간 t의 (s, a)가 <b>"질문 q와 앞선 토큰들 \(o_{\lt t}\)가 주어졌을 때 t번째 토큰 \(o_t\)"</b>가 되고, ② 한 답 안의 토큰들을 <b>\(1/|o|\)로 평균</b>해요(긴 답이 불리하지 않게 길이로 나눔).</p>
+        <p><span class="tag w">어드밴티지</span>\(A_t\)는 보상 \(\{r_{\ge t}\}\)와 학습된 가치 함수 \(V_\psi\)로 <b>GAE</b>를 적용해 계산해요(논문 설명). PPO 해설 페이지의 GAE와 같은 것이에요.</p>
+        <p><span class="tag r">확률비</span>괄호 안의 분수가 PPO 때의 r이에요. 이 페이지에서는 편의상 \(\rho_{i,t}\)라고 부를게요(논문은 이름을 붙이지 않았어요).</p>
+      </div>
+    </div>
+
+    <div class="eqc" id="e2">
+      <div class="no">(2)</div>
+      <div class="body">
+        <div class="tex">\[r_t=r_\varphi(q,o_{\le t})-\beta\log\frac{\pi_\theta(o_t|q,o_{\lt t})}{\pi_{\text{ref}}(o_t|q,o_{\lt t})}\]</div>
+        <p><span class="tag r">읽기</span>PPO로 LLM을 RL할 때의 <b>표준 방식</b>(InstructGPT 계열)이에요. 보상 모델이 준 점수에서, 기준 모델(보통 처음 SFT 모델)에서 멀어진 만큼을 <b>토큰마다 벌점으로 빼서</b> 보상으로 써요. 보상 모델이 허점 있는 점수를 줘도 정책이 거기만 파고드는 것(과최적화)을 막으려는 목적이에요.</p>
+        <p><span class="tag w">문제</span>벌점이 보상 안에 들어가니까 <b>Â 계산(GAE) 안에 벌점이 섞여요</b>. 논문은 이게 계산을 복잡하게 만든다고 말해요.</p>
+      </div>
+    </div>
+
+    <div class="eqc" id="e3">
+      <div class="no">(3)</div>
+      <div class="body">
+        <div class="tex">\[J_{GRPO}(\theta)=\mathbb E\Big[q\sim P(Q),\{o_i\}_{i=1}^{G}\sim\pi_{\theta_{\text{old}}}(O|q)\Big]\frac1G\sum_{i=1}^{G}\frac1{|o_i|}\sum_{t=1}^{|o_i|}\Big\{\min\big(\rho_{i,t}\hat A_{i,t},\ \mathrm{clip}(\rho_{i,t},1-\varepsilon,1+\varepsilon)\hat A_{i,t}\big)-\beta\,\mathbb D_{KL}\big[\pi_\theta\|\pi_{\text{ref}}\big]\Big\}\]</div>
+        <div class="tex">\[\rho_{i,t}=\frac{\pi_\theta(o_{i,t}|q,o_{i,\lt t})}{\pi_{\theta_{\text{old}}}(o_{i,t}|q,o_{i,\lt t})}\]</div>
+        <p><span class="tag r">읽기</span>식 (1)과 거의 같은데 <b>세 곳</b>이 달라요. ① 질문 하나당 답을 <b>G개</b> 뽑아요(\(\frac1G\sum_i\)). ② \(A_t\)가 \(\hat A_{i,t}\)로 바뀌어요. 이건 <b>답 i 안에서만 계산한 그룹 상대 값</b>이라서 V 모델이 필요 없어요(다음 절). ③ 중괄호 안 끝에 <b>\(-\beta\,\mathbb D_{KL}\)</b>가 직접 들어가요. 식 (2)처럼 보상에 섞지 않고 <b>손실에 바로 더해서</b> Â 계산이 단순해져요.</p>
+        <p><span class="tag w">왜 그룹인가</span>논문의 설명: ① V 모델은 정책과 비슷한 크기라 메모리·계산 부담이 크고, ② LLM은 보통 <b>마지막 토큰에만 보상</b>이 있어서 토큰마다 정확한 V를 학습하기 어려워요. 대신 <b>같은 질문에서 나온 여러 답의 평균 보상</b>을 기준선으로 쓰면 돼요. 이게 보상 모델이 "<b>같은 질문의 답끼리 비교한 데이터</b>로 학습된다"는 점과도 잘 맞는다고 논문이 덧붙여요.</p>
+      </div>
+    </div>
+
+    <div class="eqc" id="e4">
+      <div class="no">(4)</div>
+      <div class="body">
+        <div class="tex">\[\mathbb D_{KL}\big[\pi_\theta\|\pi_{\text{ref}}\big]=\frac{\pi_{\text{ref}}(o_{i,t}|q,o_{i,\lt t})}{\pi_\theta(o_{i,t}|q,o_{i,\lt t})}-\log\frac{\pi_{\text{ref}}(o_{i,t}|q,o_{i,\lt t})}{\pi_\theta(o_{i,t}|q,o_{i,\lt t})}-1\]</div>
+        <p><span class="tag r">읽기</span>KL을 <b>샘플 하나로 어림하는 식</b>이에요. \(u=\pi_{\text{ref}}/\pi_\theta\)라 하면 <b>\(u-\log u-1\)</b>이에요. 논문은 이를 Schulman(2020)의 <b>불편(unbiased) 추정</b>이고 "항상 양수임이 보장된다"고 적어요.</p>
+        <div class="ex">
+          <p><span class="tag e">예시</span>u 값별 계산 (제가 계산한 값):</p>
+          <div class="mini-wrap"><table class="mini">
+            <thead><tr><th>u = π_ref/π_θ</th><th>log u</th><th>u − log u − 1</th></tr></thead>
+            <tbody>
+              <tr><td>1.0 (똑같음)</td><td>0.000</td><td class="ok">0.000</td></tr>
+              <tr><td>2.0 (ref가 2배 더 좋아함)</td><td>0.693</td><td class="hit">0.307</td></tr>
+              <tr><td>0.5 (ref가 절반만 좋아함)</td><td>−0.693</td><td class="hit">0.193</td></tr>
+            </tbody>
+          </table></div>
+          <p>u가 1에서 어느 쪽으로 벗어나도 값이 <b>0 이상으로 커져요</b>. 이게 "항상 양수"라는 뜻이고, 이유는 \(\log u\le u-1\)이기 때문이에요(제 설명이에요). 정책이 기준 모델에서 멀어질수록 벌점이 커지는 건 PPO 식 (5)의 KL 벌점과 같은 역할이에요.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ ADVANTAGE ============ -->
+<section id="s-adv">
+  <h2>그룹 상대 어드밴티지 <span class="sec">§4.1.2 outcome · §4.1.3 process</span></h2>
+  <p>GRPO의 핵심은 식 (3)의 \(\hat A_{i,t}\)가 <b>어떻게 만들어지는가</b>예요. 논문은 두 가지 방식을 써요.</p>
+
+  <div class="eqs">
+    <div class="eqc" id="eout">
+      <div class="no">§4.1.2</div>
+      <div class="body">
+        <p><b>Outcome supervision (결과 감독).</b> 답 \(o_1,\dots,o_G\)에 보상 모델이 점수 \(\mathbf r=\{r_1,\dots,r_G\}\)를 매기고, 이걸 <b>그룹 평균을 빼고 그룹 표준편차로 나눠서</b> 정규화해요. 그 값이 <b>답 전체의 모든 토큰</b>의 어드밴티지가 돼요.</p>
+        <div class="tex">\[\hat A_{i,t}=\tilde r_i=\frac{r_i-\mathrm{mean}(\mathbf r)}{\mathrm{std}(\mathbf r)}\]</div>
+        <p><span class="tag r">읽기</span>"평균보다 잘한 답은 +, 못한 답은 −"예요. PPO에서 \(G-V(s)\)였던 것을 <b>\(r_i-\text{평균}\)</b>으로 바꾼 것이고, 표준편차로 나눠서 문제마다 점수 스케일이 달라도 비슷한 크기가 되게 해요. 한 답 안의 모든 토큰이 같은 값을 받아요(보상이 끝에만 있으니까).</p>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <h3>직접 만져 보기: 같은 문제를 G번 풀었더니 k번 맞았다면</h3>
+    <div class="ctl">
+      <div><label for="gG">그룹 크기 G <output id="gGo"></output></label>
+        <select id="gG"><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option><option value="64">64 (논문 실험값)</option></select></div>
+      <div><label for="gK">맞은 답 개수 k <output id="gKo"></output></label>
+        <input type="range" id="gK" min="0" max="8" step="1" value="6"></div>
+      <div><label for="gS">표준편차 정의</label>
+        <select id="gS"><option value="pop" selected>모집단 (÷G)</option><option value="smp">표본 (÷(G−1))</option></select></div>
+    </div>
+    <div class="dots" id="gDots" role="img" aria-label="맞은 답은 초록, 틀린 답은 빨강으로 표시한 그룹"></div>
+    <div class="read" id="gRead" aria-live="polite"></div>
+    <figcaption>초록 = 보상 1(맞음), 빨강 = 보상 0(틀림). <b>논문은 표준편차를 모집단/표본 중 어느 것으로 계산하는지, 표준편차가 0일 때를 어떻게 처리하는지 적지 않았어요.</b> 그래서 정의를 선택할 수 있게 했어요. G = 8, k = 6이면 모집단 기준으로 맞은 답 +0.58, 틀린 답 −1.73이에요.</figcaption>
+  </figure>
+
+  <div class="call">
+    <h3>이 위젯으로 확인할 것</h3>
+    <ul>
+      <li><b>합은 항상 0이에요.</b> 맞은 답의 Â와 틀린 답의 Â를 개수로 곱해 더하면 0이에요. "평균 기준"이라 위아래가 정확히 균형을 맞춰요(PPO 해설의 MSE→평균 이야기와 같은 이유예요).</li>
+      <li><b>드문 쪽이 더 크게 받아요.</b> k = 1이면 하나뿐인 성공이 큰 +를 받고, k = G−1이면 하나뿐인 실패가 큰 −를 받아요. "대부분이 못 푸는 문제에서 겨우 푼 답"을 강하게 밀어 줘요.</li>
+      <li><b>k = 0 또는 k = G이면 표준편차가 0이라 식이 정의되지 않아요.</b> 모두 같은 보상이면 "평균보다 나은 답"이 없으니 밀 방향도 없어요. 이 경우를 어떻게 처리하는지는 이 논문에 없어요(아래 "논문 밖" 상자 참고).</li>
+    </ul>
+  </div>
+
+  <div class="eqs">
+    <div class="eqc" id="eproc">
+      <div class="no">§4.1.3</div>
+      <div class="body">
+        <p><b>Process supervision (과정 감독).</b> 결과만 보면 복잡한 수학에서는 신호가 부족할 수 있어서, 풀이의 <b>단계마다</b> 보상을 주는 과정 보상 모델(PRM)도 써요. 단계 j가 끝나는 토큰 위치를 \(\mathrm{index}(j)\)라 하고, 모든 답의 모든 단계 보상 \(\mathbf R\)로 정규화해요.</p>
+        <div class="tex">\[\tilde r_i^{\,\mathrm{index}(j)}=\frac{r_i^{\,\mathrm{index}(j)}-\mathrm{mean}(\mathbf R)}{\mathrm{std}(\mathbf R)},\qquad \hat A_{i,t}=\sum_{\mathrm{index}(j)\ge t}\tilde r_i^{\,\mathrm{index}(j)}\]</div>
+        <p><span class="tag r">읽기</span>토큰 t의 어드밴티지는 <b>그 토큰 이후에 끝나는 모든 단계의 정규화 보상의 합</b>이에요. 앞쪽 토큰은 뒤쪽 단계들의 평가를 전부 물려받고, 뒤쪽 토큰은 자기 이후 단계만 받아요.</p>
+        <div class="ex">
+          <p><span class="tag e">예시</span>답 하나가 3단계이고 정규화 보상이 (+0.5, −0.2, +1.0)이라고 해요(설명용 숫자예요).</p>
+          <div class="mini-wrap"><table class="mini">
+            <thead><tr><th>토큰이 속한 단계</th><th>그 이후 단계 보상의 합 = Â</th></tr></thead>
+            <tbody>
+              <tr><td>1단계 토큰</td><td>0.5 − 0.2 + 1.0 = 1.3</td></tr>
+              <tr><td>2단계 토큰</td><td>−0.2 + 1.0 = 0.8</td></tr>
+              <tr><td>3단계 토큰</td><td>1.0</td></tr>
+            </tbody>
+          </table></div>
+          <p>2단계가 약간 나빴어도(−0.2) 그 앞 토큰들은 이후 단계 전체의 평가(합 1.3)를 받아서, 풀이 전체가 좋았다면 앞부분도 올라가요.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="call inf">
+    <h3>논문 밖 (제 지식 · 제 추론)</h3>
+    <ul>
+      <li><b>"그룹이 전부 같은 결과면 Â = 0이라서 그 문제는 걸러낸다(dynamic sampling)"</b>는 이 논문에 없어요. 제가 아는 바로는 후속 연구(DAPO)에서 나온 방식이고, 이번에 확인하지는 않았어요.</li>
+      <li>표준편차로 나누는 것에 대한 후속 비판이 있다는 것도 제 기억이고 이 논문에는 없어요.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ ALG + RESULTS ============ -->
+<section id="s-alg">
+  <h2>알고리즘 1과 §4.2 결과 <span class="sec">Algorithm 1 · Table 5</span></h2>
+
+  <h3>Iterative GRPO (§4.1.4, Algorithm 1)</h3>
+  <pre class="alg"><span class="n"> 1</span> π_θ ← π_θinit
+<span class="n"> 2</span> for iteration = 1 … I:
+<span class="n"> 3</span>     π_ref ← π_θ                          <span class="c"># 기준 모델을 지금 정책으로 갈아 끼움</span>
+<span class="n"> 4</span>     for step = 1 … M:
+<span class="n"> 5</span>         질문 배치 D_b 뽑기
+<span class="n"> 6</span>         π_θold ← π_θ                     <span class="c"># 옛 정책 고정 (PPO의 θ_old와 같음)</span>
+<span class="n"> 7</span>         각 질문 q에서 G개 답 {o_i} ~ π_θold 뽑기
+<span class="n"> 8</span>         보상 모델로 r_i 계산
+<span class="n"> 9</span>         그룹 상대 어드밴티지 Â_i,t 계산
+<span class="n">10</span>         for GRPO iteration = 1 … μ:
+<span class="n">11</span>             GRPO 목적함수 최대화로 π_θ 갱신   <span class="c"># 논문 표기는 "Equation 21"</span>
+<span class="n">12</span>         보상 모델도 replay로 계속 학습</pre>
+  <p>PPO의 Algorithm 1과 비교하면: 바깥 <b>M번</b> 반복이 "rollout → 학습"의 한 바퀴이고, 안쪽 <b>μ번</b>이 PPO의 K epoch에 해당해요. 새로운 부분은 <b>3행</b>(기준 모델을 주기적으로 갱신)과 <b>12행</b>(보상 모델도 계속 학습)이에요.</p>
+  <p>§4.1.4는 반복 이유를 이렇게 설명해요: RL이 진행되면 <b>옛 보상 모델이 현재 정책을 감독하기에 부족해질 수 있어서</b>, 정책이 뽑은 샘플로 보상 모델의 학습 데이터를 새로 만들고, 과거 데이터를 10% 섞어(replay) 이어서 학습해요.</p>
+
+  <div class="call">
+    <h3>한 번 업데이트하면 clip은 의미가 없어요 (논문에 근거가 있는 관찰)</h3>
+    <ul>
+      <li>§4.2의 실험 설정은 "<b>탐색(샘플링) 한 번당 정책을 한 번만 업데이트한다</b>"(μ = 1)예요.</li>
+      <li>업데이트 시점에 \(\pi_\theta=\pi_{\theta_{\text{old}}}\)이니 확률비 \(\rho=1\)이고, clip 구간(1±ε) 안이라서 <b>clip은 걸리지 않아요</b>(제 해석이에요).</li>
+      <li>실제로 논문 부록 A.1.6의 식 (19)는 <b>"단순화 분석을 위해 \(\pi_{\theta_{\text{old}}}=\pi_\theta\)로 가정"</b>하고 clip을 아예 빼요. 그 위에서 gradient를 구한 게 식 (20)~(21)이에요(원문에 적힌 가정이에요).</li>
+    </ul>
+  </div>
+
+  <h3>§4.2 설정과 결과</h3>
+  <dl class="nums">
+    <div><dt>RL 시작 모델</dt><dd>Instruct 7B</dd></div>
+    <div><dt>RL 질문</dt><dd>약 144K (GSM8K·MATH 계열)</dd></div>
+    <div><dt>정책 학습률</dt><dd>1e-6</dd></div>
+    <div><dt>KL 계수 β</dt><dd>0.04</dd></div>
+    <div><dt>질문당 샘플 G</dt><dd>64</dd></div>
+    <div><dt>최대 길이 · 배치</dt><dd>1024 · 1024</dd></div>
+    <div><dt>탐색당 업데이트</dt><dd>1회 (μ = 1)</dd></div>
+    <div><dt>보상 모델 시작·학습률</dt><dd>Base 7B · 2e-5</dd></div>
+  </dl>
+
+  <figure>
+    <div class="bars" id="resBars">
+      <div class="bar"><span class="lab">GSM8K · SFT(Instruct)</span><span class="trk"><span class="fill mute" style="width:82.9%"></span></span><span class="pct">82.9</span></div>
+      <div class="bar"><span class="lab"><b>GSM8K · RL</b></span><span class="trk"><span class="fill" style="width:88.2%"></span></span><span class="pct"><b>88.2</b></span></div>
+      <div class="bargap"></div>
+      <div class="bar"><span class="lab">MATH · SFT(Instruct)</span><span class="trk"><span class="fill mute" style="width:46.8%"></span></span><span class="pct">46.8</span></div>
+      <div class="bar"><span class="lab"><b>MATH · RL</b></span><span class="trk"><span class="fill" style="width:51.7%"></span></span><span class="pct"><b>51.7</b></span></div>
+      <div class="bargap"></div>
+      <div class="bar"><span class="lab">MGSM-zh · SFT(Instruct)</span><span class="trk"><span class="fill mute" style="width:73.2%"></span></span><span class="pct">73.2</span></div>
+      <div class="bar"><span class="lab"><b>MGSM-zh · RL</b></span><span class="trk"><span class="fill" style="width:79.6%"></span></span><span class="pct"><b>79.6</b></span></div>
+      <div class="bargap"></div>
+      <div class="bar"><span class="lab">CMATH · SFT(Instruct)</span><span class="trk"><span class="fill mute" style="width:84.6%"></span></span><span class="pct">84.6</span></div>
+      <div class="bar"><span class="lab"><b>CMATH · RL</b></span><span class="trk"><span class="fill" style="width:88.8%"></span></span><span class="pct"><b>88.8</b></span></div>
+    </div>
+    <figcaption>논문 Table 5의 체인오브소트(CoT) 줄이에요. 막대 길이는 0~100% 눈금이에요. 향상폭은 GSM8K +5.3, MATH +4.9, MGSM-zh +6.4, CMATH +4.2예요(제가 뺀 값). 논문은 GSM8K·MATH를 <b>in-domain</b>, 나머지 벤치마크를 <b>out-of-domain</b>으로 분류하고, RL에 쓴 데이터가 "GSM8K·MATH의 CoT 형식 SFT 질문"뿐인데도 모든 평가 항목이 올랐다고 말해요.</figcaption>
+  </figure>
+  <p><b>비교 맥락:</b> 같은 표에서 DeepSeekMath-RL 7B(MATH 51.7)는 7B~70B 오픈소스 모델을 모두 앞서고, GPT-4(52.9), Gemini Ultra(53.2) 같은 비공개 모델과 가까워요. 논문 표현으로는 "대부분의 비공개 모델을 앞섰다"예요.</p>
+</section>
+
+<!-- ============ UNIFIED ============ -->
+<section id="s-uni">
+  <h2>§5.2 통합 틀: SFT · RFT · DPO · PPO · GRPO <span class="sec">식 (5) · 표 10 · 식 (21)</span></h2>
+  <p>논문의 가장 "논문다운" 기여예요. <b>서로 다른 학습법을 같은 틀에 넣어 놓고 어디가 다른지</b> 봐요.</p>
+
+  <div class="eqs">
+    <div class="eqc" id="e5">
+      <div class="no">(5)</div>
+      <div class="body">
+        <div class="tex">\[\nabla_\theta\mathcal J_{\mathcal A}(\theta)=\mathbb E_{(q,o)\sim\underbrace{\mathcal D}_{\text{data source}}}\Big[\frac1{|o|}\sum_{t=1}^{|o|}\underbrace{GC_{\mathcal A}(q,o,t,\pi_{rf})}_{\text{gradient coefficient}}\,\nabla_\theta\log\pi_\theta(o_t|q,o_{\lt t})\Big]\]</div>
+        <p><span class="tag r">읽기</span>모든 방법의 gradient는 <b>"토큰의 로그 확률을 올리는 방향 \(\nabla\log\pi\)"에 계수 \(GC\)를 곱한 것</b>의 평균이라는 말이에요. 방법마다 다른 건 세 가지예요: ① <b>데이터 출처 \(\mathcal D\)</b>, ② <b>보상 함수 \(\pi_{rf}\)</b>, ③ 이 둘을 계수로 바꾸는 <b>알고리즘 \(\mathcal A\)</b>.</p>
+        <p><span class="tag w">핵심 직관</span>학습은 전부 "이 토큰 확률을 <b>얼마나 세게</b> 올리거나(+) 내릴지(−)"를 정하는 계수만 다르고, 방향은 \(\nabla\log\pi\)로 똑같아요. 앞서 PPO에서 "정책을 민다"고 했던 그것이에요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tbl">
+    <table class="wide">
+      <thead><tr><th>방법</th><th>데이터 출처</th><th>보상</th><th>gradient 계수 GC</th><th>한 줄 뜻</th></tr></thead>
+      <tbody>
+        <tr><th>SFT</th><td>사람이 고른 SFT 데이터</td><td>없음 (사람이 선택)</td><td><b>항상 1</b></td><td>전부 맞다고 보고 따라 쓰기 <b>(BC)</b></td></tr>
+        <tr><th>RFT</th><td>SFT 모델이 뽑은 답</td><td>규칙(정답 여부)</td><td>맞으면 1, 틀리면 0 (식 10)</td><td>맞은 답만 골라 따라 쓰기</td></tr>
+        <tr><th>DPO</th><td>SFT 모델이 뽑은 선호 쌍</td><td>규칙</td><td>식 14</td><td>좋은 답과 나쁜 답을 한 쌍으로 비교</td></tr>
+        <tr><th>Online RFT</th><td><b>지금 정책</b>이 뽑은 답</td><td>규칙</td><td>맞으면 1, 틀리면 0 (식 10)</td><td>RFT인데 데이터를 계속 새로 뽑음</td></tr>
+        <tr><th>PPO</th><td>지금 정책</td><td>모델</td><td>\(A_t\) (식 18)</td><td>V와 GAE로 토큰별 이득</td></tr>
+        <tr><th>GRPO</th><td>지금 정책, 그룹</td><td>모델</td><td>\(\hat A_{i,t}+\beta\big(\tfrac{\pi_{\text{ref}}}{\pi_\theta}-1\big)\) (식 21)</td><td>그룹 정규화 보상 + KL 항</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="eqs">
+    <div class="eqc" id="e21">
+      <div class="no">(21)</div>
+      <div class="body">
+        <div class="tex">\[GC_{GRPO}(q,o,t,\pi_{\theta_{rm}})=\hat A_{i,t}+\beta\Big(\frac{\pi_{\text{ref}}(o_{i,t}|o_{i,\lt t})}{\pi_\theta(o_{i,t}|o_{i,\lt t})}-1\Big)\]</div>
+        <p><span class="tag r">읽기</span>GRPO의 gradient 계수는 <b>(그룹 상대 어드밴티지) + (기준 모델로 끌어당기는 힘)</b>이에요. 부록 A.1.6의 식 (19)에서 \(\pi_{\theta_{\text{old}}}=\pi_\theta\)로 두고 gradient를 구하면 식 (20)이 나오고, 그 계수 부분이 식 (21)이에요. 논문이 한 줄로 요약하는 차이: <b>Online RFT는 틀린 답에 벌을 주지 않고 맞은 답을 똑같은 세기로 올리는데, GRPO는 보상 값에 따라 세기를 달리해서 올리고(+) 내려요(−)</b>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="call">
+    <h3>이 틀에서 논문이 관찰한 것 (Figure 5~7)</h3>
+    <ul>
+      <li><b>온라인이 오프라인보다 낫다.</b> Online RFT가 RFT를 앞서는데, 초반엔 비슷하지만 후반에 벌어져요. 논문 설명: 초반엔 정책과 SFT 모델이 닮아서 샘플 차이가 작고, 후반엔 정책이 달라져서 <b>지금 정책에서 뽑은 데이터</b>가 더 도움이 돼요.</li>
+      <li><b>계수를 세밀하게 나눌수록 좋다.</b> GRPO가 Online RFT를 앞서요(+/−와 크기를 보상에 맞춰 조절). 과정 감독(PS)이 결과 감독(OS)보다 좋아요.</li>
+      <li><b>반복 RL은 도움이 된다.</b> 두 번 반복했을 때 특히 <b>첫 반복에서 크게</b> 올랐어요(Figure 6).</li>
+      <li><b>RL이 한 일의 정체(§5.2.2).</b> 후보 K개로 평가하면 <b>Maj@K(다수결 정답)는 오르는데 Pass@K(K번 중 한 번이라도 맞음)는 안 올라요</b>(Figure 7). 논문 해석: 출력 분포를 더 견고하게(robust) 만들어서 <b>"이미 낼 수 있던 정답을 상위로 끌어올리는" 효과</b>이고, 근본 능력이 늘어난 것은 아니에요.</li>
+    </ul>
+  </div>
+
+  <div class="call val">
+    <h3>논문이 말하는 "더 효과적인 RL"의 방향 (§5.2.3)</h3>
+    <ul>
+      <li><b>데이터:</b> 이번에는 SFT 때 쓴 질문과 단순 nucleus sampling만 썼는데, 이게 Maj@K만 오른 이유일 수 있다고 해요. 분포 밖 질문과 더 나은 샘플링(트리 탐색 등)을 앞으로 해 보겠대요.</li>
+      <li><b>알고리즘:</b> 지금까지 모든 방법은 <b>보상 신호를 완전히 믿고</b> 확률을 올리고 내려요. 그런데 신호가 늘 믿을 만하지는 않아서(예: 사람이 정성껏 단 PRM800K 데이터에도 <b>약 20%가 틀린 주석</b>), <b>노이즈 보상에 강한 알고리즘</b>(weak-to-strong 방향)을 앞으로의 과제로 꼽아요.</li>
+      <li><b>보상 함수:</b> 보상 모델이 분포 밖 질문에 일반화하는지, 불확실성을 어떻게 반영하는지, 과정 보상 모델을 어떻게 싸게 만드는지가 중요하다고 해요.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section id="s-lim">
+  <h2>한계 <span class="sec">논문 밖 정리</span></h2>
+
+  <div class="call inf">
+    <h3>이 페이지에서 "논문 밖"인 것을 모아 두면</h3>
+    <ul>
+      <li>그룹이 모두 같은 결과일 때(표준편차 0) 처리, 표준편차의 정의(모집단/표본), dynamic sampling: <b>이 논문에 없어요.</b></li>
+      <li>"μ = 1이면 clip이 안 걸린다"는 §4.2의 설정과 부록 식 (19)의 가정에서 제가 이끌어 낸 해석이에요(원문에 "clip이 의미 없다"는 문장은 없어요).</li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="s-quiz">
+  <h2>점검 질문 <span class="sec">답은 눌러서 확인</span></h2>
+  <div>
+    <details><summary>Q1. GRPO가 PPO와 다른 점 두 가지는?</summary>
+      <p>① Â를 학습된 V 모델과 GAE 대신 <b>같은 질문 G개 답의 그룹 평균·표준편차</b>로 계산해요(V 모델이 필요 없어요). ② KL 벌점을 보상에 섞지 않고 <b>손실에 직접</b> 더해요. clip 구조는 그대로예요.</p></details>
+    <details><summary>Q2. G = 8에서 6개가 맞고 2개가 틀렸을 때 각 답의 Â는? (모집단 표준편차)</summary>
+      <p>평균 0.75, 표준편차 \(\sqrt{0.75\times0.25}\approx0.433\)이에요. 맞은 답은 (1−0.75)/0.433 ≈ <b>+0.58</b>, 틀린 답은 (0−0.75)/0.433 ≈ <b>−1.73</b>이에요. 확인: 6×0.577 + 2×(−1.732) ≈ 0. 표본 표준편차를 쓰면 +0.54 / −1.62예요.</p></details>
+    <details><summary>Q3. 한 답 안의 모든 토큰이 왜 같은 Â를 받나요?</summary>
+      <p>Outcome supervision은 <b>답이 끝난 뒤에 한 번만</b> 보상을 받기 때문이에요. 그 정규화 보상을 그 답의 모든 토큰의 어드밴티지로 써요. 단계별 보상이 있는 process supervision에서는 토큰마다 값이 달라져요(이후 단계 보상의 합).</p></details>
+    <details><summary>Q4. 식 (4)의 KL 추정이 항상 0 이상인 이유는?</summary>
+      <p>\(u=\pi_{\text{ref}}/\pi_\theta\)일 때 \(u-\log u-1\)이고, \(\log u\le u-1\)이라 항상 0 이상이에요. u = 1(두 정책이 같음)일 때 0이에요. 논문은 "항상 양수임이 보장된다"고만 적었고 이 부등식 설명은 제가 붙인 거예요.</p></details>
+    <details><summary>Q5. 부록 식 (19)가 \(\pi_{\theta_{\text{old}}}=\pi_\theta\)를 가정하는 이유는? 이게 clip과는 무슨 관계인가요?</summary>
+      <p>원문은 "단순화 분석을 위해"라고만 적었어요. 실험 설정이 탐색 한 번당 업데이트 1번(μ = 1)이라 업데이트 시점에 두 정책이 같고, 그러면 확률비가 1이라 clip이 걸리지 않으니 식에서 빼도 gradient가 같다는 맥락이에요(이 연결은 제 해석이에요).</p></details>
+    <details><summary>Q6. RL이 Maj@K는 올리고 Pass@K는 못 올렸다는 건 무슨 뜻인가요?</summary>
+      <p>RL이 모델이 <b>새로운 풀이 능력을 얻게 한 게 아니라</b>, 이미 가끔 맞히던 풀이를 더 자주 고르게(분포를 견고하게) 만들었다는 해석이에요(논문 §5.2.2). Pass@K는 "K번 중 한 번이라도 맞음"이라 원래 능력의 상한에 가깝고, Maj@K는 "다수결이 정답"이라 정답에 확률이 쏠릴수록 올라요.</p></details>
+    <details><summary>Q7. SFT, Online RFT, GRPO의 gradient 계수를 한 줄씩 말해 보세요.</summary>
+      <p><b>SFT:</b> 항상 1(전부 맞다고 보고 올림). <b>Online RFT:</b> 정답이면 1, 오답이면 0(틀린 답은 무시). <b>GRPO:</b> 그룹 정규화 보상(+/−, 크기는 보상에 따라 다름) + β(π_ref/π_θ − 1)(기준 모델로 끌어당김). 데이터는 SFT가 사람이 고른 것, 나머지 둘이 지금 정책이 뽑은 것이에요.</p></details>
+  </div>
+</section>
+
+<footer>
+  <p>출처: Zhihong Shao, Peiyi Wang, Qihao Zhu 외, "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models", <a href="https://arxiv.org/abs/2402.03300">arXiv 2402.03300v3</a> (2024, DeepSeek-AI · Tsinghua · Peking University). 식 (1)–(5), (19)–(21), Algorithm 1, §4.2 설정과 Table 5·10의 숫자는 논문 PDF에서 텍스트를 추출해 옮겼어요. 인용 수(약 10,900)는 11월 13일 Semantic Scholar에서 읽은 값이에요.</p>
+  <p>옮기지 않은 것: 그림 1~7의 곡선(PPO vs GRPO 그림은 제가 다시 그린 것), §2.2·2.3의 데이터 품질 검증·Base 모델 평가 표, §3.2의 Instruct 평가 표, §5.1의 세부 실험은 핵심 문장만 읽었어요. 부록 A.1의 DPO(식 12~14)와 PPO(식 15~18) 유도는 훑기만 했어요.</p>
+  <p>설명용 예시: 위젯의 G·k 값, 과정 감독 3단계 숫자, KL 추정식 표, 점검 질문의 계산(제가 계산했고 node로 확인). 주황색 상자와 "제 해석/제 추론"이라고 표시한 문장은 논문에 없는 내용이에요. 앞선 정리: <a href="/reports/ppo-paper-explained/" target="_top">PPO 논문 해설</a>, <a href="/reports/awr-paper-explained/" target="_top">AWR 논문 해설</a>.</p>
+</footer>
+
+</div>
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { enableMenu: false }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" async></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function f2(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2); }
+
+  function groupStats(G, k, smp) {
+    var mean = k / G;
+    var varP = mean * (1 - mean);
+    var variance = smp ? varP * G / (G - 1) : varP;
+    var std = Math.sqrt(variance);
+    return { mean: mean, std: std, aOk: std > 0 ? (1 - mean) / std : NaN, aNo: std > 0 ? (0 - mean) / std : NaN };
+  }
+
+  function drawGroup() {
+    var G = parseInt($('gG').value, 10);
+    var kEl = $('gK');
+    kEl.max = G;
+    var k = Math.min(parseInt(kEl.value, 10), G);
+    kEl.value = k;
+    var smp = $('gS').value === 'smp';
+    $('gGo').textContent = G;
+    $('gKo').textContent = k + ' / ' + G;
+    var dots = '';
+    for (var i = 0; i < G; i++) dots += '<span class="dot' + (i < k ? ' ok' : '') + '"></span>';
+    $('gDots').innerHTML = dots;
+    var s = groupStats(G, k, smp);
+    var msg = '<div>보상 평균 = k/G = <b>' + s.mean.toFixed(3) + '</b>, 표준편차 = <b>' + s.std.toFixed(3) + '</b> (' + (smp ? '표본' : '모집단') + ')</div>';
+    if (!(s.std > 0)) {
+      msg += '<div><b class="stop">표준편차가 0이라 (r − 평균)/표준편차가 0÷0이에요.</b> 모든 답의 결과가 같아서 "평균보다 나은 답"이 없어요. 논문은 이 경우의 처리를 적지 않았어요.</div>';
+    } else {
+      msg += '<div>맞은 답 ' + k + '개의 Â = <b class="go">' + f2(s.aOk) + '</b> &nbsp;·&nbsp; 틀린 답 ' + (G - k) + '개의 Â = <b class="stop">' + f2(s.aNo) + '</b></div>';
+      var total = k * s.aOk + (G - k) * s.aNo;
+      msg += '<div>개수를 곱해 더한 합 = ' + (Math.abs(total) < 1e-9 ? '0.00' : total.toFixed(2)) + ' (항상 0)</div>';
+      if (k * 2 < G) msg += '<div>맞은 답이 드물수록 그 답이 큰 +를 받아요.</div>';
+      else if (k * 2 > G) msg += '<div>틀린 답이 드물수록 그 답이 큰 −를 받아요.</div>';
+    }
+    $('gRead').innerHTML = msg;
+  }
+  ['gG', 'gK', 'gS'].forEach(function (id) { $(id).addEventListener('input', drawGroup); });
+  drawGroup();
+})();
+</script>
+
+</body>
+</html>

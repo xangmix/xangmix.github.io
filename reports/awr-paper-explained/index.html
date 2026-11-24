@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>AWR 논문 해설</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column; same schematic language as "SmolVLA 정책 지도"/"AWR 흐름 지도": teal = data, rose = value V, indigo = policy, orange = where θ changes. Equations sit in numbered cards keyed to the paper's own numbers. */
+  :root {
+    --bg: #f3f5f6;
+    --surface: #ffffff;
+    --ink: #17202b;
+    --muted: #5b6672;
+    --line: #c9d1d8;
+    --env: #0f766e;
+    --env-soft: #e3f2f0;
+    --value: #be185d;
+    --value-soft: #fbe7f0;
+    --policy: #3b4cca;
+    --policy-soft: #e8eafb;
+    --update: #c2410c;
+    --update-soft: #fcebe1;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --display: "IBM Plex Sans KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+      --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+      --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+      --good: #4ade80; --bad: #f87171; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+    --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+    --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+    --good: #4ade80; --bad: #f87171; color-scheme: dark;
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.75; }
+  .wrap { max-width: 920px; margin: 0 auto; padding-block: 40px 72px;
+          padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+          display: grid; gap: 52px; }
+  header { display: grid; gap: 14px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5.5vw, 42px); line-height: 1.2; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1.35; margin: 0; text-wrap: balance; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  h2 .sec { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--policy); }
+  h3 { font-family: var(--display); font-weight: 600; font-size: 17px; line-height: 1.4; margin: 0; }
+  p { margin: 0; max-width: 70ch; }
+  .lede { font-size: 17px; }
+  .muted { color: var(--muted); }
+  .m { font-family: var(--mono); font-size: .9em; }
+  a { color: var(--policy); }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--policy); outline-offset: 2px; border-radius: 3px; }
+  section { display: grid; gap: 16px; scroll-margin-top: 16px; }
+  .stack { display: grid; gap: 12px; }
+
+  /* reading-order nav */
+  nav.toc { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: center; font-size: 14px; }
+  nav.toc a { text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+  nav.toc a:hover { border-color: var(--policy); color: var(--policy); }
+  nav.toc .arw { color: var(--muted); font-size: 12px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+  .sw.env { border-color: var(--env); background: var(--env-soft); }
+  .sw.value { border-color: var(--value); background: var(--value-soft); }
+  .sw.policy { border-color: var(--policy); background: var(--policy-soft); }
+  .sw.update { border-color: var(--update); background: var(--update-soft); }
+
+  /* three summary columns */
+  .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .trio > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .trio .k { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .trio .k.p { color: var(--bad); } .trio .k.i { color: var(--policy); } .trio .k.r { color: var(--good); }
+  .trio ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
+
+  .abs { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; }
+  .abs ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+
+  /* figures */
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .scroll { overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 660px; height: auto; color: var(--ink); font-family: var(--body); }
+  figcaption { font-size: 14.5px; color: var(--muted); max-width: 74ch; }
+  svg text { fill: currentColor; }
+  svg .t { font-size: 14px; font-weight: 700; }
+  svg .s { font-size: 11.5px; fill: var(--muted); }
+  svg .h { font-family: var(--display); font-size: 15px; font-weight: 700; }
+  svg .mono { font-family: var(--mono); font-size: 12px; }
+  svg .lbl { font-size: 12px; fill: var(--muted); }
+  svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  svg .env { fill: var(--env-soft); stroke: var(--env); stroke-width: 2; }
+  svg .val { fill: var(--value-soft); stroke: var(--value); stroke-width: 2; }
+  svg .policy { fill: var(--policy-soft); stroke: var(--policy); stroke-width: 2; }
+  svg .c-upd { fill: var(--update); font-weight: 700; }
+  svg .c-val { fill: var(--value); font-weight: 700; }
+  svg .ar { stroke: currentColor; stroke-width: 1.6; fill: none; }
+  svg .ar-d { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+  svg .head { fill: currentColor; }
+  svg .head-d { fill: var(--muted); }
+
+  /* tables */
+  .tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--display); font-weight: 600; font-size: 13.5px; color: var(--muted); background: var(--bg); white-space: nowrap; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+  tbody th { font-weight: 500; white-space: nowrap; }
+  .sym { min-width: 720px; }
+  .sym td:first-child { white-space: nowrap; }
+  .num td, .num th { font-variant-numeric: tabular-nums; }
+  .num td { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  .num .best { color: var(--policy); font-weight: 600; }
+  .num .awr { background: var(--policy-soft); }
+
+  /* roadmap grid */
+  .road { min-width: 780px; display: grid; grid-template-columns: 170px repeat(5, minmax(0, 1fr)); gap: 6px; font-size: 13.5px; }
+  .road > div { padding: 8px 10px; border-radius: 6px; min-width: 0; }
+  .road .hd { font-family: var(--display); font-weight: 600; color: var(--muted); font-size: 13px; position: relative; }
+  .road .hd:not(.first)::before { content: "→"; position: absolute; left: -10px; top: 8px; color: var(--muted); font-weight: 400; }
+  .road .lane { font-weight: 600; font-size: 13.5px; }
+  .road .lane small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+  .road .c { background: var(--bg); border: 1px solid var(--line); display: grid; gap: 2px; align-content: start; }
+  .road .c a { font-family: var(--mono); font-size: 12.5px; text-decoration: none; }
+  .road .c span { color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+  .road .laneA { color: var(--env); } .road .laneB { color: var(--value); }
+  .road .end { grid-column: 2 / -1; background: var(--policy-soft); border: 1.5px solid var(--policy); color: var(--ink); }
+
+  /* equation cards */
+  .eqs { display: grid; gap: 14px; }
+  .eqc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 4px 12px; scroll-margin-top: 16px; }
+  .no { font-family: var(--mono); font-size: 13px; color: var(--policy); font-weight: 500; padding-top: 10px; }
+  .eqc .body { display: grid; gap: 8px; min-width: 0; }
+  .tex { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+  .tag { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); margin-right: 6px; white-space: nowrap; }
+  .tag.r { color: var(--policy); border-color: var(--policy); }
+  .tag.w { color: var(--env); border-color: var(--env); }
+  .tag.e { color: var(--update); border-color: var(--update); }
+  .eqc p { font-size: 15.5px; }
+  .ex { background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: 15px; display: grid; gap: 6px; }
+  .ex p { font-size: 15px; }
+
+  /* derivation rows (appendix) */
+  .drv { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 16px; display: grid; }
+  .dr { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 2px 12px; padding: 10px 0; border-bottom: 1px dashed var(--line); scroll-margin-top: 16px; }
+  .dr:last-child { border-bottom: 0; }
+  .dr .body { display: grid; gap: 4px; min-width: 0; }
+  .dr p { font-size: 15px; }
+  .drv-title { font-family: var(--display); font-weight: 600; font-size: 15px; padding: 10px 0 2px; color: var(--muted); }
+
+  /* callouts */
+  .call { border-left: 3px solid var(--policy); background: var(--policy-soft); border-radius: 0 10px 10px 0; padding: 12px 16px; display: grid; gap: 8px; }
+  .call.val { border-color: var(--value); background: var(--value-soft); }
+  .call.inf { border-color: var(--update); background: var(--update-soft); }
+  .call h3 { font-size: 16px; }
+  .call ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+  .mini { border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; width: auto; background: var(--surface); border-radius: 6px; }
+  .mini td, .mini th { padding: 4px 12px; border-bottom: 1px solid var(--line); text-align: right; }
+  .mini th { font-family: var(--body); font-weight: 500; color: var(--muted); }
+  .mini .hit { color: var(--value); font-weight: 600; }
+
+  /* weight-share bars (RWR vs AWR) */
+  .bars { display: grid; gap: 18px; }
+  .bargroup { display: grid; gap: 8px; }
+  .bargroup h3 { font-size: 15px; }
+  .bar { display: grid; grid-template-columns: 190px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .bar .lab { min-width: 0; }
+  .bar .lab small { color: var(--muted); font-family: var(--mono); font-size: 11.5px; display: block; }
+  .bar .trk { height: 14px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--policy); border-radius: 3px; min-width: 2px; }
+  .bar .fill.hard { background: var(--value); }
+  .bar .pct { font-family: var(--mono); text-align: right; font-size: 13px; }
+  @media (max-width: 560px) { .bar { grid-template-columns: 1fr 58px; } .bar .trk { grid-column: 1 / -1; grid-row: 2; } }
+
+  /* numbers grid */
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0; }
+  .nums div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 2px; }
+  .nums dt { font-size: 13px; color: var(--muted); }
+  .nums dd { margin: 0; font-family: var(--mono); font-size: 15.5px; font-variant-numeric: tabular-nums; }
+
+  ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 74ch; }
+
+  /* self-check */
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; }
+  details + details { margin-top: 8px; }
+  summary { cursor: pointer; font-weight: 500; }
+  details[open] summary { margin-bottom: 8px; color: var(--policy); }
+
+  footer { font-size: 13.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+  @media (max-width: 560px) {
+    .eqc, .dr { grid-template-columns: 1fr; }
+    .no { padding-top: 0; }
+  }
+
+  /* MathJax output inherits ink color */
+  mjx-container { color: var(--ink); }
+  mjx-container[display="true"] { margin: 4px 0 !important; text-align: left !important; }
+  mjx-container[jax="SVG"][display="true"] { display: block; overflow-x: auto; overflow-y: hidden; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">RL Part2 준비 · Peng, Kumar, Zhang, Levine · UC Berkeley · arXiv 1910.00177 (2019)</div>
+  <h1>AWR 논문 해설</h1>
+  <p class="lede">Advantage-Weighted Regression. 강화학습을 <b>지도학습 회귀 두 번</b>으로 만든 논문이에요. ① 점수 예측기 V를 실제 점수에 맞추고, ② 데이터 속 행동을 "평균보다 잘한 만큼" 더 따라 해요. 이 페이지는 Abstract부터 부록 C까지 순서대로 풀고, <b>논문의 식 (1)~(57)을 전부</b> 설명해요.</p>
+  <nav class="toc" aria-label="읽는 순서">
+    <a href="#s-sum">한 장 요약</a><span class="arw">→</span>
+    <a href="#s-sym">기호 사전</a><span class="arw">→</span>
+    <a href="#s-map">논문 지도</a><span class="arw">→</span>
+    <a href="#s-alg">알고리즘 1</a><span class="arw">→</span>
+    <a href="#s-pre">식 1–2</a><span class="arw">→</span>
+    <a href="#s-31">식 3–10</a><span class="arw">→</span>
+    <a href="#s-32">식 11–16</a><span class="arw">→</span>
+    <a href="#s-33">구현 손질</a><span class="arw">→</span>
+    <a href="#s-appA">부록 A 식 17–39</a><span class="arw">→</span>
+    <a href="#s-appB">부록 B 식 40–57</a><span class="arw">→</span>
+    <a href="#s-exp">실험</a><span class="arw">→</span>
+    <a href="#s-lim">한계</a><span class="arw">→</span>
+    <a href="#s-quiz">점검 질문</a>
+  </nav>
+  <div class="legend">
+    <span><i class="sw env"></i>데이터·환경</span>
+    <span><i class="sw value"></i>V (점수 매기는 쪽)</span>
+    <span><i class="sw policy"></i>정책 π</span>
+    <span><i class="sw update"></i>θ가 바뀌는 곳 · 논문 밖 추론</span>
+  </div>
+</header>
+
+<!-- ============ SUMMARY ============ -->
+<section id="s-sum">
+  <h2>한 장 요약 <span class="sec">Abstract · §1</span></h2>
+  <div class="trio">
+    <div>
+      <span class="k p">문제</span>
+      <ul>
+        <li><b>Policy gradient</b>(Part1의 PG)는 단순하지만 불안정하고, 거의 <b>on-policy</b>라서 매번 새로 판을 돌려야 해요(샘플이 많이 듦).</li>
+        <li><b>Q-learning 계열</b>은 남의 데이터(off-policy)를 쓸 수 있지만, 안정화 장치가 많이 필요하고 고정 데이터만으로는 잘 안 돼요.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k i">아이디어</span>
+      <ul>
+        <li>RL 업데이트를 <b>지도학습 회귀 두 번</b>으로만 해요.</li>
+        <li>회귀 #1: V(s)를 return에 맞춤(MSE).</li>
+        <li>회귀 #2: 정책을 데이터 행동에 맞추되 <span class="m">exp(A/β)</span> 가중치를 곱함(가중치 BC).</li>
+        <li>데이터는 <b>리플레이 버퍼</b>에 쌓아 재사용해요(off-policy).</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k r">결과</span>
+      <ul>
+        <li>Gym에서 PPO·TRPO보다 좋고, SAC·TD3와 최종 성능이 비슷해요.</li>
+        <li>34자유도 휴머노이드·82자유도 개의 모션 모방에서 PPO와 같거나 더 좋아요.</li>
+        <li><b>고정 데이터만으로</b> 데모 정책과 같거나 더 좋은 정책을 배워요.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="abs">
+    <h3>Abstract를 문장 단위로 풀면</h3>
+    <ol>
+      <li>목표는 <b>표준 지도학습을 부품으로 쓰는</b> 단순하고 확장 가능한 RL 알고리즘이에요.</li>
+      <li>loss는 단순하고 수렴이 잘 되는 <b>최대우도(maximum likelihood)</b>만 써요. "데이터 행동이 나올 확률 log π를 키운다"는 뜻이라 BC 학습과 같은 종류예요. 그러면서도 off-policy 데이터를 쓸 수 있어야 해요.</li>
+      <li>방법(AWR)은 지도학습 두 단계예요. 하나는 가치 함수 V의 <b>목표값 회귀</b>, 다른 하나는 정책의 <b>가중치 붙은 목표 행동 회귀</b>예요.</li>
+      <li>연속·이산 행동 모두 되고, 기존 지도학습 코드 위에 몇 줄만 더하면 구현돼요.</li>
+      <li>이론: "제약이 있는 정책 최적화"의 근사해로 유도하고, 경험 재생(replay) 데이터를 섞었을 때의 성질도 분석해요.</li>
+      <li>실험: Gym 벤치마크에서 기존 최신 알고리즘들과 경쟁할 만하고, <b>추가 상호작용 없이 고정 데이터만으로</b> 대부분의 off-policy 알고리즘보다 좋은 정책을 배우고, 복잡한 시뮬레이션 캐릭터도 제어해요.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ SYMBOLS ============ -->
+<section id="s-sym">
+  <h2>기호 사전 <span class="sec">식 읽기 전에</span></h2>
+  <p>식이 어려운 건 대부분 기호 때문이에요. 오른쪽 열은 LIBERO/SmolVLA로 바꿔 읽은 거예요.</p>
+  <div class="tbl">
+    <table class="sym">
+      <thead><tr><th>기호</th><th>이름</th><th>뜻</th><th>우리 말로</th></tr></thead>
+      <tbody>
+        <tr><td>\(s,\ a,\ r\)</td><td>상태·행동·보상</td><td>지금 상황, 고른 행동, 받은 점수</td><td>카메라 2장+관절 8차원+지시문 / 7차원 팔 움직임 / 성공 1·실패 0</td></tr>
+        <tr><td>\(\gamma\)</td><td>감마, 할인율</td><td>나중 보상일수록 \(\gamma^t\)배로 깎아요 (0~1)</td><td>0.99면 49스텝 뒤 보상은 0.611배</td></tr>
+        <tr><td>\(\tau\)</td><td>타우, 궤적</td><td>한 판 기록 \((s_0,a_0,r_0),(s_1,a_1,r_1),\dots\)</td><td>에피소드 하나</td></tr>
+        <tr><td>\(\pi(a|s)\)</td><td>정책</td><td>상태 s에서 행동 a를 고를 확률</td><td>SmolVLA(θ)</td></tr>
+        <tr><td>\(\mu(a|s)\)</td><td>뮤, 샘플링 정책</td><td>데이터를 모은 정책</td><td>시연한 사람·과거 정책</td></tr>
+        <tr><td>\(\pi_k,\ \pi^*\)</td><td></td><td>k번째 반복의 정책 / 이론상 정답 정책</td><td></td></tr>
+        <tr><td>\(J(\pi)\)</td><td>목적 함수</td><td>정책의 점수 = 할인 return의 기댓값</td><td>성공률에 가까운 값</td></tr>
+        <tr><td>\(p_\pi(\tau)\)</td><td></td><td>π로 돌렸을 때 그 한 판이 나올 확률</td><td></td></tr>
+        <tr><td>\(d_\pi(s)\)</td><td>할인 상태 분포</td><td>\(\sum_t\gamma^t p(s_t=s|\pi)\). π가 s에 얼마나 자주(일찍) 가나</td><td>상태 방문 빈도표</td></tr>
+        <tr><td>\(\mathcal{R}_{s,a}\)</td><td>return</td><td>s에서 a를 하고 끝까지 받은 할인 보상 합</td><td>Part1의 G</td></tr>
+        <tr><td>\(\mathcal{R}^\mu_{s,a}\)</td><td></td><td>a를 한 <b>다음부터는 μ대로</b> 했을 때의 return</td><td></td></tr>
+        <tr><td>\(V^\mu(s)\)</td><td>가치 함수</td><td>s에서 μ대로 하면 받는 평균 return</td><td>"이 상황이면 평균 이 정도"</td></tr>
+        <tr><td>\(A^\mu(s,a)\)</td><td>Advantage</td><td>\(\mathcal{R}^\mu_{s,a}-V^\mu(s)\). 평균보다 얼마나 잘했나</td><td>+면 잘함, −면 못함</td></tr>
+        <tr><td>\(\eta(\pi),\ \hat\eta(\pi)\)</td><td>에타</td><td>개선량 \(J(\pi)-J(\mu)\), 그리고 그 근사</td><td>새 정책이 데이터보다 얼마나 나은가</td></tr>
+        <tr><td>\(D_{\mathrm{KL}}(p\|q)\)</td><td>KL 발산</td><td>두 확률분포가 얼마나 다른지. 같으면 0</td><td>데이터에서 얼마나 멀어졌나</td></tr>
+        <tr><td>\(\epsilon\)</td><td>엡실론</td><td>KL 허용 한도</td><td>목줄 길이</td></tr>
+        <tr><td>\(\beta\)</td><td>베타, 온도</td><td>라그랑주 승수이자 가중치 온도 (논문 0.05)</td><td>점수를 얼마나 믿나</td></tr>
+        <tr><td>\(\alpha_s\)</td><td>알파</td><td>상태마다 "확률 합 = 1"을 지키게 하는 라그랑주 승수</td><td></td></tr>
+        <tr><td>\(Z(s)\)</td><td>분배 함수</td><td>확률 합을 1로 맞추는 나눗셈 값</td><td>정규화 상수</td></tr>
+        <tr><td>\(\mathcal{D}\)</td><td>리플레이 버퍼</td><td>모아 둔 (s, a, r) 데이터. 오래된 것부터 버림(FIFO), 5만 개</td><td></td></tr>
+        <tr><td>\(w_i\)</td><td></td><td>버퍼 속 i번째 과거 정책의 비율, \(\sum_i w_i=1\)</td><td>여러 데이터 출처의 비율</td></tr>
+        <tr><td>\(\omega,\ \hat\omega,\ \omega_{\max}\)</td><td>오메가</td><td>가중치 \(\exp(A/\beta)\), 자른 값, 상한(20)</td><td>형광펜 굵기</td></tr>
+        <tr><td>\(\lambda\)</td><td>람다</td><td>TD(λ)에서 짧은/긴 return을 섞는 비율 (0.95)</td><td></td></tr>
+        <tr><td>\(\mathbb{E}_{x\sim p}[\cdot]\)</td><td>기댓값</td><td>p에서 x를 뽑아 평균 낸 값</td><td>데이터로는 "샘플 평균"</td></tr>
+        <tr><td>\(\arg\max,\ \arg\min\)</td><td></td><td>값을 최대/최소로 만드는 <b>그 입력</b></td><td>"가장 좋은 π"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ MAP ============ -->
+<section id="s-map">
+  <h2>논문 지도 <span class="sec">식들이 어디로 이어지나</span></h2>
+  <p>유도는 같은 다섯 단계를 <b>두 번</b> 해요. 위 줄은 데이터 정책이 하나(μ)일 때(§3.1, 자세한 증명은 부록 A), 아래 줄은 버퍼에 여러 과거 정책이 섞였을 때(§3.2, 부록 B)예요. 칸을 누르면 그 식으로 가요.</p>
+  <div class="tbl" style="padding:12px">
+    <div class="road">
+      <div class="hd first"></div>
+      <div class="hd first">① 목표: 얼마나 나아지나</div>
+      <div class="hd">② 근사 + 목줄(KL)</div>
+      <div class="hd">③ 라그랑주로 풀기</div>
+      <div class="hd">④ 정답 π*</div>
+      <div class="hd">⑤ 신경망에 넣기</div>
+
+      <div class="lane laneA">데이터 정책 1개 μ<small>§3.1 · 부록 A</small></div>
+      <div class="c"><a href="#e3">식 3</a><span>증명: <a href="#e17">17–25</a></span></div>
+      <div class="c"><a href="#e4">식 4·5·6</a><span>= <a href="#e26">26–29</a></span></div>
+      <div class="c"><a href="#e7">식 7</a><span>풀이: <a href="#e30">30–35</a></span></div>
+      <div class="c"><a href="#e8">식 8</a><span>= <a href="#e36">36</a></span></div>
+      <div class="c"><a href="#e9">식 9·10</a><span>= <a href="#e37">37–39</a></span></div>
+
+      <div class="lane laneB">버퍼 = 과거 정책 혼합<small>§3.2 · 부록 B</small></div>
+      <div class="c"><a href="#e11">식 11</a><span>정의·증명: <a href="#e40">40–46</a></span></div>
+      <div class="c"><a href="#e12">식 12·13·14</a><span>= <a href="#e47">47–50</a></span></div>
+      <div class="c"><a href="#e51">식 51</a><span>(부록 B만)</span></div>
+      <div class="c"><a href="#e52">식 52</a><span>+ 한 판 근사 <a href="#e55">55</a></span></div>
+      <div class="c"><a href="#e15">식 15·16</a><span>= <a href="#e53">53–57</a></span></div>
+
+      <div class="lane"></div>
+      <div class="c end">→ <b>알고리즘 1</b>: 5번 줄 = V 회귀(<a href="#e16">식 16</a>/<a href="#e57">57</a>) · 6번 줄 = 가중치 BC(<a href="#e9">식 10</a>/<a href="#e15">15</a>/<a href="#e56">56</a>) → §3.3 실전 손질 → §5 실험</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ALGORITHM ============ -->
+<section id="s-alg">
+  <h2>알고리즘 1 <span class="sec">§3 · 전체가 이 7줄</span></h2>
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 960 350" role="img" aria-label="AWR 한 바퀴: 버퍼 D에서 return R을 받아 V를 맞추고, A = R − V를 계산하고, ω = exp(A/β)로 바꾼 뒤, 데이터 행동을 ω만큼 따라 하는 가중치 BC로 정책을 업데이트한다. 새 정책으로 판을 더 모아 D에 넣고 반복한다.">
+        <defs>
+          <marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker>
+          <marker id="mad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-d"/></marker>
+        </defs>
+        <path d="M90,120 V72 H855 V117" class="ar" marker-end="url(#ma)"/>
+        <text x="472" y="62" text-anchor="middle" class="lbl">(s, a) 그대로 전달 · 정책은 버퍼에 실제로 있는 행동만 따라 해요</text>
+
+        <rect x="20" y="120" width="140" height="120" rx="8" class="env"/>
+        <text x="90" y="152" text-anchor="middle" class="h">버퍼 𝒟</text>
+        <text x="90" y="176" text-anchor="middle" class="s">판마다 (s, a, r)</text>
+        <text x="90" y="200" text-anchor="middle" class="mono">4·7번 줄</text>
+        <text x="90" y="222" text-anchor="middle" class="s">최근 5만 개 (FIFO)</text>
+
+        <rect x="200" y="120" width="160" height="120" rx="8" class="val"/>
+        <text x="280" y="152" text-anchor="middle" class="t">① V 맞추기</text>
+        <text x="280" y="176" text-anchor="middle" class="mono">min (R − V)²</text>
+        <text x="280" y="200" text-anchor="middle" class="s">→ V(s) = R의 평균</text>
+        <text x="280" y="222" text-anchor="middle" class="s c-val">5번 줄 · 회귀 #1</text>
+
+        <rect x="400" y="120" width="140" height="120" rx="8" class="box"/>
+        <text x="470" y="152" text-anchor="middle" class="t">② 판정</text>
+        <text x="470" y="176" text-anchor="middle" class="mono">A = R − V(s)</text>
+        <text x="470" y="200" text-anchor="middle" class="s">평균보다 잘했나?</text>
+        <text x="470" y="222" text-anchor="middle" class="s">+ 잘함 · − 못함</text>
+
+        <rect x="580" y="120" width="150" height="120" rx="8" class="box"/>
+        <text x="655" y="152" text-anchor="middle" class="t">③ 가중치</text>
+        <text x="655" y="176" text-anchor="middle" class="mono">ω = exp(A/β)</text>
+        <text x="655" y="200" text-anchor="middle" class="s">항상 0보다 큼</text>
+        <text x="655" y="222" text-anchor="middle" class="s">20에서 자름 (§3.3)</text>
+
+        <rect x="770" y="120" width="170" height="120" rx="8" class="policy"/>
+        <text x="855" y="152" text-anchor="middle" class="t">④ 가중치 BC</text>
+        <text x="855" y="176" text-anchor="middle" class="mono">max Σ ω·log π(a|s)</text>
+        <text x="855" y="200" text-anchor="middle" class="s">잘한 판을 더 따라 함</text>
+        <text x="855" y="222" text-anchor="middle" class="s c-upd">6번 줄 · θ 업데이트</text>
+
+        <line x1="160" y1="180" x2="197" y2="180" class="ar" marker-end="url(#ma)"/>
+        <text x="179" y="170" text-anchor="middle" class="lbl">R</text>
+        <line x1="360" y1="180" x2="397" y2="180" class="ar" marker-end="url(#ma)"/>
+        <text x="379" y="170" text-anchor="middle" class="lbl">V</text>
+        <line x1="540" y1="180" x2="577" y2="180" class="ar" marker-end="url(#ma)"/>
+        <text x="559" y="170" text-anchor="middle" class="lbl">A</text>
+        <line x1="730" y1="180" x2="767" y2="180" class="ar" marker-end="url(#ma)"/>
+        <text x="749" y="170" text-anchor="middle" class="lbl">ω</text>
+
+        <path d="M855,240 V292 H90 V244" class="ar-d" marker-end="url(#mad)"/>
+        <text x="472" y="316" text-anchor="middle" class="lbl">4번 줄: 새 정책으로 판을 약 2000개 더 모아 𝒟에 추가 → 다시 ①</text>
+        <text x="472" y="336" text-anchor="middle" class="lbl">고정 데이터(§5.4)면 이 화살표 없이 같은 𝒟로 ①~④</text>
+      </svg>
+    </div>
+    <figcaption>정책 θ가 바뀌는 곳은 ④ 하나예요. ①에서는 V 신경망만 바뀌어요. 위쪽 화살표가 이 알고리즘의 성격을 정해요. 정책은 항상 <b>데이터에 실제로 있는 행동</b>만 따라 하고, 판마다 가중치만 달라져요.</figcaption>
+  </figure>
+
+  <div class="eqs">
+    <div class="eqc" id="alg">
+      <div class="no">Alg 1</div>
+      <div class="body">
+        <div class="tex">\[\begin{array}{ll}
+1: & \pi_1 \leftarrow \text{random policy}\\
+2: & \mathcal{D} \leftarrow \emptyset\\
+3: & \textbf{for } k=1,\dots,k_{\max}\ \textbf{do}\\
+4: & \quad \text{add trajectories } \{\tau_i\} \text{ sampled via } \pi_k \text{ to } \mathcal{D}\\
+5: & \quad V^{\mathcal D}_k \leftarrow \arg\min_V\ \mathbb{E}_{s,a\sim\mathcal D}\Big[\big\|\mathcal{R}^{\mathcal D}_{s,a}-V(s)\big\|^2\Big]\\
+6: & \quad \pi_{k+1} \leftarrow \arg\max_\pi\ \mathbb{E}_{s,a\sim\mathcal D}\Big[\log\pi(a|s)\,\exp\!\Big(\tfrac{1}{\beta}\big(\mathcal{R}^{\mathcal D}_{s,a}-V^{\mathcal D}_k(s)\big)\Big)\Big]\\
+7: & \textbf{end for}
+\end{array}\]</div>
+        <p><span class="tag r">읽기</span>1–2: 아무렇게나 움직이는 정책과 빈 버퍼로 시작해요. 4: 지금 정책으로 판을 돌려 버퍼에 넣어요. 5: 버퍼 전체로 V를 return에 맞춰요(MSE). 6: 버퍼 전체로 정책을 "log 확률 × 가중치" 최대로 맞춰요.</p>
+        <p><span class="tag w">왜</span>5번과 6번 둘 다 <b>정답이 정해진 회귀</b>예요. 5번의 정답은 return, 6번의 정답은 데이터 속 행동이에요. 그래서 PG처럼 불안정한 "점수 미분"을 하지 않아도 돼요.</p>
+        <div class="tex">\[\mathcal{R}^{\mathcal D}_{s,a}=\sum_{t=0}^{T}\gamma^t r_t,\qquad A^{\mathcal D}(s,a)=\mathcal{R}^{\mathcal D}_{s,a}-V^{\mathcal D}(s),\qquad \text{weight}=\exp\!\Big(\tfrac{1}{\beta}A^{\mathcal D}(s,a)\Big)\]</div>
+        <p><span class="tag r">읽기</span>버퍼 속 (s, a)의 return은 그 시점부터 판 끝(T)까지 받은 할인 보상 합이에요(Monte Carlo 추정). 실제 구현은 §3.3의 TD(λ)로 바꿔요.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="call val" id="mse">
+    <h3>약속한 복습: MSE를 최소화하면 왜 평균이 나오나 (5번 줄의 정체)</h3>
+    <p>같은 상태 s에서 4판을 했고 return G가 <b>1, 1, 1, 0</b>이었다고 해요. V(s)는 숫자 하나 v만 낼 수 있어요. 어떤 v가 MSE를 가장 작게 만들까요?</p>
+    <div class="tex">\[\mathrm{MSE}(v)=\frac{(v-1)^2+(v-1)^2+(v-1)^2+(v-0)^2}{4}=v^2-1.5v+0.75\]</div>
+    <div class="scroll">
+      <table class="mini" aria-label="v에 따른 MSE">
+        <tr><th>v</th><td>0</td><td>0.25</td><td>0.5</td><td class="hit">0.75</td><td>1</td></tr>
+        <tr><th>MSE</th><td>0.75</td><td>0.4375</td><td>0.25</td><td class="hit">0.1875</td><td>0.25</td></tr>
+      </table>
+    </div>
+    <ul>
+      <li><b>G₁² + G₂² + … 를 만드는 게 아니에요.</b> G는 고정된 데이터이고, 움직이는 건 v 하나예요. 위 식은 v에 대한 아래로 볼록한 2차함수예요.</li>
+      <li>일반식: \(\sum_i(v-G_i)^2=n v^2-2v\sum_iG_i+\sum_iG_i^2\). 미분해서 0으로 두면 \(2nv-2\sum_iG_i=0\), 즉 \(v=\frac{1}{n}\sum_iG_i\) = <b>평균</b>이에요. \(\sum G_i^2\)는 v와 상관없는 상수라 꼭짓점 위치를 안 바꿔요.</li>
+      <li>줄다리기로 보면: G=1인 판 3개가 (1−v)씩 위로 당기고, G=0인 판 1개가 v만큼 아래로 당겨요. 3(1−v) = v에서 균형이 맞으니 v = 0.75예요.</li>
+      <li>그래서 5번 줄의 V(s)는 "그 상태에서 평균 return"이 되고, A = R − V는 "평균 대비 잘한 정도"가 돼요. MAE(절댓값)를 쓰면 중앙값 1.0이 나와서 성공한 판의 A가 0이 돼 버려요.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ §2 PRELIMINARIES ============ -->
+<section id="s-pre">
+  <h2>출발점: RL 목표와 RWR <span class="sec">§2 · 식 1–2</span></h2>
+  <div class="eqs">
+    <div class="eqc" id="e1">
+      <div class="no">(1)</div>
+      <div class="body">
+        <div class="tex">\[J(\pi)=\mathbb{E}_{\tau\sim p_\pi(\tau)}\Big[\sum_{t=0}^{\infty}\gamma^t r_t\Big]=\mathbb{E}_{s\sim d_\pi(s)}\,\mathbb{E}_{a\sim\pi(a|s)}\big[r(s,a)\big],\qquad d_\pi(s)=\sum_{t=0}^{\infty}\gamma^t p(s_t=s\mid\pi)\]</div>
+        <p><span class="tag r">읽기</span>정책의 점수 J는 "π로 판을 돌렸을 때 받는 할인 보상 합의 평균"이에요. 오른쪽은 같은 값을 "π가 가는 상태들(d_π) × 거기서 고르는 행동(π) × 즉시 보상 r"로 다시 쓴 거예요.</p>
+        <p><span class="tag w">왜 두 번 쓰나</span>오른쪽 꼴은 <b>"어디에 가나(d_π)"</b>와 <b>"가서 뭘 하나(π)"</b>를 분리해요. 뒤에서 이 d_π를 데이터의 d_μ로 바꿔치기하는 게 유도의 핵심이라서 미리 이렇게 써 둔 거예요.</p>
+        <div class="ex"><p><b>예시</b> LIBERO처럼 성공하면 1, 아니면 0이고 γ = 0.99라면, 49스텝째 성공한 판의 return은 0.99⁴⁹ ≈ 0.611이에요. d_π(s)는 "할인을 곱한 방문 횟수표"예요. 일찍 자주 가는 상태일수록 커요. 합이 1이 되도록 나누지 않아서 "정규화 안 된(unnormalized)" 분포라고 해요.</p></div>
+      </div>
+    </div>
+
+    <div class="eqc" id="e2">
+      <div class="no">(2)</div>
+      <div class="body">
+        <div class="tex">\[\pi_{k+1}=\arg\max_\pi\ \mathbb{E}_{s\sim d_{\pi_k}(s)}\,\mathbb{E}_{a\sim\pi_k(a|s)}\Big[\log\pi(a|s)\,\exp\!\Big(\frac{1}{\beta}\mathcal{R}_{s,a}\Big)\Big],\qquad \mathcal{R}_{s,a}=\sum_{t=0}^{\infty}\gamma^t r_t\]</div>
+        <p><span class="tag r">읽기</span>RWR(Reward-Weighted Regression, 2007)이에요. 지금 정책 π_k로 모은 데이터에서, 각 행동의 log 확률에 <b>exp(return/β)</b>를 곱해서 최대화해요. 즉 "return이 큰 행동일수록 더 세게 따라 하는" 가중치 BC예요. β > 0은 온도예요.</p>
+        <p><span class="tag w">한계</span>① baseline(V)이 없어요. ② on-policy라서 한 번 업데이트하면 데이터를 버려요. AWR은 이 두 가지를 고친 거예요.</p>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <h3>RWR과 AWR은 "상태끼리의 균형"이 달라요</h3>
+    <p class="muted" style="font-size:14.5px">설명용 예시(β = 0.1): 쉬운 상태(평균 V = 0.9)에서 두 행동의 return이 0.95 / 0.85, 어려운 상태(V = 0.2)에서 0.4 / 0.0이에요. 막대는 각 샘플이 전체 학습에서 차지하는 가중치 비중이에요.</p>
+    <div class="bars">
+      <div class="bargroup">
+        <h3>RWR: ω = exp(R/β)</h3>
+        <div class="bar"><div class="lab">쉬운 상태 · 좋은 행동<small>ω = 13,360</small></div><div class="trk"><div class="fill" style="width:72.88%"></div></div><div class="pct">72.9%</div></div>
+        <div class="bar"><div class="lab">쉬운 상태 · 나쁜 행동<small>ω = 4,915</small></div><div class="trk"><div class="fill" style="width:26.81%"></div></div><div class="pct">26.8%</div></div>
+        <div class="bar"><div class="lab">어려운 상태 · 좋은 행동<small>ω = 54.6</small></div><div class="trk"><div class="fill hard" style="width:0.30%"></div></div><div class="pct">0.3%</div></div>
+        <div class="bar"><div class="lab">어려운 상태 · 나쁜 행동<small>ω = 1</small></div><div class="trk"><div class="fill hard" style="width:0.01%"></div></div><div class="pct">&lt;0.1%</div></div>
+      </div>
+      <div class="bargroup">
+        <h3>AWR: ω = exp((R − V(s))/β)</h3>
+        <div class="bar"><div class="lab">쉬운 상태 · 좋은 행동<small>ω = 1.65</small></div><div class="trk"><div class="fill" style="width:16.86%"></div></div><div class="pct">16.9%</div></div>
+        <div class="bar"><div class="lab">쉬운 상태 · 나쁜 행동<small>ω = 0.61</small></div><div class="trk"><div class="fill" style="width:6.20%"></div></div><div class="pct">6.2%</div></div>
+        <div class="bar"><div class="lab">어려운 상태 · 좋은 행동<small>ω = 7.39</small></div><div class="trk"><div class="fill hard" style="width:75.56%"></div></div><div class="pct">75.6%</div></div>
+        <div class="bar"><div class="lab">어려운 상태 · 나쁜 행동<small>ω = 0.14</small></div><div class="trk"><div class="fill hard" style="width:1.38%"></div></div><div class="pct">1.4%</div></div>
+      </div>
+    </div>
+    <figcaption>같은 상태 안에서 두 행동의 비율은 RWR과 AWR이 똑같아요(쉬운 상태 e¹ ≈ 2.7배, 어려운 상태 e⁴ ≈ 55배). V(s)를 빼는 건 그 상태의 모든 가중치를 같은 수로 나누는 것과 같거든요. 달라지는 건 <b>상태끼리의 균형</b>이에요. RWR은 쉬운 상태의 <b>나쁜</b> 행동(26.8%)을 어려운 상태의 <b>좋은</b> 행동(0.3%)보다 훨씬 많이 배워요. 논문이 "작지만 중요한 차이"라고 부르는 부분이 이거고, §5.2 실험에서 baseline을 빼면 성능이 크게 떨어지는 이유이기도 해요. (숫자는 설명용 예시예요.)</figcaption>
+  </figure>
+</section>
+
+<!-- ============ §3.1 ============ -->
+<section id="s-31">
+  <h2>유도: 왜 exp(A/β)인가 <span class="sec">§3.1 · 식 3–10</span></h2>
+  <p>큰 흐름은 이래요. ① "데이터 정책 μ보다 얼마나 나아지나"를 목표로 잡고 ② 계산할 수 있게 근사하면서 "μ에서 너무 멀어지지 마"라는 목줄을 채우고 ③ 그 문제를 라그랑주로 풀면 ④ 정답 π*가 μ × exp(A/β) 꼴로 나오고 ⑤ 그걸 신경망에 맞추면 가중치 BC가 돼요.</p>
+  <div class="eqs">
+    <div class="eqc" id="e3">
+      <div class="no">(3)</div>
+      <div class="body">
+        <div class="tex">\[\eta(\pi)=J(\pi)-J(\mu)=\mathbb{E}_{s\sim d_\pi(s)}\mathbb{E}_{a\sim\pi(a|s)}\big[A^\mu(s,a)\big]=\mathbb{E}_{s\sim d_\pi(s)}\mathbb{E}_{a\sim\pi(a|s)}\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\]</div>
+        <div class="tex">\[V^\mu(s)=\int_a\mu(a|s)\,\mathcal{R}^{a}_{s}\,da\]</div>
+        <p><span class="tag r">읽기</span>새 정책 π의 점수에서 데이터 정책 μ의 점수를 뺀 <b>개선량</b> η는, "π로 달리면서 들르는 상태마다, π가 고른 행동이 μ의 평균보다 얼마나 나았는지(A^μ)"를 모두 더한 것과 같아요. 이 등식은 Kakade & Langford(2002)의 보조정리이고, 증명은 <a href="#e17">부록 A 식 17–25</a>에 있어요.</p>
+        <p><span class="tag w">왜 중요</span>RWR은 J(π) 자체를 키웠어요. AWR은 <b>개선량</b>을 키워요. 그러면 식 안에 자연스럽게 A = R − V가 들어오고, 이게 RWR과의 차이(baseline)가 돼요.</p>
+        <div class="ex"><p><b>비유</b> 출근길 내비. 예전 습관(μ)대로 가다가 갈림길마다 새 경로(π)를 택했을 때, "그 갈림길에서 예전 습관의 평균 시간보다 몇 분 아꼈나"를 다 더하면 = 새 경로 전체로 아낀 시간이에요.</p></div>
+      </div>
+    </div>
+
+    <div class="eqc" id="e4">
+      <div class="no">(4)</div>
+      <div class="body">
+        <div class="tex">\[\hat\eta(\pi)=\mathbb{E}_{s\sim d_\mu(s)}\mathbb{E}_{a\sim\pi(a|s)}\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\]</div>
+        <p><span class="tag r">읽기</span>식 3에서 <b>d_π를 d_μ로</b> 바꿨어요. "새 정책이 갈 상태" 대신 "데이터에 이미 있는 상태"에서 평가해요.</p>
+        <p><span class="tag w">왜</span>d_π는 π에 따라 바뀌어서(최적화하려는 대상이 평가 기준에도 들어 있음) 계산이 꼬이고, 알려면 π로 새로 판을 돌려야 해요. 바꾼 식 η̂은 η와 <b>1차까지 같고</b>(π가 μ 근처에서 거의 같은 값), π와 μ가 KL로 가까우면 좋은 근사예요(TRPO, Schulman 2015).</p>
+        <div class="ex"><p><b>비유</b> 새 레시피를 평가할 때 새 레시피용 장을 다시 보는 대신, 이미 사 둔 재료로 맛을 봐요. 레시피가 크게 안 바뀌면 거의 같은 평가가 나와요.</p></div>
+      </div>
+    </div>
+
+    <div class="eqc" id="e5">
+      <div class="no">(5)<br>(6)</div>
+      <div class="body">
+        <div class="tex">\[\arg\max_\pi\ \int_s d_\mu(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\,da\,ds\]</div>
+        <div class="tex">\[\text{s.t.}\quad \int_s d_\mu(s)\,D_{\mathrm{KL}}\big(\pi(\cdot|s)\,\|\,\mu(\cdot|s)\big)\,ds\le\epsilon,\qquad D_{\mathrm{KL}}(p\|q)=\int_a p(a)\log\frac{p(a)}{q(a)}\,da\]</div>
+        <p><span class="tag r">읽기</span>식 5는 식 4를 적분(= 모든 상태·행동에 대한 가중합)으로 풀어 쓴 거예요. 식 6은 "상태 평균 KL이 ε 이하"라는 <b>제약</b>이에요. s.t.는 "단, ~를 지키면서"라는 뜻이에요.</p>
+        <p><span class="tag w">왜</span>식 4의 근사는 π가 μ와 가까울 때만 맞아요. 그래서 "가까움"을 제약으로 걸어서 근사가 계속 믿을 만하게 해요. <b>PPO의 clip(0.8~1.2)과 같은 역할</b>(trust region)이에요.</p>
+        <div class="ex"><p><b>KL 숫자 감</b> 데이터 μ = (50%, 50%)일 때 새 정책이 (60%, 40%)면 KL ≈ 0.020, (98%, 2%)면 KL ≈ 0.595예요. ε이 작으면 앞의 것만 허용돼요.</p></div>
+      </div>
+    </div>
+
+    <div class="eqc" id="e7">
+      <div class="no">(7)</div>
+      <div class="body">
+        <div class="tex">\[\mathcal{L}(\pi,\beta)=\int_s d_\mu(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\,da\,ds+\beta\Big(\epsilon-\int_s d_\mu(s)\,D_{\mathrm{KL}}\big(\pi(\cdot|s)\,\|\,\mu(\cdot|s)\big)\,ds\Big)\]</div>
+        <p><span class="tag r">읽기</span>라그랑지안이에요. 제약(식 6)을 <b>벌점</b>으로 바꿔 목표에 붙였어요. β는 라그랑주 승수예요.</p>
+        <p><span class="tag w">감 잡기</span>"KL이 1 늘 때마다 점수에서 β만큼 깎는다"는 거래예요. β가 크면 데이터에서 멀어지는 게 비싸서 μ 근처에 머물고, β가 작으면 점수(A)를 쫓아 멀리 가요. 이 β가 그대로 뒤의 온도가 돼요. 자세한 풀이는 <a href="#e30">부록 A 식 30–35</a>에 있어요.</p>
+      </div>
+    </div>
+
+    <div class="eqc" id="e8">
+      <div class="no">(8)</div>
+      <div class="body">
+        <div class="tex">\[\pi^*(a|s)=\frac{1}{Z(s)}\,\mu(a|s)\,\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)\Big)\]</div>
+        <p><span class="tag r">읽기</span>식 7을 π(a|s)로 미분해 0으로 두고 풀면 나오는 정답 정책이에요. <b>데이터 정책 μ의 행동 분포에 exp(A/β)를 곱해 다시 줄 세우고</b>, Z(s)로 나눠 합을 1로 맞춰요.</p>
+        <div class="ex">
+          <p><b>예시</b> 상태 s에서 데이터에 행동 두 개가 반반, A는 +0.1 / −0.1이에요.</p>
+          <div class="scroll">
+            <table class="mini">
+              <tr><th>β</th><th>ω(좋은)</th><th>ω(나쁜)</th><th>π* (좋은 : 나쁜)</th></tr>
+              <tr><td>0.05</td><td>e² = 7.39</td><td>e⁻² = 0.14</td><td class="hit">98% : 2%</td></tr>
+              <tr><td>0.5</td><td>e^0.2 = 1.22</td><td>e^−0.2 = 0.82</td><td>60% : 40%</td></tr>
+              <tr><td>∞</td><td>1</td><td>1</td><td>50% : 50% = BC</td></tr>
+            </table>
+          </div>
+          <p>β = 0.05일 때 Z(s) = 0.5×7.39 + 0.5×0.14 ≈ 3.76이에요. β → ∞이면 그냥 BC가 돼요. 그래서 β는 "점수를 얼마나 믿나"를 정하는 손잡이예요.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="eqc" id="e9">
+      <div class="no">(9)<br>(10)</div>
+      <div class="body">
+        <div class="tex">\[\arg\min_\pi\ \mathbb{E}_{s\sim\mathcal{D}}\Big[D_{\mathrm{KL}}\big(\pi^*(\cdot|s)\,\|\,\pi(\cdot|s)\big)\Big]\]</div>
+        <div class="tex">\[=\arg\max_\pi\ \mathbb{E}_{s\sim d_\mu(s)}\,\mathbb{E}_{a\sim\mu(a|s)}\Big[\log\pi(a|s)\,\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)\Big)\Big]\]</div>
+        <p><span class="tag r">읽기</span>π*는 수식으로만 존재해요. 신경망 정책은 그 모양을 정확히 낼 수 없으니, π*와 KL로 <b>가장 가까운</b> 신경망 π를 찾아요(식 9, "투영"). 이걸 풀면 식 10이 돼요. 즉 <b>데이터 행동(a ~ μ)의 log 확률 × 가중치</b>를 최대화하는 가중치 BC예요. 이게 알고리즘 6번 줄이에요.</p>
+        <p><span class="tag w">한 줄 유도</span>KL(π*‖π) = ∫π* log π* − ∫π* log π예요. 앞항은 π와 상관없어서 버리고, 뒤항의 π*에 식 8을 넣으면 ∫ μ·exp(A/β)·log π / Z가 돼요. "μ로 평균"은 곧 "데이터에서 샘플"이라 식 10이 나와요(Z(s) 처리는 <a href="#e37">식 37–39</a> 참고).</p>
+        <p><span class="tag e">중요</span>행동 a는 항상 <b>데이터(μ)에서</b> 와요. 정책은 데이터에 없는 행동을 시도하지 않아요. 그래서 §5.4에서 고정 데이터만으로 학습해도 안정적이에요.</p>
+        <p class="muted" style="font-size:14.5px">논문은 "우리 목표(개선량)가 baseline V^μ(s)를 정책 업데이트에 넣었고, 이게 효과적인 알고리즘의 핵심 요소"라고 강조해요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ §3.2 ============ -->
+<section id="s-32">
+  <h2>리플레이 버퍼: 여러 정책 데이터가 섞여도 되나 <span class="sec">§3.2 · 식 11–16</span></h2>
+  <p>§3.1은 데이터를 정책 하나(μ)가 모았다고 가정했어요. 실제 버퍼에는 π₁, π₂, …, π_k가 모은 판이 섞여 있어요. 매번 데이터를 버리면 낭비고, 중요도 샘플링(importance sampling)으로 재사용하면 분산이 커져요. 그래서 버퍼를 <b>"과거 정책들의 혼합"</b>으로 보고 같은 유도를 다시 해요.</p>
+  <div class="tex" style="background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 16px">\[\mu_k(\tau)=\sum_{i=1}^k w_i\,\pi_i(\tau),\qquad \pi_i(\tau)=p(\tau\mid\pi_i),\qquad \sum_i w_i=1\]</div>
+  <p class="muted" style="font-size:15px">읽기: 버퍼에서 판 하나를 꺼내는 건 "확률 w_i로 과거 정책 π_i를 고르고, 그 정책이 만든 판 하나를 꺼내는 것"과 같아요. 비유하면 여러 학년 학생들의 풀이 노트를 섞은 더미예요.</p>
+  <div class="eqs">
+    <div class="eqc" id="e11">
+      <div class="no">(11)</div>
+      <div class="body">
+        <div class="tex">\[\eta(\pi)=J(\pi)-\sum_i w_i J(\pi_i)=\mathbb{E}_{s\sim d_\pi(s)}\,\mathbb{E}_{a\sim\pi(a|s)}\Big[\sum_i w_i A^{\pi_i}(s,a)\Big]\]</div>
+        <p><span class="tag r">읽기</span>개선량의 기준이 "과거 정책들의 가중 평균 점수"가 됐어요. 식 3을 정책마다 적용해 w_i로 평균 내면, 각 정책 기준 Advantage의 가중 평균이 나와요(증명 <a href="#e42">식 42–46</a>).</p>
+      </div>
+    </div>
+    <div class="eqc" id="e12">
+      <div class="no">(12)</div>
+      <div class="body">
+        <div class="tex">\[\hat\eta(\pi)=\mathbb{E}_{s\sim d_\mu(s)}\,\mathbb{E}_{a\sim\pi(a|s)}\big[A^{\pi_i}(s,a)\big]=\sum_{i=1}^k w_i\Big(\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi(a|s)}\big[A^{\pi_i}(s,a)\big]\Big)\]</div>
+        <p><span class="tag r">읽기</span>식 4처럼 d_π를 데이터 상태로 바꿔요. 오른쪽이 실제 뜻이에요. <b>"각 과거 정책 π_i가 간 상태들에서, π_i 기준 Advantage로 평가"</b>해서 w_i로 섞어요. 가운데 식의 A^{π_i}는 i를 생략한 느슨한 표기예요.</p>
+      </div>
+    </div>
+    <div class="eqc" id="e13">
+      <div class="no">(13)<br>(14)</div>
+      <div class="body">
+        <div class="tex">\[\arg\max_\pi\ \sum_{i=1}^k w_i\Big(\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi(a|s)}\big[A^{\pi_i}(s,a)\big]\Big)\]</div>
+        <div class="tex">\[\text{s.t.}\quad\mathbb{E}_{s\sim d_\mu(s)}\Big[D_{\mathrm{KL}}\big(\pi(\cdot|s)\,\|\,\mu(\cdot|s)\big)\Big]\le\epsilon,\qquad \mu(a|s)=\frac{\mu(s,a)}{d_\mu(s)}=\frac{\sum_i w_i d_{\pi_i}(s)\pi_i(a|s)}{\sum_j w_j d_{\pi_j}(s)}\]</div>
+        <p><span class="tag r">읽기</span>식 5–6과 같은 구조예요. 목줄의 기준 μ(a|s)는 "버퍼에서 상태 s 근처 데이터만 모았을 때의 행동 분포"예요. 그 상태에 자주 간 정책일수록 더 큰 비중을 가져요.</p>
+        <div class="ex"><p><b>예시</b> w가 같고, 상태 s에 π₁은 30번, π₂는 10번 갔다면 μ(a|s) = 0.75·π₁(a|s) + 0.25·π₂(a|s)예요.</p></div>
+        <p class="muted" style="font-size:14.5px">논문은 이 목표를 알고리즘 1의 업데이트가 최적화한다는 것을 부록 B에서 보여요.</p>
+      </div>
+    </div>
+    <div class="eqc" id="e15">
+      <div class="no">(15)</div>
+      <div class="body">
+        <div class="tex">\[\arg\max_\pi\ \sum_{i=1}^k w_i\,\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi_i(a|s)}\left[\log\pi(a|s)\exp\!\left(\frac{1}{\beta}\left(\mathcal{R}^{\pi_i}_{s,a}-\frac{\sum_j w_j d_{\pi_j}(s)V^{\pi_j}(s)}{\sum_j w_j d_{\pi_j}(s)}\right)\right)\right]\]</div>
+        <p><span class="tag r">읽기</span>라그랑주로 풀고 신경망에 투영한 결과예요. 식 10과 같은 가중치 BC인데, baseline 자리에 <b>과거 정책들 V의 "방문 가중 평균"</b>이 들어가요. 바깥의 Σw_i E[…]는 그냥 "버퍼에서 샘플"이라 알고리즘 6번 줄로 구현돼요(유도 <a href="#e52">식 52–56</a>).</p>
+      </div>
+    </div>
+    <div class="eqc" id="e16">
+      <div class="no">(16)</div>
+      <div class="body">
+        <div class="tex">\[\bar V=\arg\min_V\ \sum_i w_i\,\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi_i(a|s)}\Big[\big\|\mathcal{R}^{\pi_i}_{s,a}-V(s)\big\|^2\Big],\qquad \bar V(s)=\frac{\sum_i w_i d_{\pi_i}(s)V^{\pi_i}(s)}{\sum_j w_j d_{\pi_j}(s)}\]</div>
+        <p><span class="tag r">읽기</span>정책마다 V를 따로 학습하면 정책별 데이터가 적어서 부정확해요. 그래서 <b>V 하나(V̄)</b>를 버퍼 전체에 MSE로 맞춰요. 그러면 MSE 최솟값 = 평균이라서, V̄가 저절로 식 15에 필요한 가중 평균 baseline이 돼요. 이게 알고리즘 5번 줄이에요(<a href="#mse">MSE → 평균 복습</a>).</p>
+        <div class="ex"><p><b>예시</b> 상태 s에서 π₁의 판 30개는 평균 return 0.8, π₂의 판 10개는 평균 0.4라면, 섞어서 MSE로 맞춘 V̄(s) = (30×0.8 + 10×0.4)/40 = <b>0.7</b>이에요. 식 16 오른쪽의 방문 가중 평균과 같아요.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ §3.3 ============ -->
+<section id="s-33">
+  <h2>실전 손질 4가지 <span class="sec">§3.3 · 번호 없는 식</span></h2>
+  <div class="eqs">
+    <div class="eqc" id="eclip">
+      <div class="no">ω</div>
+      <div class="body">
+        <div class="tex">\[\omega^{\mathcal D}_{s,a}=\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^{\mathcal D}_{s,a}-V^{\mathcal D}(s)\big)\Big),\qquad \hat\omega^{\mathcal D}_{s,a}=\min\big(\omega^{\mathcal D}_{s,a},\ \omega_{\max}\big)\]</div>
+        <p><span class="tag r">읽기</span>가중치가 가끔 너무 커지면(예: β = 0.05에서 A = 0.3이면 e⁶ ≈ 403) gradient가 폭발해요. 그래서 <b>ω_max = 20</b>에서 잘라요.</p>
+      </div>
+    </div>
+    <div class="eqc" id="etd">
+      <div class="no">TD(λ)</div>
+      <div class="body">
+        <div class="tex">\[\mathcal{R}^{\lambda}_t=r_t+\gamma\Big[(1-\lambda)\,V^{\mathcal D}_{k-1}(s_{t+1})+\lambda\,\mathcal{R}^{\lambda}_{t+1}\Big]\]</div>
+        <p><span class="tag r">읽기</span>return을 끝까지 다 더하는 Monte Carlo는 분산이 커요. 그래서 TD(λ)로 바꿔요. 다음 스텝에서 "V의 예측(1−λ)"과 "실제로 이어진 return(λ)"을 섞어요. <b>λ = 0.95</b>, V는 지난 반복의 V_{k−1}을 써요. 위 식은 논문에 적혀 있지 않은 TD(λ)의 표준 재귀식이에요.</p>
+        <p><span class="tag w">결과</span>MC로도 경쟁력은 있지만 조금 나빴어요(§5.2).</p>
+      </div>
+    </div>
+    <div class="eqc">
+      <div class="no">샘플</div>
+      <div class="body">
+        <p>식 10은 상태를 할인 분포 d_μ(s)에서 뽑으라고 하지만, 실제로는 <b>버퍼에서 균일하게</b> 뽑아도 잘 됐어요. 흔한 구현 방식이에요.</p>
+      </div>
+    </div>
+    <div class="eqc">
+      <div class="no">β</div>
+      <div class="body">
+        <p>예전 방법들은 라그랑주 승수 β를 매번 조절했어요. AWR은 <b>상수로 고정</b>(β = 0.05)해도 잘 됐어요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APPENDIX A ============ -->
+<section id="s-appA">
+  <h2>부록 A: 단일 정책 유도의 전체 과정 <span class="sec">식 17–39</span></h2>
+  <p>§3.1에서 "자세한 건 부록"이라고 넘긴 단계들이에요. 각 줄 오른쪽에 <b>그 줄에서 무엇이 바뀌었는지</b> 적었어요.</p>
+
+  <div class="drv">
+    <div class="drv-title">A-1. 개선량 = Advantage의 합 (식 3의 증명)</div>
+    <div class="dr" id="e17"><div class="no">(17)</div><div class="body">
+      <div class="tex">\[\mathbb{E}_{\tau\sim p_\pi(\tau)}\Big[\sum_{t=0}^{\infty}\gamma^t A^\mu(s_t,a_t)\Big]\]</div>
+      <p>새 정책 π로 달린 판에서, 매 스텝 "μ 기준 Advantage"를 할인해 더한 값이에요. 이게 J(π) − J(μ)와 같다는 걸 보이는 게 목표예요.</p></div></div>
+    <div class="dr" id="e18"><div class="no">(18)</div><div class="body">
+      <div class="tex">\[=\mathbb{E}_{\tau\sim p_\pi(\tau)}\Big[\sum_{t=0}^{\infty}\gamma^t\big(r(s_t,a_t)+\gamma V^\mu(s_{t+1})-V^\mu(s_t)\big)\Big]\]</div>
+      <p>A^μ(s,a) = R^μ − V^μ에서, R^μ = "지금 보상 r + 다음 상태부터 μ대로 간 값 γV^μ(s′)"로 바꿨어요(기댓값으로 같아요). 괄호 안은 Part1에서 본 <b>TD 오차 δ</b>와 같은 모양이에요.</p></div></div>
+    <div class="dr" id="e19"><div class="no">(19)</div><div class="body">
+      <div class="tex">\[=\mathbb{E}_{\tau\sim p_\pi(\tau)}\Big[-V^\mu(s_0)+\sum_{t=0}^{\infty}\gamma^t r(s_t,a_t)\Big]\]</div>
+      <p><b>망원경 합(telescoping)</b>이에요. γ^{t+1}V(s_{t+1})과 다음 항의 −γ^{t+1}V(s_{t+1})이 서로 지워져서 맨 앞의 −V(s₀)만 남아요.</p>
+      <div class="ex"><p><b>숫자로</b> γ = 1, V(s₀) = 0.5, V(s₁) = 0.6, V(s₂) = 0.8, 끝나면 0일 때: (0.6 − 0.5) + (0.8 − 0.6) + (0 − 0.8) = −0.5 = −V(s₀). 중간 값들은 다 지워져요.</p></div></div></div>
+    <div class="dr" id="e20"><div class="no">(20)</div><div class="body">
+      <div class="tex">\[=-\mathbb{E}_{s_0\sim p(s_0)}\big[V^\mu(s_0)\big]+\mathbb{E}_{\tau\sim p_\pi(\tau)}\Big[\sum_{t=0}^{\infty}\gamma^t r(s_t,a_t)\Big]\]</div>
+      <p>기댓값을 두 개로 나눴어요. 시작 상태 s₀의 분포는 어떤 정책이든 같아서(환경이 정함) 첫 항은 정책과 상관없이 p(s₀)로 써요.</p></div></div>
+    <div class="dr" id="e21"><div class="no">(21)</div><div class="body">
+      <div class="tex">\[=-J(\mu)+J(\pi)\]</div>
+      <p>시작 상태에서 μ의 평균 return = J(μ), π로 달린 할인 보상 합의 평균 = J(π). 증명 끝이에요. <b>"π로 달리며 μ 기준 A를 모으면 두 정책의 점수 차"</b>가 돼요.</p></div></div>
+
+    <div class="drv-title">A-2. 궤적 평균을 상태 평균으로 바꾸기 (d_π의 탄생)</div>
+    <div class="dr" id="e22"><div class="no">(22)</div><div class="body">
+      <div class="tex">\[\eta(\pi)=\mathbb{E}_{\tau\sim p_\pi(\tau)}\Big[\sum_{t=0}^{\infty}\gamma^t A^\mu(s_t,a_t)\Big]\]</div>
+      <p>방금 증명한 식을 η라고 이름 붙였어요.</p></div></div>
+    <div class="dr" id="e23"><div class="no">(23)</div><div class="body">
+      <div class="tex">\[=\sum_{t=0}^{\infty}\int_s p(s_t=s\mid\pi)\int_a\pi(a|s)\,\gamma^t A^\mu(s,a)\,da\,ds\]</div>
+      <p>"판 전체의 평균"을 "t번째 스텝에 상태 s에 있을 확률 × 거기서 a를 고를 확률"로 풀었어요.</p></div></div>
+    <div class="dr" id="e24"><div class="no">(24)</div><div class="body">
+      <div class="tex">\[=\int_s\sum_{t=0}^{\infty}\gamma^t p(s_t=s\mid\pi)\int_a\pi(a|s)\,A^\mu(s,a)\,da\,ds\]</div>
+      <p>Σ_t와 ∫_s의 순서를 바꾸고, t에 의존하는 γ^t를 앞으로 모았어요.</p></div></div>
+    <div class="dr" id="e25"><div class="no">(25)</div><div class="body">
+      <div class="tex">\[=\int_s d_\pi(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\,da\,ds\]</div>
+      <p>모은 Σγ^t p(s_t = s|π)가 바로 d_π(s)예요. 식 3을 적분으로 쓴 꼴이에요.</p></div></div>
+
+    <div class="drv-title">A-3. 근사하고 제약 걸기</div>
+    <div class="dr" id="e26"><div class="no">(26)</div><div class="body">
+      <div class="tex">\[\hat\eta(\pi)=\int_s d_\mu(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\,da\,ds\]</div>
+      <p>= <a href="#e4">식 4</a>. d_π → d_μ로 바꾼 근사예요.</p></div></div>
+    <div class="dr" id="e27"><div class="no">(27)<br>(28)<br>(29)</div><div class="body">
+      <div class="tex">\[\arg\max_\pi\ \int_s d_\mu(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]\,da\,ds\]</div>
+      <div class="tex">\[\text{s.t.}\quad D_{\mathrm{KL}}\big(\pi(\cdot|s)\,\|\,\mu(\cdot|s)\big)\le\epsilon,\ \ \forall s\qquad\qquad \int_a\pi(a|s)\,da=1,\ \ \forall s\]</div>
+      <p>식 28은 <b>모든 상태마다</b> KL ≤ ε이에요(본문 식 6보다 엄격). 식 29는 "π는 확률분포라 합이 1"이라는 당연하지만 꼭 필요한 제약이에요. 모든 상태에서 KL을 지키는 건 풀 수 없어서, 본문 식 6처럼 <b>상태 평균</b> KL로 완화해요.</p></div></div>
+    <div class="dr" id="e30"><div class="no">(30)</div><div class="body">
+      <div class="tex">\[\arg\max_\pi\ \Big(\int_s d_\mu(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]da\,ds\Big)+\beta\Big(\epsilon-\int_s d_\mu(s)D_{\mathrm{KL}}\big(\pi(\cdot|s)\|\mu(\cdot|s)\big)ds\Big)\quad\text{s.t.}\ \int_a\pi(a|s)\,da=1\]</div>
+      <p>KL 제약을 "지키지 않으면 β만큼 벌점"인 <b>부드러운 제약</b>으로 바꿨어요(= 본문 식 7의 모양).</p></div></div>
+
+    <div class="drv-title">A-4. 라그랑주로 정답 π* 구하기</div>
+    <div class="dr" id="e31"><div class="no">(31)</div><div class="body">
+      <div class="tex">\[\mathcal{L}(\pi,\beta,\alpha)=\Big(\int_s d_\mu(s)\int_a\pi(a|s)\big[\mathcal{R}^\mu_{s,a}-V^\mu(s)\big]da\,ds\Big)+\beta\Big(\epsilon-\int_s d_\mu(s)D_{\mathrm{KL}}\big(\pi(\cdot|s)\|\mu(\cdot|s)\big)ds\Big)+\int_s\alpha_s\Big(1-\int_a\pi(a|s)\,da\Big)ds\]</div>
+      <p>남은 제약 "합 = 1"도 상태마다 승수 α_s를 붙여 넣었어요. 이제 제약 없는 하나의 식이라 미분해서 0으로 두면 돼요.</p></div></div>
+    <div class="dr" id="e32"><div class="no">(32)</div><div class="body">
+      <div class="tex">\[\frac{\partial\mathcal{L}}{\partial\pi(a|s)}=d_\mu(s)\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)-\beta\,d_\mu(s)\log\pi(a|s)+\beta\,d_\mu(s)\log\mu(a|s)-\beta\,d_\mu(s)-\alpha_s\]</div>
+      <p>항별로 보면: ① 첫 항은 π에 대해 1차라 계수가 그대로 남아요. ② KL = ∫π log π − ∫π log μ이고, <b>(x log x)′ = log x + 1</b>이라서 −β d_μ(log π + 1 − log μ)가 나와요. ③ 마지막 항에서 −α_s가 나와요.</p></div></div>
+    <div class="dr" id="e33"><div class="no">(33)</div><div class="body">
+      <div class="tex">\[\log\pi(a|s)=\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)+\log\mu(a|s)-1-\frac{1}{d_\mu(s)}\frac{\alpha_s}{\beta}\]</div>
+      <p>식 32 = 0으로 두고 β·d_μ(s)로 나눠서 log π에 대해 정리했어요.</p></div></div>
+    <div class="dr" id="e34"><div class="no">(34)</div><div class="body">
+      <div class="tex">\[\pi(a|s)=\mu(a|s)\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)\Big)\exp\!\Big(-\frac{1}{d_\mu(s)}\frac{\alpha_s}{\beta}-1\Big)\]</div>
+      <p>양변에 exp를 씌웠어요. log의 합은 곱이 되니 μ × exp(A/β) × (상태마다 정해진 상수)예요.</p></div></div>
+    <div class="dr" id="e35"><div class="no">(35)</div><div class="body">
+      <div class="tex">\[Z(s)=\exp\!\Big(\frac{1}{d_\mu(s)}\frac{\alpha_s}{\beta}+1\Big)=\int_{a'}\mu(a'|s)\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a'}-V^\mu(s)\big)\Big)da'\]</div>
+      <p>두 번째 exp는 a와 상관없는 상태별 상수예요. π의 합이 1이 되려면 이 상수가 정확히 1/Z(s)여야 해요. 그래서 Z(s) = "μ로 평균 낸 가중치"예요. 앞의 예시(β = 0.05)에서는 Z ≈ 3.76이었어요.</p></div></div>
+    <div class="dr" id="e36"><div class="no">(36)</div><div class="body">
+      <div class="tex">\[\pi^*(a|s)=\frac{1}{Z(s)}\,\mu(a|s)\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)\Big)\]</div>
+      <p>= <a href="#e8">식 8</a>. 정답 정책이에요.</p></div></div>
+
+    <div class="drv-title">A-5. 신경망으로 옮기기 (가중치 BC의 탄생)</div>
+    <div class="dr" id="e37"><div class="no">(37)</div><div class="body">
+      <div class="tex">\[\arg\min_\pi\ \mathbb{E}_{s\sim d_\mu(s)}\Big[D_{\mathrm{KL}}\big(\pi^*(\cdot|s)\,\|\,\pi(\cdot|s)\big)\Big]\]</div>
+      <p>신경망 π 중에서 π*와 가장 가까운 것을 찾아요. KL(π*‖π) 방향은 "π*가 확률을 주는 행동을 π가 놓치지 않게" 하는 방향이에요.</p></div></div>
+    <div class="dr" id="e38"><div class="no">(38)</div><div class="body">
+      <div class="tex">\[=\arg\min_\pi\ \mathbb{E}_{s\sim d_\mu(s)}\Big[D_{\mathrm{KL}}\Big(\tfrac{1}{Z(s)}\mu(a|s)\exp\!\big(\tfrac{1}{\beta}(\mathcal{R}^\mu_{s,a}-V^\mu(s))\big)\ \Big\|\ \pi(\cdot|s)\Big)\Big]\]</div>
+      <p>π* 자리에 식 36을 그대로 넣었어요.</p></div></div>
+    <div class="dr" id="e39"><div class="no">(39)</div><div class="body">
+      <div class="tex">\[=\arg\max_\pi\ \mathbb{E}_{s\sim d_\mu(s)}\,\mathbb{E}_{a\sim\mu(a|s)}\Big[\log\pi(a|s)\exp\!\Big(\frac{1}{\beta}\big(\mathcal{R}^\mu_{s,a}-V^\mu(s)\big)\Big)\Big]\]</div>
+      <p>KL을 풀면 π와 무관한 ∫π* log π* 항이 빠지고, −∫π* log π를 최소화 = ∫π* log π를 최대화가 남아요. π* = μ × (가중치/Z)이니 "μ에서 a를 뽑아 가중치 × log π의 평균"이 돼요. = <a href="#e9">식 10</a>.</p>
+      <p class="muted" style="font-size:14.5px">한 가지 관찰: 38 → 39에서 1/Z(s)가 사라졌어요. Z(s)는 상태별 상수라 <b>같은 상태 안의 행동 비교</b>에는 영향이 없지만, 엄밀히는 상태끼리의 비중을 조금 바꿔요. 논문은 이를 생략했어요.</p></div></div>
+  </div>
+</section>
+
+<!-- ============ APPENDIX B ============ -->
+<section id="s-appB">
+  <h2>부록 B: 리플레이 버퍼 버전의 전체 과정 <span class="sec">식 40–57</span></h2>
+  <p>부록 A와 같은 길을 "버퍼 = 과거 정책 혼합"으로 다시 가요. 새로 생기는 건 두 가지예요. 기준 분포 μ(a|s)가 혼합이 되고, 마지막에 <b>한 판으로 평균을 대신하는 근사(식 55)</b>가 들어가요.</p>
+
+  <div class="drv">
+    <div class="drv-title">B-1. 버퍼를 분포로 정의하기</div>
+    <div class="dr" id="e40"><div class="no">(40)</div><div class="body">
+      <div class="tex">\[\mu(\tau)=\sum_{i=1}^k w_i\,d_{\pi_i}(\tau),\qquad \mu(s,a)=\sum_{i=1}^k w_i\,d_{\pi_i}(s)\,\pi_i(a|s),\qquad d_\mu(s)=\sum_{i=1}^k w_i\,d_{\pi_i}(s)\]</div>
+      <p>버퍼의 ① 판 분포, ② (상태, 행동) 분포, ③ 상태 분포를 각각 과거 정책들의 가중 합으로 썼어요. 첫 식의 d_{π_i}(τ)는 본문의 π_i(τ) = p(τ|π_i), 즉 "π_i로 그 판이 나올 확률"과 같은 뜻이에요. 혼합은 <b>판 단위</b>예요(한 판은 한 정책이 끝까지 만듦).</p></div></div>
+    <div class="dr" id="e41"><div class="no">(41)</div><div class="body">
+      <div class="tex">\[\mu(a|s)=\frac{\mu(s,a)}{d_\mu(s)}=\frac{\sum_{i=1}^k w_i\,d_{\pi_i}(s)\,\pi_i(a|s)}{\sum_{j=1}^k w_j\,d_{\pi_j}(s)}\]</div>
+      <p>조건부 = 결합 ÷ 주변이에요. "상태 s에서 버퍼가 보여 주는 행동 분포"이고, s에 자주 간 정책의 행동이 더 큰 비중을 가져요(<a href="#e13">식 14 예시</a>).</p></div></div>
+
+    <div class="drv-title">B-2. 혼합 기준 개선량 (식 11의 증명)</div>
+    <div class="dr" id="e42"><div class="no">(42)</div><div class="body">
+      <div class="tex">\[J(\pi)=J(\pi_i)+\mathbb{E}_{s\sim d_\pi(s),\,a\sim\pi(a|s)}\big[A^{\pi_i}(s,a)\big]\]</div>
+      <p>부록 A의 보조정리(식 17–21)를 과거 정책 π_i 하나하나에 적용했어요.</p></div></div>
+    <div class="dr" id="e43"><div class="no">(43)</div><div class="body">
+      <div class="tex">\[\eta(\pi)=J(\pi)-J(\mu)\]</div>
+      <p>개선량의 정의예요. 이번엔 μ가 혼합이에요.</p></div></div>
+    <div class="dr" id="e44"><div class="no">(44)</div><div class="body">
+      <div class="tex">\[=J(\pi)-\sum_{i=1}^k w_i\,J(\pi_i)\]</div>
+      <p>판 단위 혼합이라 "혼합의 점수 = 각 정책 점수의 가중 평균"이에요.</p></div></div>
+    <div class="dr" id="e45"><div class="no">(45)</div><div class="body">
+      <div class="tex">\[=\sum_{i=1}^k w_i\big(J(\pi)-J(\pi_i)\big)\]</div>
+      <p>Σw_i = 1이라서 J(π) = Σw_i J(π)로 쓸 수 있고, 하나의 합으로 묶었어요.</p></div></div>
+    <div class="dr" id="e46"><div class="no">(46)</div><div class="body">
+      <div class="tex">\[=\sum_{i=1}^k w_i\Big(\mathbb{E}_{s\sim d_\pi(s),\,a\sim\pi(a|s)}\big[A^{\pi_i}(s,a)\big]\Big)\]</div>
+      <p>괄호 안에 식 42를 넣었어요. = <a href="#e11">식 11</a>.</p></div></div>
+
+    <div class="drv-title">B-3. 버퍼 기준 목줄과 제약 문제</div>
+    <div class="dr" id="e47"><div class="no">(47)</div><div class="body">
+      <div class="tex">\[\mathbb{E}_{s\sim\mu(s)}\Big[D_{\mathrm{KL}}\big(\pi(a|s)\,\|\,\mu(a|s)\big)\Big]\le\varepsilon\]</div>
+      <p>새 정책을 "버퍼의 조건부 행동 분포"에 묶어요. 논문이 꼽는 장점 두 가지: ① π가 <b>모든</b> 과거 정책과 동떨어진 행동을 고르지 못해요. ② 비중이 d_{π_i}(s)에 따라 정해져서, π는 <b>π_i가 자주 가던 상태에서만</b> π_i와 비슷하면 돼요.</p></div></div>
+    <div class="dr" id="e48"><div class="no">(48)<br>(49)<br>(50)</div><div class="body">
+      <div class="tex">\[\arg\max_\pi\ \sum_{i=1}^k w_i\,\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi(a|s)}\big[\mathcal{R}^{\pi_i}_{s,a}-V^{\pi_i}(s)\big]\]</div>
+      <div class="tex">\[\text{s.t.}\quad\mathbb{E}_{s\sim d_\mu(s)}\big[D_{\mathrm{KL}}(\pi(\cdot|s)\|\mu(\cdot|s))\big]\le\epsilon,\qquad\int_a\pi(a|s)\,da=1,\ \ \forall s\]</div>
+      <p>목표(48, = 식 13), 목줄(49, = 식 14), 확률 합(50). 부록 A의 27–29와 같은 구조예요.</p></div></div>
+
+    <div class="drv-title">B-4. 라그랑주로 풀고 신경망에 넣기</div>
+    <div class="dr" id="e51"><div class="no">(51)</div><div class="body">
+      <div class="tex">\[\mathcal{L}(\pi,\beta,\alpha)=\Big(\sum_i w_i\,\mathbb{E}_{s\sim d_{\pi_i}(s)}\mathbb{E}_{a\sim\pi(a|s)}\big[\mathcal{R}^{\pi_i}_{s,a}-V^{\pi_i}(s)\big]\Big)+\beta\Big(\epsilon-\mathbb{E}_{s\sim d_\mu(s)}D_{\mathrm{KL}}\Big(\pi(\cdot|s)\,\Big\|\,\frac{\sum_{i}w_i d_{\pi_i}(s)\pi_i(\cdot|s)}{\sum_{j}w_j d_{\pi_j}(s)}\Big)\Big)+\int_s\alpha_s\Big(1-\int_a\pi(a|s)\,da\Big)ds\]</div>
+      <p>식 31과 같은 라그랑지안인데, 목표가 혼합 Advantage이고 KL 기준이 식 41의 혼합 분포예요.</p></div></div>
+    <div class="dr" id="e52"><div class="no">(52)</div><div class="body">
+      <div class="tex">\[\pi^*(a|s)=\frac{1}{Z(s)}\,\mu(a|s)\exp\!\left(\frac{1}{\beta}\,\frac{\sum_i w_i d_{\pi_i}(s)\big(\mathcal{R}^{\pi_i}_{s,a}-V^{\pi_i}(s)\big)}{\sum_j w_j d_{\pi_j}(s)}\right)\]</div>
+      <p>부록 A와 같은 방법으로 풀면 나와요. exp 안이 "과거 정책들의 Advantage를 <b>방문 가중 평균</b>한 것"으로 바뀌었어요.</p></div></div>
+    <div class="dr" id="e53"><div class="no">(53)</div><div class="body">
+      <div class="tex">\[\arg\min_\pi\ \mathbb{E}_{s\sim d_\mu(s)}\big[D_{\mathrm{KL}}\big(\pi^*(\cdot|s)\,\|\,\pi(\cdot|s)\big)\big]\]</div>
+      <p>식 37과 같은 투영이에요.</p></div></div>
+    <div class="dr" id="e54"><div class="no">(54)</div><div class="body">
+      <div class="tex">\[=\arg\min_\pi\ \mathbb{E}_{s\sim d_\mu(s)}\left[D_{\mathrm{KL}}\left(\frac{1}{Z(s)}\mu(a|s)\exp\!\left(\frac{1}{\beta}\frac{\sum_i w_i d_{\pi_i}(s)\big(\mathcal{R}^{\pi_i}_{s,a}-V^{\pi_i}(s)\big)}{\sum_j w_j d_{\pi_j}(s)}\right)\,\Big\|\,\pi(\cdot|s)\right)\right]\]</div>
+      <p>식 52를 넣었어요. 여기서 문제가 생겨요. exp 안의 "여러 정책 return의 평균"을 구하려면 <b>같은 상태에서 여러 정책을 각각 돌려 봐야</b> 해요. 환경을 아무 상태로나 리셋할 수 있어야 한다는 뜻이라 보통은 불가능해요.</p></div></div>
+    <div class="dr" id="e55"><div class="no">(55)</div><div class="body">
+      <div class="tex">\[\frac{\sum_i w_i d_{\pi_i}(s)\,\mathcal{R}^{\pi_i}_{s,a}}{\sum_j w_j d_{\pi_j}(s)}\approx\mathcal{R}^{\mathcal D}_{s,a}\qquad\text{such that }(s,a)\in\mathcal{D}\]</div>
+      <p>그래서 그 평균을 <b>버퍼에 실제로 있는 그 한 판의 return</b>으로 대신해요. 이 추정은 <b>편향</b>돼요. 평균이 exp 안에 들어 있는데, "평균의 exp"와 "exp의 평균"은 다르거든요(Jensen 부등식). 그래도 실험에선 잘 됐어요.</p>
+      <div class="ex"><p><b>편향 숫자 감</b> 같은 (s, a)에서 return이 0.2 또는 0.8로 반반 나온다고 해요(β = 0.1). 평균의 exp는 exp(0.5/0.1) = e⁵ ≈ 148이지만, exp의 평균은 (e² + e⁸)/2 ≈ 1494로 10배 차이가 나요. 한 판짜리 추정은 운 좋은 판의 가중치를 크게 부풀릴 수 있어요. (설명용 예시)</p></div></div></div>
+    <div class="dr" id="e56"><div class="no">(56)</div><div class="body">
+      <div class="tex">\[\arg\max_\pi\ \sum_{i=1}^k w_i\,\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi_i(a|s)}\left[\log\pi(a|s)\exp\!\left(\frac{1}{\beta}\left(\mathcal{R}^{\pi_i}_{s,a}-\frac{\sum_j w_j d_{\pi_j}(s)V^{\pi_j}(s)}{\sum_j w_j d_{\pi_j}(s)}\right)\right)\right]\]</div>
+      <p>식 55의 근사를 넣은 실제 목표예요. = <a href="#e15">식 15</a> = 알고리즘 6번 줄.</p></div></div>
+    <div class="dr" id="e57"><div class="no">(57)</div><div class="body">
+      <div class="tex">\[\bar V=\arg\min_V\ \sum_i w_i\,\mathbb{E}_{s\sim d_{\pi_i}(s)}\,\mathbb{E}_{a\sim\pi_i(a|s)}\Big[\big\|\mathcal{R}^{\pi_i}_{s,a}-V(s)\big\|^2\Big]\]</div>
+      <p>baseline은 V 하나를 버퍼 전체에 MSE로 맞춰서 구해요. 해가 정확히 식 56의 baseline(방문 가중 평균)이에요. = <a href="#e16">식 16</a> = 알고리즘 5번 줄.</p></div></div>
+  </div>
+
+  <h3 style="margin-top:6px">부록 C: 실험 설정</h3>
+  <dl class="nums">
+    <div><dt>정책 신경망</dt><dd>128-64 ReLU</dd></div>
+    <div><dt>V 신경망</dt><dd>같은 구조 · 출력 1</dd></div>
+    <div><dt>최적화</dt><dd>SGD · momentum 0.9</dd></div>
+    <div><dt>학습률 π / V</dt><dd>5e-5 / 1e-4</dd></div>
+    <div><dt>온도 β</dt><dd>0.05</dd></div>
+    <div><dt>TD(λ)</dt><dd>λ = 0.95</dd></div>
+    <div><dt>ω 상한</dt><dd>20</dd></div>
+    <div><dt>반복당 새 데이터</dt><dd>≈ 2000 샘플</dd></div>
+    <div><dt>버퍼 / 배치</dt><dd>50k / 256</dd></div>
+    <div><dt>반복당 스텝 V / π</dt><dd>200 / 1000</dd></div>
+  </dl>
+</section>
+
+<!-- ============ EXPERIMENTS ============ -->
+<section id="s-exp">
+  <h2>실험: 무엇을 보여 줬나 <span class="sec">§5</span></h2>
+
+  <h3>5.1 벤치마크: 최신 알고리즘들과 비교</h3>
+  <p>비교 대상은 on-policy TRPO·PPO, off-policy DDPG·TD3·SAC, 그리고 RWR이에요. 시드 5개 평균 최종 return이고, ±는 표준편차예요(논문 표 1). 굵은 파란색이 행별 최고예요.</p>
+  <div class="tbl">
+    <table class="num" style="min-width:760px">
+      <thead><tr><th>Task</th><th>TRPO</th><th>PPO</th><th>DDPG</th><th>TD3</th><th>SAC</th><th>RWR</th><th class="awr">AWR</th></tr></thead>
+      <tbody>
+        <tr><th>Ant-v2</th><td>2901 ± 85</td><td>1161 ± 389</td><td>72 ± 1550</td><td>4285 ± 671</td><td class="best">5909 ± 371</td><td>181 ± 19</td><td class="awr">5067 ± 256</td></tr>
+        <tr><th>HalfCheetah-v2</th><td>3302 ± 428</td><td>4920 ± 429</td><td class="best">10563 ± 382</td><td>4309 ± 1238</td><td>9297 ± 1206</td><td>1400 ± 370</td><td class="awr">9136 ± 184</td></tr>
+        <tr><th>Hopper-v2</th><td>1880 ± 337</td><td>1391 ± 304</td><td>855 ± 282</td><td>935 ± 489</td><td>2769 ± 552</td><td>605 ± 114</td><td class="awr best">3405 ± 121</td></tr>
+        <tr><th>Humanoid-v2</th><td>552 ± 9</td><td>695 ± 59</td><td>4382 ± 423</td><td>81 ± 17</td><td class="best">8048 ± 700</td><td>509 ± 18</td><td class="awr">4996 ± 697</td></tr>
+        <tr><th>LunarLander-v2</th><td>104 ± 94</td><td>121 ± 49</td><td>−</td><td>−</td><td>−</td><td>185 ± 23</td><td class="awr best">229 ± 2</td></tr>
+        <tr><th>Walker2d-v2</th><td>2765 ± 168</td><td>2617 ± 362</td><td>401 ± 470</td><td>4212 ± 427</td><td class="best">5805 ± 587</td><td>406 ± 64</td><td class="awr best">5813 ± 483</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="plain">
+    <li><b>PPO·TRPO보다</b> 샘플 효율과 최종 성능 모두 확실히 좋아요.</li>
+    <li><b>SAC·TD3보다</b> 샘플 효율은 낮지만, 최종 성능은 대체로 비슷해요. 지도학습 회귀만 쓰는데도요.</li>
+    <li>가장 어려운 <b>Humanoid</b>에서는 SAC에 많이 밀려요(4996 vs 8048).</li>
+    <li><b>RWR</b>은 모든 과제에서 못해요. AWR이 바꾼 부분(baseline, 버퍼)이 결정적이라는 뜻이에요.</li>
+    <li>LunarLander는 <b>이산 행동</b>이에요. DDPG·TD3·SAC는 Q 함수에서 정책으로 역전파해야 해서 이산 행동에 바로 못 써요(표의 −). AWR은 그냥 돼요.</li>
+  </ul>
+
+  <h3>5.2 Ablation: 무엇이 중요했나</h3>
+  <ul class="plain">
+    <li><b>On-Policy</b>(최신 정책 데이터만 사용): 불안정하고 성능이 눈에 띄게 떨어져요. 작은 데이터에 과적합되는 것으로 보여요.</li>
+    <li><b>No Baseline</b>(V를 빼면 = RWR 가중치 exp(R/β)): 성능이 크게 떨어져요. 앞의 <a href="#s-pre">RWR vs AWR 막대 그림</a>이 그 이유예요.</li>
+    <li><b>No TD(λ)</b>(Monte Carlo return): 일부 과제에선 경쟁력이 있지만 조금 나빠요.</li>
+    <li>가장 중요한 두 요소는 <b>경험 재생(버퍼)</b>과 <b>baseline</b>이에요.</li>
+  </ul>
+  <div class="call">
+    <h3>버퍼 크기 = 안정성과 속도의 손잡이 (5k · 20k · 50k · 100k · 500k)</h3>
+    <p>버퍼가 작으면 불안정해요(과적합). 크면 오래된 데이터가 대부분이어도 안정적이지만 학습이 느려져요. 이유는 식 7의 목줄 때문이에요. μ(버퍼)가 천천히 바뀌면, μ에 묶인 π도 천천히 바뀌어요. 기본값은 50k예요.</p>
+  </div>
+
+  <h3>5.3 모션 모방: 고자유도 캐릭터</h3>
+  <p>모션캡처 클립(CMU, SFU 등)을 따라 하는 과제예요. 34자유도 휴머노이드(옆돌기, 스핀킥), 82자유도 개(구보, 속보, 회전). 값은 최소~최대 가능 return으로 정규화했어요(논문 표 2).</p>
+  <div class="tbl">
+    <table class="num" style="min-width:520px">
+      <thead><tr><th>Task</th><th>PPO</th><th>RWR</th><th class="awr">AWR</th></tr></thead>
+      <tbody>
+        <tr><th>Humanoid: Cartwheel</th><td>0.76 ± 0.02</td><td>0.03 ± 0.01</td><td class="awr best">0.78 ± 0.07</td></tr>
+        <tr><th>Humanoid: Spinkick</th><td>0.70 ± 0.02</td><td>0.05 ± 0.03</td><td class="awr best">0.77 ± 0.04</td></tr>
+        <tr><th>Dog: Canter</th><td>0.76 ± 0.03</td><td>0.78 ± 0.04</td><td class="awr best">0.86 ± 0.01</td></tr>
+        <tr><th>Dog: Trot</th><td class="best">0.86 ± 0.01</td><td class="best">0.86 ± 0.01</td><td class="awr best">0.86 ± 0.03</td></tr>
+        <tr><th>Dog: Turn</th><td>0.75 ± 0.02</td><td>0.75 ± 0.03</td><td class="awr best">0.82 ± 0.03</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>AWR은 잘 튜닝된 PPO와 같거나 더 좋고, 학습도 더 빨라요. RWR은 휴머노이드는 거의 못 하지만 개는 꽤 해요. 휴머노이드 동작이 더 역동적이고 곡예에 가까워서로 보여요.</p>
+
+  <h3>5.4 고정 데이터만으로 학습</h3>
+  <div class="call val">
+    <ul>
+      <li><b>설정:</b> 학습 중에 새 데이터를 <b>전혀 안 모아요</b>. SAC로 학습한 데모 정책이 과제마다 100만 스텝을 모았고, 모방학습 데이터와 달리 <b>스텝별 보상도 들어 있어요</b>(Kumar et al. 2019의 과제).</li>
+      <li><b>AWR이 한 일:</b> 그 데이터를 그대로 버퍼 𝒟로 놓고 알고리즘을 <b>수정 없이</b> 돌렸어요(4번 줄만 빠짐).</li>
+      <li><b>비교:</b> Demo(원래 데모 정책), BC, PPO, TD3, SAC, 그리고 이 설정 전용인 BCQ·BEAR.</li>
+      <li><b>결과:</b> AWR은 <b>데모 정책과 같거나 더 좋았어요</b>. PPO는 나빴어요. TD3·SAC는 이론상 off-policy인데도 고생했고, <b>그냥 BC가 이들보다 나은 경우가 많았어요</b>. AWR은 훨씬 복잡한 BCQ·BEAR와 비슷했어요.</li>
+      <li><b>해석:</b> 이 설정에서 AWR은 <b>"Advantage 가중 BC"</b>예요. Advantage가 큰 데모 행동에 더 높은 확률을 줘요. 정책이 항상 데이터에 있는 행동으로만 학습하니, Q 기반 방법이 빠지는 <b>분포 밖 행동(out-of-distribution) 문제</b>에 덜 취약해요.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section id="s-lim">
+  <h2>한계 <span class="sec">§6</span></h2>
+  <h3>논문이 말한 한계와 다음 과제</h3>
+  <ul class="plain">
+    <li>가장 효율적인 off-policy 방법(SAC, TD3)만큼 <b>샘플 효율이 좋지는 않아요</b>.</li>
+    <li>고정 데이터 학습의 효율과 성능을 더 올려야 실제 세계에 쓸 수 있어요.</li>
+    <li>회귀 기반 RL이 특히 잘 맞는 응용을 찾는 것, 버퍼와 결합했을 때의 <b>수렴 이론</b>이 남은 과제예요.</li>
+    <li>(본문에서) 식 55의 한 판 근사는 편향돼 있어요.</li>
+  </ul>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="s-quiz">
+  <h2>스스로 점검 질문 <span class="sec">눌러서 답 보기</span></h2>
+  <div>
+    <details><summary>Q1. AWR의 두 회귀는 각각 무엇을 무엇에 맞추나요?</summary>
+      <p>① V(s)를 버퍼 속 return R에 MSE로 맞춰요(5번 줄, 결과는 평균). ② 정책 π를 버퍼 속 행동 a에 맞추되, 판마다 exp((R − V)/β)를 곱한 log 확률을 최대화해요(6번 줄, 가중치 BC).</p></details>
+    <details><summary>Q2. RWR과 AWR의 차이는 무엇이고, 왜 중요하죠?</summary>
+      <p>가중치에서 baseline V(s)를 빼느냐예요. 같은 상태 안의 행동 비교는 똑같지만, 상태끼리의 균형이 달라져요. RWR은 쉬운 상태의 나쁜 행동을 어려운 상태의 좋은 행동보다 더 배울 수 있어요. 실험에서 baseline을 빼면 성능이 크게 떨어졌어요.</p></details>
+    <details><summary>Q3. β를 키우거나 줄이면 어떻게 되나요?</summary>
+      <p>β는 KL 목줄의 값(라그랑주 승수)이자 온도예요. 작으면 점수를 강하게 믿어서 가장 잘한 행동만 따라 하고(데이터에서 멀어질 위험), 크면 점수를 덜 믿어요. β → ∞이면 모든 가중치가 1이라 그냥 BC예요.</p></details>
+    <details><summary>Q4. 왜 AWR은 고정 데이터에서 Q-learning 계열보다 안전한가요?</summary>
+      <p>식 10에서 행동 a를 항상 데이터(μ)에서 뽑아요. 데이터에 없는 행동을 평가하거나 시도하지 않으니, 분포 밖 행동의 잘못된 Q값에 속을 일이 없어요.</p></details>
+    <details><summary>Q5. 식 55의 근사는 왜 필요하고, 왜 편향되나요?</summary>
+      <p>여러 정책의 return 평균을 정확히 구하려면 같은 상태에서 여러 정책을 돌려 봐야 해서(아무 상태로나 리셋 필요) 한 판의 return으로 대신해요. 그런데 평균이 exp 안에 있어서, 한 판 값의 exp를 평균 내면 평균의 exp와 달라져요(Jensen 부등식).</p></details>
+    <details><summary>Q6. 버퍼를 키우면 학습이 왜 느려지나요?</summary>
+      <p>버퍼가 곧 데이터 정책 μ예요. 버퍼가 크면 μ가 천천히 바뀌고, KL 목줄(식 7) 때문에 μ에 묶인 π도 천천히 바뀌어요. 대신 안정적이에요.</p></details>
+    <details><summary>Q7. PPO의 clip과 AWR의 어디가 같은 역할인가요?</summary>
+      <p>식 6(KL ≤ ε)과 식 7의 β 벌점이에요. 둘 다 "근사가 믿을 만한 범위 안에서만 정책을 바꾼다"는 trust region 장치예요.</p></details>
+  </div>
+</section>
+
+<footer>
+  <p>출처: Xue Bin Peng, Aviral Kumar, Grace Zhang, Sergey Levine, "Advantage-Weighted Regression: Simple and Scalable Off-Policy Reinforcement Learning", <a href="https://arxiv.org/abs/1910.00177">arXiv 1910.00177v3</a> (2019). 식 번호와 표 1·2의 숫자는 논문 그대로예요.</p>
+  <p>RWR vs AWR 막대, β 표, KL·Jensen·망원경 합·V̄ 숫자는 설명용 예시예요. §3.3의 TD(λ) 재귀식은 논문에 없는 표준 정의예요. 주황색 상자는 논문에 없는 제 추론이에요. 한눈에 보는 그림은 <a href="/reports/awr-flow-map/" target="_top">AWR 흐름 지도</a>에 있어요.</p>
+</footer>
+
+</div>
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { enableMenu: false }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" async></script>
+
+</body>
+</html>

@@ -1,0 +1,779 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>탄소중립 중간고사 요약</title>
+<style>
+:root{--bg:#fafaf7;--fg:#1d1d1b;--muted:#6b6b66;--line:#e2e1da;--accent:#2f6f4f;--mark:#fff3c4;--card:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#161715;--fg:#e8e8e3;--muted:#9a9a93;--line:#2e2f2b;--accent:#7fc4a0;--mark:#4a4220;--card:#1e1f1c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+nav{position:fixed;top:0;left:0;bottom:0;width:280px;overflow-y:auto;padding:20px 16px;border-right:1px solid var(--line);font-size:13.5px;background:var(--bg)}
+nav ul{list-style:none;padding-left:12px;margin:0} nav>div>ul{padding-left:0}
+nav a{color:var(--muted);text-decoration:none;display:block;padding:2px 0} nav a:hover{color:var(--accent)}
+main{margin-left:280px;max-width:900px;padding:32px 40px 120px}
+h1{font-size:26px;line-height:1.35}
+h2{margin-top:56px;padding-top:16px;border-top:2px solid var(--accent);color:var(--accent)}
+h3{margin-top:32px}
+strong{background:linear-gradient(transparent 60%,var(--mark) 60%)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--card)}
+blockquote{margin:0;padding:8px 16px;border-left:4px solid var(--accent);background:var(--card);color:var(--muted)}
+li{margin:2px 0} hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+@media (max-width:900px){nav{display:none} main{margin:0;padding:20px 16px 80px}}
+@media print{nav{display:none} main{margin:0}}
+</style></head><body>
+<nav><div><div class="toc">
+<ul>
+<li><a href="#30">⚡ 시험 직전 30초 체크</a></li>
+<li><a href="#1">1주차 — 서론: 탄소중립의 개념·기후변화·학문 융합</a><ul>
+<li><a href="#1-1">1-1 탄소중립의 개념과 중요성</a></li>
+<li><a href="#1-2">1-2 기후변화의 영향 및 목표</a></li>
+<li><a href="#1-3">1-3 학문 융합의 필요성</a></li>
+</ul>
+</li>
+<li><a href="#2-ccs">2주차 — CCS(탄소 포집 및 저장) 기술</a><ul>
+<li><a href="#2-1-ccs">2-1 CCS 기술 소개</a></li>
+<li><a href="#2-2-co2-vs">2-2 CO2 포집 방법 (물리적 vs 화학적)</a></li>
+<li><a href="#2-3-co2">2-3 CO2 저장 기술 및 적용 사례</a></li>
+</ul>
+</li>
+<li><a href="#3-co2-utilization">3주차 — CO2 전환(Utilization) 기술</a><ul>
+<li><a href="#3-1-co2">3-1 CO2를 유용한 화학물질로 전환하는 기술</a></li>
+<li><a href="#3-2-co2">3-2 CO2 전환의 실제 사례 분석</a></li>
+<li><a href="#3-3-co2">3-3 CO2 전환 기술의 상용화 과제</a></li>
+</ul>
+</li>
+<li><a href="#4">4주차 — 녹색 화학·촉매·재생 가능한 자원</a><ul>
+<li><a href="#4-1">4-1 녹색 화학의 원리</a></li>
+<li><a href="#4-2">4-2 촉매 기술</a></li>
+<li><a href="#4-3">4-3 재생 가능한 자원의 활용</a></li>
+</ul>
+</li>
+<li><a href="#5">5주차 — 에너지 효율 향상 기술</a><ul>
+<li><a href="#5-1">5-1 에너지 효율 향상 기술의 필요성</a></li>
+<li><a href="#5-2">5-2 최신 에너지 효율 기술</a></li>
+<li><a href="#5-3">5-3 에너지 효율 향상 기술 적용 사례</a></li>
+</ul>
+</li>
+<li><a href="#6">6주차 — 에너지 시스템 효율화 해결책·최신 동향·미래 기술</a><ul>
+<li><a href="#6-1">6-1 에너지 시스템의 효율성을 높이는 해결책</a></li>
+<li><a href="#6-2">6-2 최신 에너지 효율 기술 동향</a></li>
+<li><a href="#6-3">6-3 에너지 효율 향상 및 탄소중립을 위한 미래 기술</a></li>
+</ul>
+</li>
+<li><a href="#7">7주차 — 재생에너지 기술(태양광·풍력·수소)</a><ul>
+<li><a href="#7-1">7-1 태양광 에너지 기술</a></li>
+<li><a href="#7-2">7-2 풍력 에너지 기술</a></li>
+<li><a href="#7-3">7-3 수소 에너지 기술</a></li>
+</ul>
+</li>
+<li><a href="#8">8주차 — 지속 가능한 공학 기술</a><ul>
+<li><a href="#8-1">8-1 지속 가능한 공학 기술의 개념</a></li>
+<li><a href="#8-2">8-2 재생 가능한 자원과 공학 기술</a></li>
+<li><a href="#8-3">8-3 지속 가능한 공학 기술의 적용 사례</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div></nav>
+<main><h1 id="18">탄소중립을 실현하기 위한 화학, 공학 및 경제학의 융합 — 1~8주차 핵심 요약 (중간고사 대비)</h1>
+<blockquote>
+<p>강의 영상 24개(1~8주차 × 3차시)를 받아쓰기한 뒤 요약함. 2026-10-24 작성.
+괄호 속 프로젝트명(예: Sleipner, Petra Nova)은 교수님이 직접 말하진 않았고 이해를 돕기 위해 덧붙인 것.</p>
+</blockquote>
+<h2 id="30">⚡ 시험 직전 30초 체크</h2>
+<p><strong>숫자</strong>
+- 파리협정 <strong>2015년</strong>, 목표 <strong>1.5℃</strong>(최소 2℃). 탄소중립 목표: <strong>EU·한국·미국 2050년, 중국 2060년</strong>
+- 대기 중 CO2 농도 약 <strong>0.04%</strong> → 그래서 배출 <strong>전</strong>(배기가스에서) 포집
+- 노르웨이 CCS <strong>연 100만 톤(세계 최초 상업용)</strong> / 호주 <strong>400만 톤</strong> / 미국 텍사스 아민 CCS <strong>400만 톤</strong>
+- 아민 흡수법 포집 효율 <strong>90% 이상</strong>, 아이슬란드 CRI 메탄올 <strong>연 4,000톤</strong>
+- 수소: 압축 <strong>700 bar</strong>, 액화 <strong>−253℃(약 20K)</strong>
+- 덴마크 풍력 <strong>국가 전력 40% 이상</strong>(7주차) / <strong>50% 이상</strong>(8주차), 독일 태양광 <strong>20%</strong> 목표
+- 싱가포르 스마트 도시: 에너지 <strong>−20%</strong>, 탄소 <strong>−15%</strong> / 엠파이어 스테이트 빌딩 <strong>−40%</strong>
+- 스웨덴: 도시 폐기물 <strong>99%</strong> 소각 → 지역난방
+- 전기차·하이브리드 연료 소비 <strong>−50%</strong>, 수송 탄소 <strong>−30%</strong>, 산업 에너지 <strong>−20~30%</strong>, 건물 <strong>−30~40%</strong></p>
+<p><strong>비교 단골</strong>
+- <strong>감축 vs 흡수</strong>(다이어트: 덜 먹기 vs 운동하기)
+- <strong>흡착(물리, 고체, PSA·TSA, 저에너지·저효율) vs 흡수(화학, 액체 아민, 고효율·고에너지·독성)</strong>
+- 아민 공정: <strong>흡수탑 = 저온·고압</strong>, <strong>탈거탑 = 고온·저압</strong>, 열교환기 = 에너지 절약
+- <strong>연소 후 포집</strong>(기존 설비에 추가 가능) vs <strong>순산소 연소</strong>(산소 생산비↑)
+- 저장 3가지: <strong>지질(고갈 유전·염수층·석탄층 + 덮개암) / 해양(산성화 우려) / 광물(CaCO3·MgCO3, 영구·느림·비쌈)</strong>
+- 전환 3가지: <strong>화학적(고효율·고온고압) / 전기화학적(재생에너지 연계·전력소비↑) / 생물학적(친환경·느림)</strong>
+- 촉매: <strong>균일(같은 상·분리 번거로움) / 불균일(다른 상·고체) / 효소(단백질, 온도·pH) / 광촉매(TiO2)</strong>
+- 수소: <strong>그레이(SMR, CO2 배출) / 블루(+CCUS) / 그린(재생에너지 수전해)</strong>
+- <strong>태양광 = 직류 → 인버터로 교류</strong>, <strong>풍력 = 교류로 생성</strong>
+- 녹색화학 <strong>12원칙</strong>(4주차 표 참고) — 폐기물 예방, 원자 효율성, 촉매 사용, 분해 가능 설계, 실시간 모니터링, 사고 예방 …
+- 단일 학문 한계: 화학(상용화 비용) / 공학(초기·운영비) / 경제(산업 저항·저소득층 부담) → <strong>융합 필요</strong>
+- 성공 요인: <strong>정부 정책 + 인프라·데이터 + 시민 참여</strong> / 실패 요인: <strong>비용 + 사회적 수용성 + 환경평가 부족</strong></p>
+<p><strong>거의 모든 강의의 공통 결론</strong>: 도전과제 = <strong>경제성(초기 투자비)·기술·사회적 수용성(NIMBY)·정책 지원</strong> → 해결 = <strong>기술 개발 + 정부 지원 + 국제협력</strong></p>
+<hr />
+<h2 id="1">1주차 — 서론: 탄소중립의 개념·기후변화·학문 융합</h2>
+<h3 id="1-1">1-1 탄소중립의 개념과 중요성</h3>
+<ul>
+<li><strong>탄소중립</strong> = 인간활동으로 배출한 탄소와 흡수한 탄소의 균형 → <strong>순배출량(net emission) 0 = 넷제로(Net-Zero)</strong></li>
+<li>방법 2가지 (다이어트 비유: 덜 먹기 / 운동하기)</li>
+<li><strong>감축</strong>: ① 산업 공정 개선(같은 에너지에 CO2 덜 배출) ② 에너지 효율화(인류 최대 CO2 원인 = 에너지 생산) ③ 재생에너지 확대</li>
+<li><strong>흡수</strong>: ① 산림 조성 ② 해양 생태계 복원(해조류·식물플랑크톤이 나무보다 더 많이 흡수, 예: 한국 김 양식 = "블랙 반도체") ③ <strong>CCS</strong>(Carbon Capture &amp; Storage, 인위적이지만 가장 강력)</li>
+<li>주요 기술: <strong>CCS</strong>(포집·저장 / 드라이아이스 등 활용) + <strong>탄소 전환(Utilization)</strong>: CO2 + 생석회(CaO) → 탄산칼슘(CaCO3, 시멘트·건축자재), CO2 + H2 → 메탄올 등 연료 → 산업·교통 연료·농업 비료 활용. 합치면 <strong>CCUS</strong></li>
+<li>필요성: 기후변화(폭염·홍수·가뭄), 지속가능한 발전, <strong>미래 세대에 대한 책임</strong>, 생태계 보존(급변 시 가장 큰 피해는 그 시대 지배종 = 인류, 공룡 예시), <strong>경제적 안정성</strong>(탄소세·배출권거래제 도입 리스크 → 석탄발전소 단가 상승, 일자리·산업 피해)</li>
+<li><strong>파리협정(2015)</strong>: 목표 <strong>1.5℃</strong>(최소 2℃ 이하). 현재 정책대로면 2.5~2.9℃ 상승 우려(비가역적)</li>
+<li>탄소중립 목표연도: <strong>EU·한국·미국 2050년</strong>, <strong>중국 2060년</strong></li>
+<li>EU: 재생에너지·원전·석탄→가스 전환 / 중국: 배터리·태양광 투자 / 한국: 국가 온실가스 감축목표(NDC) 강화, 석탄 비율 축소</li>
+<li>주체별 역할: 정부(정책·규제·인프라 투자) / 기업(친환경 기술, <strong>ESG</strong> 경영) / 시민(에너지 절약, <strong>탄소발자국</strong> 줄이기 = 일상 활동이 유발한 CO2 총량) / 국제협력(공동목표, 선진국→개도국 기술 이전)</li>
+<li>삶에의 영향: 장기적 에너지 비용 절감, 대기질 개선(미세먼지↓), <strong>녹색 일자리</strong> 창출, 지속가능 소비문화</li>
+<li>요약: 탄소중립 = 배출과 흡수의 균형, 기후변화 대응·경제 안정에 필수, <strong>정부·기업·시민 협력</strong> 필요</li>
+</ul>
+<h3 id="1-2">1-2 기후변화의 영향 및 목표</h3>
+<ul>
+<li><strong>기후변화</strong> = 장기적인 기온·강수량·기후 패턴 변화. 주원인 = 온실가스(특히 <strong>CO2</strong>) 배출 증가</li>
+<li>영향</li>
+<li>환경: 생태계 파괴·멸종(다양성↓ → 취약), <strong>해수면 상승·저지대 침수</strong>(그래프상 가속 상승), 빙하 융해, 엘니뇨·라니냐로 기상이변(태풍·홍수·가뭄) 증가, 어종 변화(동해)</li>
+<li>경제: 농업 생산량 감소, 에너지 비용 상승(냉방), 공급망·산업 생산 차질(커피·코코아 가격 급등 예), <strong>기후변화 대응 비용 증가</strong>(배수시설 확대 등)</li>
+<li>사회: <strong>기후난민</strong> 증가(호밀밭 예시, 해안 침수), 건강 악화(미세먼지·폭염·한파 → 노약자), <strong>불평등 심화</strong>(개도국 피해↑, 선진국과 격차↑) → 사회적 갈등</li>
+<li>글로벌 협력: 기후변화협약, <strong>탄소배출권 거래제</strong>(A국은 남는 배출권을 판매해 산업 투자, B국은 초과분을 구매해 벌금↓), 선진국→개도국 기술 이전·자금 지원, 국제 공동 R&amp;D</li>
+<li>산업계 영향: 에너지(화석연료 의존↓, <strong>재생에너지 확대</strong>가 핵심, 풍력·태양광 부적합국은 수소), 배출 규제 강화 / 제조·운송(공정 개선, 저탄소 소재, 전기·수소차, CNG 버스, <strong>공급망 탄소발자국 관리</strong>)</li>
+<li>산업계 대응: 기술 혁신(CCS, 지속가능 공정), <strong>투자 확대(R&amp;D)</strong>, ESG 경영(Environment·Social·Governance), 글로벌 협력</li>
+<li>요약: 기후변화는 환경·경제·사회에 복합적 영향 → 1.5℃(최소 2℃) 이하 → 앞으로는 <strong>네거티브 이미션</strong>(누적 CO2 적극 포집)이 필요해질 수 있음</li>
+</ul>
+<h3 id="1-3">1-3 학문 융합의 필요성</h3>
+<ul>
+<li>기후변화·탄소중립 같은 현대 문제는 <strong>단일 학문으로 해결 불가</strong> → 다학제적 접근(화학+공학+경제) = 시너지. 핵심 개념: <strong>융합적 사고·통합적 문제 해결 능력</strong></li>
+<li>단일 학문의 한계</li>
+<li><strong>화학</strong>(CCS·탄소전환): 랩 스케일 → 산업 스케일 <strong>상용화 비용</strong>, 대규모 실적용 어려움 → 기술 개발만으로는 불가, 경제·공학 병행 필요</li>
+<li><strong>공학</strong>(에너지 효율, 재생에너지, 지속가능 공정): <strong>초기 설치·운영비 매우 높음</strong>, 경제 시스템·정책 지원 없이 독립적 기능 어려움</li>
+<li><strong>경제학</strong>(탄소가격, 보조금, 탄소세, 배출권거래제 = 시장기반 메커니즘): <strong>산업계 저항</strong>, 기술적 한계로 정책만으론 실질 감축 어려움(탄소가격 &gt; 발전 수익이면 폐업), <strong>저소득층·개도국 부담 증가</strong></li>
+<li>탄소중립 = 기술(화학·공학) + 경제 + 정책이 상호작용하는 복합 문제 → 탄소 포집·전환 기술 / 에너지 시스템 설계·최적화 / 시장기반 인센티브·정책 지원이 <strong>삼위일체</strong>로 돌아가야 함</li>
+<li>시너지: 기술 혁신(화학+공학 → 개발+상용화), 경제적 지속가능성, 기술·경제 논리 기반의 효과적 정책 설계</li>
+<li>사례: 재생에너지 프로젝트(기술 혁신 + 정부 보조금·세금감면 + 에너지 저장·전환 기술) / CCS(공학적 인프라 + 포집 탄소 판매·전환 + 정부 지원·배출권거래제)</li>
+<li>협력 방안: <strong>산학연 협력 플랫폼</strong>, <strong>융합형 인재 양성</strong>(다학제 교육, 복수전공), 정책적 지원(연구비, 규제 완화), 글로벌 협력(공동연구, 기술 이전)</li>
+<li>요약: 단일 학문 한계 → 융합으로 기술·경제·정책 통합 → <strong>실질적이고 지속가능한 해결책</strong></li>
+</ul>
+<h2 id="2-ccs">2주차 — CCS(탄소 포집 및 저장) 기술</h2>
+<h3 id="2-1-ccs">2-1 CCS 기술 소개</h3>
+<ul>
+<li><strong>CCS = Carbon Capture and Storage</strong>: 화석연료·산업공정에서 나온 CO2를 <strong>대기로 배출되기 전에</strong> 포집해 안전하게 저장(또는 유용 물질로 전환 → <strong>CCUS</strong>, U = Utilization)</li>
+<li>왜 배출 전? 대기 중 CO2 농도는 약 <strong>0.04%</strong>로 너무 낮아 포집이 어려움 → 농도 높은 <strong>배기가스(연도가스, flue gas)</strong>에서 포집</li>
+<li>대기 중 CO2 직접 포집(DAC)은 고급 기술로 연구 중</li>
+<li>활용 분야(고탄소배출 산업): <strong>발전소</strong>(CH4 + 2O2 → CO2 + 2H2O), <strong>시멘트</strong>(CaCO3·MgCO3 분해), <strong>철강</strong>(코크스 C → CO → CO2; 대안 = 수소환원제철)</li>
+<li>필요성: ① 산업화로 배출량 급증 ② 재생에너지로 <strong>즉각 전환 불가</strong>(태양광만 쓰면 낮에만 전기) → 기존 발전을 유지하면서 CO2를 막는 <strong>가교/보완 기술</strong> ③ 탄소중립 달성을 위한 보완 기술</li>
+<li><strong>아민 흡수 공정(공정도 핵심!)</strong></li>
+<li><strong>흡수탑(Absorber)</strong>: 배기가스를 <strong>아래로</strong> 주입(가스는 위로 올라감), <strong>린 아민(Lean amine)</strong>을 위에서 스프레이로 분사 → 접촉 표면적↑ → 반응속도↑ → 아민이 CO2만 선택 흡수 → 위로 정제가스(N2, H2O 등) 배출<ul>
+<li>배기가스 성분 중 가장 많은 것은 CO2가 아니라 <strong>질소(N2)</strong></li>
+<li>아민 = 암모니아(NH3) 유도체, 대표 <strong>MEA</strong>, <strong>독성·부식성</strong> 있음 → 버리지 않고 순환</li>
+</ul>
+</li>
+<li>CO2를 흡수한 <strong>리치 아민(Rich amine)</strong> → 펌프 → <strong>열교환기</strong> → <strong>탈거탑(Stripper, 재생탑)</strong>: 아민과 CO2 분리 → 아래로 린 아민 재생, 위로 <strong>고순도(~100%) CO2</strong> → 저장·판매(드라이아이스 등)</li>
+<li>온도·압력 조건(탄산음료 비유): <strong>흡수 = 저온·고압</strong>(쿨러로 아민 냉각), <strong>탈거 = 고온·저압</strong></li>
+<li><strong>열교환기</strong> 역할: 뜨거운 린 아민 ↔ 차가운 리치 아민 열교환 → 추가 에너지 없이 서로 가열/예냉(에너지 절약)</li>
+<li>CCS 3단계: <strong>포집 → 수송</strong>(파이프라인·선박·탱크로리) → <strong>저장</strong>(지하 깊은 지질구조)</li>
+<li>포집 방식</li>
+<li><strong>연소 후 포집(Post-combustion)</strong>: 연소 후 배기가스에서 포집. <strong>기존 발전소·공장에 그대로 추가 설치 가능</strong>, 단 에너지·비용 높음 → 석탄화력, 시멘트</li>
+<li><strong>순산소 연소 포집(Oxy-fuel)</strong>: 공기(N2가 O2의 약 4배) 대신 <strong>순수 산소</strong>로 연소 → 생성물이 CO2+H2O뿐 → 냉각하면 물은 응축, CO2만 남음 → 포집 효율 높음, 단 <strong>산소 생산 비용 높음</strong> → 소규모 특수 공정</li>
+<li>글로벌 사례</li>
+<li><strong>노르웨이 슬라이프너(Sleipner)</strong>: 천연가스 생산 중 CO2 포집 → <strong>해저 염수층</strong> 저장, <strong>연 100만 톤</strong>, <strong>세계 최초 상업용 CCS</strong>(돈이 되는 CCS의 시작)</li>
+<li><strong>호주 서부(Gorgon)</strong>: 천연가스 공정, 해저 지층 저장, <strong>연 400만 톤</strong>, 최대 규모 중 하나</li>
+<li>도전 과제: <strong>경제적</strong>(높은 초기 투자·운영비), <strong>기술적</strong>(높은 에너지 소비), <strong>환경적</strong>(저장 CO2 누출, MEA 오염), <strong>사회적 수용성</strong>(독성 물질 우려)</li>
+<li>전망: 비용 절감, 효율 향상, <strong>포집 후 전환(CCU) 확대</strong>로 추가 수익</li>
+<li>요약: CCS는 탄소중립 필수 기술, 지속 발전에 <strong>글로벌 협력·투자</strong> 필요</li>
+</ul>
+<h3 id="2-2-co2-vs">2-2 CO2 포집 방법 (물리적 vs 화학적)</h3>
+<ul>
+<li><strong>물리적 포집</strong>: CO2와 흡착제/용매 간 <strong>물리적 상호작용</strong></li>
+<li><strong>PSA(압력 스윙 흡착)</strong>: 압력을 올렸다 내렸다 하며 흡착/탈착 / <strong>TSA(온도 스윙 흡착)</strong>: 온도를 올렸다 내렸다</li>
+<li>장점: <strong>에너지 소비 낮음, 설비 유지보수 쉬움</strong>(한 변수만 조절해 공정 간단) / 단점: <strong>포집 효율 낮음, 고농도 CO2 필요</strong></li>
+<li><strong>화학적 포집</strong>: 화학 반응으로 특정 화합물과 결합(<strong>아민 흡수법</strong>, 탄산염 반응)</li>
+<li>장점: <strong>고효율, 저농도에서도 효과적</strong> / 단점: <strong>에너지 소비 높음, 용매 부식성·독성</strong></li>
+<li><strong>흡착 vs 흡수 비교표</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>흡착(물리)</th>
+<th>흡수(화학)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>원리</td>
+<td>CO2가 고체 <strong>표면에 부착</strong></td>
+<td>용매가 CO2를 <strong>화학적으로 흡수</strong></td>
+</tr>
+<tr>
+<td>물질</td>
+<td><strong>고체 흡착제</strong></td>
+<td><strong>액체 흡수제(용액)</strong></td>
+</tr>
+<tr>
+<td>조건</td>
+<td>저온·고압</td>
+<td>상온·대기압(단 흡수/탈거 조건 필요)</td>
+</tr>
+<tr>
+<td>효율</td>
+<td>상대적으로 낮음</td>
+<td>높음</td>
+</tr>
+<tr>
+<td>에너지</td>
+<td>적음, 유지보수 쉬움</td>
+<td>큼</td>
+</tr>
+<tr>
+<td>예</td>
+<td>PSA, TSA</td>
+<td>아민(MEA)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>사례</li>
+<li>PSA: <strong>천연가스 정제 공정</strong>(연소 전 CO2 제거, 저비용), 미국 천연가스 처리 플랜트</li>
+<li>TSA: <strong>화력발전소 배기가스</strong>(고온 배기가스 온도차 활용)</li>
+<li>아민 흡수법: <strong>석탄화력발전소</strong>, 아민 재생 반복, <strong>90% 이상 포집 효율</strong></li>
+<li>탄산염 기반: <strong>시멘트 공정</strong>(CCU에 가까움), 캐나다 CCS 프로젝트(바운더리 댐)</li>
+<li>미국 텍사스(Petra Nova): 석탄화력, 아민(MEA), <strong>연 400만 톤</strong>, 세계 최대 상업용 중 하나</li>
+<li>주요 이슈: 경제성(초기·운영비), 에너지 소비, 환경(흡수제 부식성·폐기물), 저농도 효율 저하, 사회적 수용성(<strong>NIMBY</strong> = Not In My Backyard)</li>
+<li>발전 방향: <strong>고효율 흡수제·흡착제 개발</strong>, 에너지 효율 최적화(가성비 온도·압력), <strong>하이브리드 기술</strong>, <strong>스케일업</strong>(대규모 상용화)</li>
+<li>요약: 포집은 물리적(흡착)/화학적(흡수)으로 구분, 각각 장단점 → 산업화엔 기술·경제(+정책) 문제 해결 필요</li>
+</ul>
+<h3 id="2-3-co2">2-3 CO2 저장 기술 및 적용 사례</h3>
+<ul>
+<li>저장 = 포집 CO2를 대기로 나가지 않게 <strong>영구 격리</strong>. 필요성: 지속가능한 감축, 산업화 시대의 잔재 처리, <strong>재생에너지 전환 보완</strong>, <strong>장기적 해결책</strong>(석탄·석유처럼 준영구 격리)</li>
+<li><strong>3가지 저장 방법</strong>
+  1. <strong>지질 저장</strong>: 안정된 지하 지질구조에 주입<ul>
+<li>위치: <strong>고갈된 석유·가스 유전</strong>, <strong>염수층</strong>, <strong>석탄층</strong></li>
+<li>과정: <strong>압축·액화</strong>(액체 = 밀도 높고 파이프 수송 용이) → 지하 주입 → <strong>밀봉층(Cap rock, 덮개암)</strong>으로 누출 방지</li>
+<li>장점: 대량 저장, 비교적 안전(지질학적으로 검증된 곳) / 단점: 초기 비용 높음, <strong>누출 가능성</strong>, 물과 만나 탄산 → 산성화 우려
+  2. <strong>해양 저장</strong>: 심해·해저 지질층에 주입(심해는 고압이라 액체 상태 유지)</li>
+<li>장점: 저장 용량 매우 큼, 접근 가능한 해저 지질구조 많음 / 단점: <strong>해양 산성화 → 심해 생태계 영향</strong> → 장기 모니터링·안전 기준 필수
+  3. <strong>광물 저장(광물 탄산화)</strong>: CO2 + 칼슘·마그네슘 광물 → 안정한 탄산염</li>
+<li><strong>CO2 + CaO → CaCO3</strong>, <strong>CO2 + MgO → MgCO3</strong></li>
+<li>장점: <strong>영구적·안전</strong>(누출 위험 없음) / 단점: <strong>반응속도 느림</strong>(고체+기체), <strong>처리 비용 높음</strong>(광물 채굴 필요)</li>
+<li>최신 연구: <strong>바닷물 속 Ca²⁺·Mg²⁺ 이온</strong> 농축 활용 + CO2를 <strong>탄산이온(CO3²⁻)</strong>으로 바꿔 빠르게 침전(석회수에 숨 불면 뿌옇게 되는 원리)</li>
+</ul>
+</li>
+<li>안정성: 밀봉층 안정성, 지질 특성 분석(지진·화산), <strong>장기 모니터링</strong>, 안정성 평가 기준(누출 최소화, 지역사회 영향), 기술적 안전장치(지진 감지, CO2 농도·압력 감시)</li>
+<li>환경 영향: (+) 탄소중립 기여, 대기 CO2 저감 / (−) <strong>지진 유발 가능성, 해양 산성화, 광물 채굴로 인한 환경 파괴</strong> → 환경영향평가·모니터링 필요</li>
+<li>사례: <strong>아이슬란드 헬리셰이디(Hellisheiði) 발전소(CarbFix)</strong>: CO2를 물과 함께 <strong>현무암층</strong>에 주입 → <strong>수년 내 탄산염으로 광물화</strong>, 빠르고 안전한 저장</li>
+<li>요약: 저장은 <strong>지질·해양·광물화</strong>로 구분, 안정성·환경영향 고려 필수, 글로벌 성공 사례 축적 중</li>
+</ul>
+<h2 id="3-co2-utilization">3주차 — CO2 전환(Utilization) 기술</h2>
+<h3 id="3-1-co2">3-1 CO2를 유용한 화학물질로 전환하는 기술</h3>
+<ul>
+<li><strong>CO2 전환 기술(Conversion/Utilization)</strong> = 포집한 CO2를 화학반응으로 <strong>유용한 화학물질·연료</strong>로 바꾸는 기술 → 탄소중립·온실가스 감축 + <strong>화석연료 대체·자원순환</strong></li>
+<li>주요 제품: <strong>메탄올, 에틸렌, 플라스틱 원료, 합성연료</strong>(광물 탄산화도 전환 기술의 하나)</li>
+<li>저장(CCS)과 비교: 저장은 <strong>비용(−)</strong>, 전환은 제품 판매로 <strong>수익(+)</strong> 가능 → 최근 더 많이 활용</li>
+<li>비판: 연료·플라스틱도 결국 다시 CO2가 됨 → 감축이 아니라 <strong>"배출 지연"</strong>이라는 주장도 있음</li>
+<li><strong>3가지 접근</strong>
+  1. <strong>전기화학적 전환</strong>: 전기 에너지로 CO2 <strong>환원</strong> → <strong>CO</strong>(+ H2O → CO2 + H2, 수소 생산), <strong>메탄올</strong>, <strong>에틸렌</strong>(석유화학의 쌀 → PE, PVC). 촉매: <strong>구리·은·니켈</strong><ul>
+<li>장점: 반응 조건 까다롭지 않음, <strong>재생에너지와 연계 가능</strong> / 단점: <strong>높은 전력 소비</strong>(CO2는 매우 안정한 물질), <strong>촉매 내구성</strong> 문제</li>
+<li>극복 아이디어: 전기가 싼 곳 = <strong>발전소 옆</strong>에 설치(CO2와 전기를 동시에 확보)</li>
+<li>사례: CO2→CO(합성가스·연료), CO2→메탄올(수송 쉬운 액체 연료, 메탄올 연료전지), 지멘스 프로젝트
+  2. <strong>생물학적 전환</strong>: <strong>미생물·조류(미세조류·해조류)·박테리아</strong> 이용 → <strong>광합성으로 CO2 고정</strong>(포도당), <strong>바이오연료</strong> 생산</li>
+<li>장점: <strong>저에너지, 환경친화적</strong> / 단점: <strong>전환 속도 느림, 대규모 상업화 한계</strong></li>
+<li>사례: 조류 → <strong>바이오디젤</strong>, 박테리아 → <strong>에탄올</strong>, 미국 CO2 기반 바이오연료
+  3. <strong>화학적 전환</strong>: <strong>촉매(금속 촉매, 고체 산 촉매)</strong> 이용 → <strong>탄산염, 요소(Urea)</strong>(요소수 = 디젤차 질소산화물 제거, 비료)</li>
+<li>장점: <strong>높은 전환 효율</strong> / 단점: <strong>고온·고압 필요 → 비용↑</strong></li>
+</ul>
+</li>
+<li>연구 동향: 효율성 향상(<strong>고성능 촉매</strong>, 저에너지 공정), 경제성 개선(비용 절감, 상업화 가능 공정 설계), <strong>다학제적 접근</strong>(화학·공학·생물학 협력), 글로벌 연구(EU <strong>Horizon</strong>, 일본 CO2 전환 컨소시엄)</li>
+<li>산업 적용: 화학산업(<strong>메탄올, 요소 비료</strong>), 에너지산업(합성연료, 수소)</li>
+<li><strong>그린 메탄올</strong>: CO2로 만든 메탄올 → 사용해도 추가 배출 없음으로 간주</li>
+<li>CO2 → 연료 → 연소 → CO2 → 연료… = <strong>탄소 순환 무한 루프</strong>(대기 중 CO2 증감 없음)</li>
+<li>CO2 → <strong>폴리우레탄(고분자)</strong>: 안정한 물질에 CO2 고정</li>
+<li>도전과제: <strong>경제적 효율성</strong>, <strong>기술적 안정성</strong></li>
+<li>요약: 화학적/전기화학적/생물학적 구분. 전기화학적은 재생에너지 연계로 유망, 화학적은 연구 가장 많음, 생물학적은 친환경이지만 느림</li>
+</ul>
+<h3 id="3-2-co2">3-2 CO2 전환의 실제 사례 분석</h3>
+<ul>
+<li>목표: CO2를 산업적으로 유용한 물질로 전환, <strong>경제적 이익 창출</strong>(이게 없으면 그냥 묻음), 환경적 지속가능성</li>
+<li><strong>메탄올(CH3OH)</strong>: CO2 + H2 → 메탄올 → 연료(메탄올 엔진), 플라스틱·용매. 그린 메탄올 = 고가</li>
+<li>사례: 아이슬란드 <strong>CRI(Carbon Recycling International)</strong>: CO2+수소로 <strong>연 4,000톤 메탄올</strong>, <strong>석유 기반 메탄올 대체</strong>, <strong>재생에너지 연계(전기화학 공정)</strong> 성공 사례</li>
+<li><strong>합성연료</strong>: CO2 + H2 → <strong>디젤·가솔린</strong>(고온·고압) → 자동차·<strong>항공연료</strong>, <strong>에너지 저장 매개체</strong>(CO2보다 잠재 에너지 높음)</li>
+<li>사례: <strong>독일</strong> 재생에너지로 CO2 → 연료(화석연료 대체, 탄소 배출 저감)</li>
+<li><strong>폴리우레탄</strong>: CO2 → 고분자 → <strong>단열재, 쿠션, 스펀지</strong>. 대기 방출 차단 + 장기 활용</li>
+<li>사례: <strong>독일</strong> CO2 원료 폴리우레탄 폼(화학적 전환, 연 수천 톤 CO2 활용) → <strong>원료비 절감, 화석연료 의존도↓</strong>, 산업 전반에 적용 가능한 <strong>모델 제시</strong></li>
+<li><strong>경제적 이익 4가지</strong>: ① <strong>원료 비용 절감</strong>(석유 대신 CO2) ② <strong>부가가치 창출</strong>(메탄올·플라스틱·합성연료) ③ 지속가능한 산업 생태계(자원 순환) ④ <strong>정책적 지원</strong>(남는 탄소배출권 판매, 세금 감면, 친환경 기업 인증)</li>
+<li><strong>실패 사례</strong>: 일부 CO2 기반 <strong>합성연료 프로젝트 조기 종료</strong> — 원인: <strong>높은 초기 투자비</strong>, 기술 문제(고온·고압에서 <strong>촉매 내구성 vs 반응 효율</strong> 트레이드오프) → <strong>경제적 수익성 확보 실패</strong></li>
+<li>교훈: <strong>기술적 안정성 확보</strong> 먼저, <strong>정책적 지원·경제적 인센티브</strong> 필요</li>
+<li>도전과제: <strong>경제성</strong>(비용), <strong>기술적 한계</strong>(촉매 효율·내구성, 공정 기술), <strong>규모 확장</strong>(랩 스케일 성공 ≠ 성공, 산업 규모여야 진짜 성공), <strong>정책 지원</strong>(배출권·세금 감면), <strong>사회적 수용성</strong>(혐오시설은 아니지만 인식 개선 필요)</li>
+<li>요약: 다양한 산업에 적용 가능, <strong>성공 = 경제·기술·정책 지원이 결합될 때</strong>, 실패 사례 → 기술 안정성·경제성 확보 중요</li>
+</ul>
+<h3 id="3-3-co2">3-3 CO2 전환 기술의 상용화 과제</h3>
+<ul>
+<li><strong>상용화</strong> = 실험실·파일럿 규모 기술을 <strong>대규모 현장에 적용</strong>해 대량생산하는 과정. 중요성: 기후변화 대응 기술 확보, <strong>경제적 지속가능성·수익성</strong>, 지역 개발·일자리</li>
+<li><strong>① 기술적 과제</strong></li>
+<li><strong>촉매 효율성</strong>(촉매 = 반응을 쉽게 일으키는 물질, 비쌈) → 반응 효율·내구성 부족, 촉매 활성 감소 → 비용 증가</li>
+<li><strong>에너지 소비</strong>(전기화학 공정) → 전기 독점 공급 계약, 자체 발전원</li>
+<li><strong>공정 최적화</strong>: 스케일업 시 <strong>효율 저하</strong>(반응기가 커지면 부피 대비 표면적↓ → 내부까지 열전달 어려움)</li>
+<li><strong>제품 순도</strong>, <strong>기존 산업 공정과의 기술적 통합</strong></li>
+<li>해결: <strong>고성능 촉매</strong>(반응 온도 낮춤, 300℃→200℃), <strong>에너지 효율 최적화</strong>(재생에너지, 폐열 활용), <strong>공정 자동화·모니터링(스마트 공정)</strong>, <strong>기술 표준화·국제 인증</strong></li>
+<li><strong>② 경제적 장벽</strong>: <strong>높은 초기 투자비</strong>(설비·촉매 개발), <strong>운영·유지비</strong>, <strong>시장 수요 부족</strong>(그린 메탄올 인식 부족), <strong>경제적 불확실성</strong>(초기 수익성 미확보)</li>
+<li>해결: <strong>비용 절감 기술</strong>(저비용 촉매), <strong>규모의 경제</strong>(대량생산 → 단위비용↓), <strong>탄소 가격제</strong>(CO2 제품 보조 or 석유 제품에 탄소세 → 경쟁력 비슷하게, 예: 석유 기반 $5 vs CO2 기반 $15 → $10 차이 보정), <strong>민간 투자 유치</strong>(파트너십)</li>
+<li><strong>③ 환경적 과제</strong>: 공정 자체의 <strong>추가 온실가스 배출</strong>, <strong>부산물·폐기물 처리</strong>, <strong>장기 환경영향 데이터 부족</strong>, <strong>원료·에너지 공급 지속가능성</strong>(CO2+H2→메탄올에 에너지·<strong>수소</strong> 대량 필요)</li>
+<li>해결: <strong>환경영향평가 강화</strong>, <strong>폐기물 처리 기술·재자원화</strong>, <strong>재생에너지 활용</strong>, <strong>지속가능 원료 공급망</strong></li>
+<li><strong>④ 정책·제도</strong>: <strong>R&amp;D 투자 확대</strong>(정부가 장기 투자), <strong>재정 지원</strong>(세금 감면·보조금·저리 금융), 법·제도 기반(<strong>탄소 배출 규제 강화</strong> → 전환 기술 경쟁력↑), <strong>국제협력</strong></li>
+<li>글로벌: <strong>EU</strong> = 막대한 보조금 + <strong>탄소배출권 거래제(EU ETS)</strong> / <strong>미국</strong> = <strong>세액공제</strong> / <strong>중국</strong> = 정부 차원 기술 지원 / <strong>한국</strong> = <strong>2050 탄소중립</strong>, 기술 투자 확대</li>
+<li>요약: 기술(촉매·에너지·공정 최적화), 경제(초기 투자·시장 수요), 환경(부산물·지속가능 에너지), 정책(정부·국제기구·민간 협력·투자)</li>
+</ul>
+<h2 id="4">4주차 — 녹색 화학·촉매·재생 가능한 자원</h2>
+<h3 id="4-1">4-1 녹색 화학의 원리</h3>
+<ul>
+<li><strong>녹색화학(Green Chemistry)</strong> 정의 = 화학물질의 <strong>설계·제조·사용 과정에서 환경과 인체에 미치는 유해성을 최소화</strong>하는 원리. 유해물질 사용·생성 최소화 + <strong>자원·에너지 효율 극대화</strong> = 지속가능한 화학 접근법</li>
+<li>목표: 환경오염 최소화, <strong>경제적 이익과 지속가능한 발전의 균형</strong>(석탄은 지금은 가장 싸지만 미세먼지·CO2 → 미래 세대 고려)</li>
+<li>중요성: 산업 폐기물 감소, 안전·지속가능한 화학산업, <strong>화석연료(탄화수소) 의존도 감소</strong>(바이오연료, 그린 메탄올, 신재생), 산업혁명기 스모그·수명 감소의 교훈</li>
+<li>핵심 목표 3가지: <strong>폐기물 발생 최소화, 안전한 화학물질 설계, 에너지 효율 극대화</strong>(전기 생산에도 CO2 배출)</li>
+<li><strong>녹색화학 12원칙</strong> (자주 출제될 가능성 높음!)
+  1. <strong>폐기물 최소화</strong>(예방) — 친환경 처리, <strong>재자원화</strong>
+  2. <strong>원자 효율성(Atom economy)</strong> — 원료가 최종 제품으로 최대한 전환되도록 설계(전환율 50%면 나머지는 폐기물)
+  3. <strong>저유해성 화학물질</strong> 사용·생성(유해물질 처리에도 에너지·CO2·폐기물 발생)
+  4. <strong>안전한 화학물질 설계</strong> — 위험성 낮은 물질로 대체(포장·검사 비용↓)
+  5. <strong>안전한 용매 및 보조제</strong> — 물 등 독성 낮은 용매(벤젠·톨루엔 같은 발암물질 지양)
+  6. <strong>에너지 효율 극대화</strong> — <strong>상온·상압에 가까운</strong> 조건에서 반응하도록 설계
+  7. <strong>재생 가능한 원료</strong> 사용(재활용, 자투리 재사용)
+  8. <strong>불필요한 유도체 사용 금지</strong> — 추가 변환·분리정제 과정 최소화
+  9. <strong>촉매 사용</strong> — 반응 촉진, 에너지↓, 온화한 조건, 전환율↑("마법 같은 물질")
+  10. <strong>분해 가능한 물질 설계</strong> — 환경에서 안전하게 분해(비닐봉지 500년 문제)
+  11. <strong>실시간 모니터링</strong> — 반응 효율·위험·유독가스·작업자 안전 확인, <strong>공정 제어</strong>
+  12. <strong>사고 가능성 최소화</strong> — 폭발·화재·누출 방지, <strong>공정안전</strong>(압력밥솥 안전밸브 원리)</li>
+<li>주요 기술: <strong>촉매 기술</strong>(고효율 촉매로 반응조건 최적화), <strong>바이오매스 활용</strong>(식물성 자원), <strong>용매 혁신</strong>(물·<strong>이온성 액체</strong>·친환경 용매), <strong>폐기물 재활용·재자원화</strong></li>
+<li>사례</li>
+<li><strong>바이오 플라스틱</strong>: 식물 원료(<strong>옥수수 전분</strong>) → <strong>생분해성</strong> → 식품 포장재·의료기기 → 플라스틱 폐기물·처리비용·화석연료 감소</li>
+<li><strong>친환경 용매</strong>: <strong>초임계 CO2</strong>, <strong>이온성 액체</strong> → <strong>제약·정밀화학</strong> 산업 → 독성 용매·폐기물 감소</li>
+<li><strong>폐기물 재활용</strong>: 폐기물 기반 바이오 원료, <strong>폐플라스틱 화학적 재활용</strong>(오일·가스·<strong>수소</strong> 생산) → 에너지·화학제품 산업, 자원 낭비·탄소 배출 저감</li>
+<li>도전과제: <strong>경제적</strong>(초기 개발·도입 비용), <strong>기술적 장벽</strong>(공정·반응기 개발), <strong>산업 적용 한계</strong>(기존 공정과 호환성 부족, 예: PE 전용 공정에 PP·PVC 혼입), <strong>정책 지원 부족</strong></li>
+<li>요약: 녹색화학 = 지속가능한 화학산업의 핵심, <strong>12원칙 = 실용적 가이드라인</strong>, 바이오플라스틱·친환경 용매 등 적용 사례</li>
+</ul>
+<h3 id="4-2">4-2 촉매 기술</h3>
+<ul>
+<li><strong>촉매</strong> = 화학반응 속도를 증가시키지만 <strong>자신은 소모되지 않는</strong> 물질. 메커니즘: <strong>활성화 에너지(Ea) 감소</strong> 또는 <strong>새로운 반응 경로 제공</strong></li>
+<li>역할: <strong>에너지 절감</strong>(비용·CO2↓), <strong>생산성 향상</strong>(반응속도↑), <strong>환경오염 최소화</strong> → <strong>녹색화학의 핵심 기술</strong>(저온·저압에서 고효율 반응)</li>
+<li>중요성: 에너지 효율(낮은 온도·압력), 반응속도↑ → 공정시간 단축, 환경적 이점(폐기물↓), 경제적 이점(원료 최적화·생산비 절감)</li>
+<li><strong>촉매 유형</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>유형</th>
+<th>특징</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>균일(균질) 촉매</strong> (homogeneous)</td>
+<td>반응물과 <strong>같은 상</strong>(주로 액체), 잘 섞임 / <strong>분리가 번거로움</strong></td>
+<td>산·염기 촉매, 아민 촉매</td>
+</tr>
+<tr>
+<td><strong>불균일(불균질) 촉매</strong> (heterogeneous)</td>
+<td>반응물과 <strong>다른 상</strong>(주로 고체)</td>
+<td><strong>백금</strong>(수소화, 연료전지), <strong>니켈</strong>, <strong>철</strong>(암모니아 합성)</td>
+</tr>
+<tr>
+<td><strong>효소 촉매(생체 촉매)</strong></td>
+<td>주성분 <strong>단백질</strong> → 적정 온도(체온)·<strong>pH</strong> 중요, 상온 반응</td>
+<td>리파아제, 카탈라아제, 아밀라아제</td>
+</tr>
+<tr>
+<td><strong>광촉매</strong></td>
+<td><strong>빛 에너지</strong>로 반응 촉진</td>
+<td><strong>TiO2(이산화티타늄)</strong>, ZnO(산화아연)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>최근 연구 동향: <strong>고효율 촉매</strong>(합금 촉매), <strong>나노 촉매</strong>(표면적 극대화), <strong>바이오 촉매</strong>(효소·미생물), <strong>광촉매</strong>(태양광 이용), <strong>AI·빅데이터</strong>로 최적 촉매 탐색(조성·구조 조합 너무 많음)</li>
+<li><strong>나노 촉매</strong>: 나노미터 크기 입자 → <strong>높은 표면적, 활성 부위 노출 증가</strong> → 반응 효율 극대화. 응용: <strong>CO2 전환, 수소 생산·저장</strong>. 사례: <strong>백금 나노촉매 → 수소 연료전지</strong></li>
+<li><strong>바이오 촉매</strong>: 효소·미생물 → 느리지만 효율적·안정적, <strong>친환경, 저온·저압</strong>. 응용: <strong>바이오디젤, 제약</strong>. 사례: <strong>리파아제</strong>(지방산 전환)</li>
+<li><strong>광촉매</strong>: TiO2·ZnO → <strong>CO2 전환, 수소 생산, 공기·물 정화</strong>. 사례: <strong>TiO2 기반 수소 생산</strong> 연구 활발</li>
+<li>산업 적용 사례</li>
+<li><strong>하버-보슈법(암모니아 합성)</strong>: <strong>철 촉매</strong> → 질소 고정 → <strong>비료</strong> → 인류 식량 생산 급증</li>
+<li><strong>석유화학</strong>: 백금·니켈 촉매 → <strong>크래킹</strong>(긴 탄소사슬 절단 → 에틸렌·프로필렌)</li>
+<li><strong>수소 생산</strong>: 니켈 촉매 등 → 연료전지용 수소 저가 공급</li>
+<li><strong>환경</strong>: <strong>자동차 촉매 변환기</strong> → <strong>NOx(질소산화물)</strong> 등 유해가스 저감(디젤차는 <strong>요소수</strong> 사용)</li>
+<li>요약: 촉매 = 반응 촉진·미소모, <strong>균일·불균일·바이오·광촉매</strong>, 산업 전반 필수, <strong>고효율·나노 촉매 + AI·빅데이터</strong>가 최근 연구 핵심</li>
+</ul>
+<h3 id="4-3">4-3 재생 가능한 자원의 활용</h3>
+<ul>
+<li><strong>재생 가능한 자원</strong> = 자연적으로 <strong>지속적으로 보충·재생</strong>되는 자원(에너지원): <strong>태양광, 풍력, 바이오매스, 수력</strong>, 지열 등</li>
+<li>활용 이유·중요성: <strong>화석연료 대체 → 탄소중립 필수</strong>, 지속가능한 에너지·화학물질 생산, 환경오염 감소, <strong>에너지 자립</strong></li>
+<li>특징: <strong>무한에 가까운 공급</strong>, <strong>환경 부담 최소화</strong>, <strong>기술 혁신으로 효율 향상</strong>(태양광·풍력 단가가 화석연료보다 싸다는 주장도)</li>
+<li>종류별 정리</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>자원</th>
+<th>원리</th>
+<th>장점</th>
+<th>단점</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>태양광</strong></td>
+<td>태양전지(패널)로 <strong>빛 → 전기</strong>(태양열 발전은 열 이용)</td>
+<td>무공해, 무한</td>
+<td><strong>기후·날씨 의존, 밤 불가 → 에너지 저장(ESS) 필요</strong></td>
+</tr>
+<tr>
+<td><strong>풍력</strong></td>
+<td>바람의 <strong>운동에너지</strong> → 터빈 → 전기, 육상·<strong>해상</strong></td>
+<td>청정, <strong>운영비 저렴</strong></td>
+<td><strong>입지 조건 의존</strong>(일정한 강풍, 예: 북해), <strong>소음·경관</strong> 문제 → 원양 해상풍력 연구</td>
+</tr>
+<tr>
+<td><strong>바이오매스</strong></td>
+<td>식물·유기물 → <strong>바이오디젤, 바이오에탄올, 메탄 발효(바이오가스)</strong></td>
+<td>탄소중립(어차피 분해되며 나올 CO2), 다양한 원료</td>
+<td><strong>경작지·식량과 경쟁</strong>, 대규모 설비·시간 필요</td>
+</tr>
+<tr>
+<td><strong>수력</strong></td>
+<td>댐에서 물의 흐름 → 터빈 / 양수발전(남는 전기로 물을 끌어올려 저장)</td>
+<td><strong>안정적</strong>, 지속가능</td>
+<td><strong>초기 설비비 높음, 지역적 제약</strong></td>
+</tr>
+<tr>
+<td><strong>지열</strong></td>
+<td>지구 내부 열 → 난방, 증기로 터빈</td>
+<td>안정적, 지속가능</td>
+<td>초기비용(굴착), 지역 제약</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>사례</li>
+<li><strong>브라질 바이오에탄올</strong>: <strong>사탕수수</strong> 원료 → 대규모 연료 생산·수출 → <strong>석유 의존도 감소</strong>, 에너지 자립, 온실가스 감축</li>
+<li><strong>독일 태양광 도시</strong>: 도시 전체에 태양광 패널 → <strong>태양광 자립도시</strong>, 탄소 저감, 가정 에너지비 절감, 지역경제 활성화, 청정에너지 사용 증가</li>
+<li>요약: 재생 가능 자원(신재생에너지) = 지속가능 에너지·자원 활용의 핵심, 다양한 기술 존재, 성공 사례로 <strong>경제적·환경적 이익 확인</strong></li>
+</ul>
+<h2 id="5">5주차 — 에너지 효율 향상 기술</h2>
+<h3 id="5-1">5-1 에너지 효율 향상 기술의 필요성</h3>
+<ul>
+<li><strong>에너지 효율</strong> = <strong>동일한 에너지로 더 많은 작업</strong> 또는 <strong>동일한 작업을 더 적은 에너지로</strong> 수행</li>
+<li>필요성: 자원 고갈 문제 해결, <strong>온실가스 배출 저감</strong>(에너지 생산 = CO2 배출), 경제적 비용 절감</li>
+<li>핵심 목표: ① <strong>에너지 낭비 최소화</strong>(예: 히터·쿨러 대신 고온 출구 가스와 저온 입구 가스를 <strong>열교환</strong>) ② <strong>지속가능한 에너지 시스템 구축</strong></li>
+<li>중요성 5가지: <strong>자원 절약</strong>(한정된 에너지 공급량, 블랙아웃 우려), <strong>탄소 배출 감소</strong>, <strong>경제적 이익</strong>(비용 절감·산업 경쟁력), <strong>에너지 안보</strong>(한국은 에너지 수입국 → 효율 2배면 수입 절반, 국제정세 영향↓), <strong>기술 혁신 촉진</strong></li>
+<li>탄소중립 관계: 배출량 = 흡수량 → 탄소중립(흡수 &gt; 배출이면 탄소 네거티브, 현실은 배출 &gt; 흡수). <strong>에너지 효율↑ → 화석연료 사용↓ → 탄소 배출↓ → 탄소중립</strong></li>
+<li>사례: <strong>건물 단열 개선</strong>(냉방 시 창문 닫기 원리), <strong>산업 공정 최적화</strong>(온도에 따른 생성물·에너지비용 고려해 최적 조건 탐색)</li>
+<li><strong>부문별 기술</strong></li>
+<li><strong>산업</strong>: <strong>스마트 공장</strong>(IoT·AI·빅데이터 → 에너지 최적화 + 작업자 안전), <strong>폐열 회수 시스템</strong>(예: 발전소 <strong>복합화력(Combined cycle)</strong> = 가스터빈 배기가스(500~600℃)로 스팀 생성 → 스팀터빈 추가 발전), <strong>고효율 장비</strong>(모터·펌프, 비효율은 열로 손실). 사례: 철강 공장 폐열 회수</li>
+<li><strong>건물</strong>: <strong>고효율 단열재</strong>, <strong>스마트 HVAC</strong>(Heating·Ventilation·Air Conditioning), <strong>LED 조명</strong>(수명 길고 발열 적음), <strong>건축 설계 최적화</strong>(자연채광·환기, 남향), 인증 건물</li>
+<li><strong>교통</strong>: <strong>전기차·하이브리드</strong>, CNG 버스, 친환경 선박·항공 연료, <strong>스마트 교통 시스템</strong>(혼잡 감소), <strong>경량화</strong>, <strong>회생제동 시스템</strong>(주행 에너지 재사용)</li>
+<li><strong>에너지 관리 시스템(EMS, Energy Management System)</strong>: <strong>실시간 에너지 소비 모니터링</strong>, <strong>비효율 패턴 감지</strong>, <strong>자동화된 에너지 제어</strong> → 산업 공장, 상업용 건물, <strong>대형 데이터센터</strong>(공조 시스템 에너지 막대) / 사례: 스마트 공장 EMS → 에너지↓·수익↑</li>
+<li>도전과제: <strong>경제적</strong>(초기 비용, 설비 교체), <strong>기술적</strong>(기존 시스템과의 통합·호환), <strong>정책·제도 지원 부족</strong>(인센티브 필요), <strong>사용자 인식 부족</strong></li>
+<li>요약: 에너지 효율 = <strong>탄소중립 핵심 전략</strong>, 산업·건축·교통 부문 적용, <strong>EMS = 효율적 에너지 사용의 핵심</strong>, 경제·기술·정책 과제 해결 필요</li>
+</ul>
+<h3 id="5-2">5-2 최신 에너지 효율 기술</h3>
+<ul>
+<li>에너지 효율 기술 = 에너지 소비 최소화하며 최대 효과. 혁신 필요성: 자원 고갈 대응, 탄소 저감·지속가능 개발</li>
+<li>핵심 기술 3가지: <strong>스마트 그리드, 고효율 전력 변환, 에너지 저장 시스템(ESS)</strong> (+ AI·빅데이터)</li>
+<li><strong>① 스마트 그리드</strong>: <strong>정보통신기술(ICT)</strong>로 에너지 <strong>생산·전달·소비를 최적화하는 전력망</strong></li>
+<li>핵심: <strong>실시간 에너지 사용 모니터링</strong>, <strong>공급·수요 자동 균형</strong>, <strong>재생에너지 통합 관리</strong> / 구성: 스마트 미터링, 분산 에너지 자원 관리, ESS</li>
+<li>장점: <strong>전력 손실 최소화</strong>(A마을 잉여 50 + B마을 부족 50 예시 → 연결로 해결), <strong>재생에너지 효율적 활용</strong>(재생에너지 먼저 쓰고 부족분은 켜고 끄기 쉬운 <strong>가스발전</strong>으로 보충)</li>
+<li>사례: <strong>한국 제주 스마트그리드 실증단지</strong>(수요·공급 최적화), <strong>덴마크</strong>(풍력을 전력망에 안정적 통합), <strong>미국 캘리포니아</strong>(스마트 미터링 + ESS)</li>
+<li>성과: 에너지 손실 최소화, 안정적 전력 공급</li>
+<li><strong>② 고효율 전력 변환</strong>: 전력 변환 과정의 손실 최소화 — <strong>고효율 인버터, 직류(DC) 전력 시스템, 에너지 회생 시스템</strong></li>
+<li>응용: 재생에너지, 데이터센터, 가정용 EMS</li>
+<li>사례: <strong>태양광 인버터</strong>(패널의 <strong>직류 → 교류</strong> 변환; 송전은 교류 — 에디슨 vs 테슬라), <strong>전기차 회생제동</strong>(주행 에너지를 배터리에 재저장 → 주행거리↑), <strong>데이터센터 고효율 전력 분배</strong></li>
+<li>성과: 변환 손실 감소, <strong>시스템 안정성 향상</strong></li>
+<li><strong>③ ESS(Energy Storage System)</strong> — "가장 중요": <strong>잉여 에너지를 저장했다가 필요할 때 사용</strong></li>
+<li>종류: <strong>리튬이온 배터리, 플로우 배터리, 양수발전</strong></li>
+<li>응용: 스마트 그리드, 재생에너지 발전소, 산업용 EMS</li>
+<li>장점: <strong>에너지 수급 균형</strong>, <strong>재생에너지 안정적 공급</strong>(들쭉날쭉한 태양광·풍력 출력을 ESS에 저장 → 일정하게 출력 = 품질 업그레이드). <strong>재생에너지가 아직 비싼 이유 = ESS 필요</strong></li>
+<li>2차전지(충·방전 반복)가 ESS로도 각광</li>
+<li>사례: <strong>호주 리튬이온 ESS</strong>, <strong>독일 주거용 ESS</strong>(가정 태양광), <strong>캘리포니아 대규모 ESS</strong>(전력망 안정화)</li>
+<li><strong>④ AI·빅데이터 기반 에너지 관리</strong>: 실시간 데이터 분석 → <strong>수요 예측</strong> → AI 알고리즘으로 최적 배분(잉여 전기 최소화). 응용: 스마트 빌딩, 산업 공장, 교통 시스템. 사례: AI 에너지 효율 예측 시스템, <strong>스마트 도시 에너지 네트워크</strong></li>
+<li>도전과제: <strong>초기 투자비</strong>, <strong>기술 표준화 부족</strong>(호환), <strong>데이터 보안</strong>(에너지 데이터 노출·<strong>AI 해킹</strong> → 핵심시설 위험), <strong>정부 장기 지원 정책</strong> 필요</li>
+<li>요약: <strong>스마트 그리드·고효율 전력 변환·ESS = 핵심 에너지 효율 기술</strong>, AI·빅데이터 활용 확대, 경제·정책 지원 필요</li>
+</ul>
+<h3 id="5-3">5-3 에너지 효율 향상 기술 적용 사례</h3>
+<ul>
+<li>목표: 비용 절감, 탄소 배출 감소, 자원 사용 최적화 / 분야: <strong>건물·교통·산업</strong></li>
+<li><strong>건물</strong>: 고효율 단열, <strong>고성능 창호·단열재</strong>, 스마트 HVAC, LED</li>
+<li>사례: <strong>프랑스 패시브 하우스</strong>(에너지 소비 최소화 건축물), <strong>미국 엠파이어 스테이트 빌딩 리노베이션 → 에너지 40% 절감</strong></li>
+<li>효과: 연간 에너지 소비 <strong>30~40% 감소</strong>, 비용 약 <strong>25% 절감</strong>, CO2 연간 수천 톤 감소, 실내 공기질·온도 개선</li>
+<li><strong>교통</strong>: 전기차·하이브리드(+수소차 연구), 스마트 교통 시스템(<strong>ITS</strong>), 경량화</li>
+<li>사례: <strong>노르웨이 = 전기차 보급률 세계 1위</strong>, <strong>싱가포르 = ITS 도입으로 교통체증 감소</strong></li>
+<li>효과: 내연기관(ICE) 대비 <strong>연료 소비 50% 감소</strong>, 교통 부문 <strong>탄소 배출 최대 30% 저감</strong>(CO2 배출 1위 에너지, 2위 수송), 연료비·<strong>유지보수비</strong> 절감, 보조금, <strong>도시 환경 개선</strong>(자동차 NOx → <strong>광화학(LA형) 스모그</strong> 감소; 런던형 스모그는 석탄 <strong>황산화물</strong>), 소음↓</li>
+<li><strong>산업</strong>: <strong>폐열 회수 시스템</strong>(스팀 생산·판매, 가열), <strong>스마트 팩토리</strong>(IoT·AI·빅데이터 EMS, 작업자 안전 지시까지), <strong>고효율 장비</strong>(구매비용 대비 이득 따져야)</li>
+<li>사례: <strong>독일 BASF 스마트 공장</strong>(에너지 효율 극대화), <strong>일본 철강산업 폐열 회수</strong>(연간 에너지 비용 절감)</li>
+<li>효과: 에너지 소비 <strong>20~30% 절감</strong>(이미 최적 설계된 공장 기준으로 큰 수치: 원가 90 중 에너지 30을 20~30% 줄이면 이윤 10 → 16~19, 약 1.5배↑), 운영비 절감, <strong>온실가스 25% 이상 저감</strong>, 생산성 향상</li>
+<li>분야별 비교: 건물(HVAC·LED·단열 → 에너지 40%·비용 절감) / 교통(전기차·ITS·하이브리드·수소차 → 연료 효율↑·탄소 저감) / 산업(스마트공장·폐열회수·고효율 장비 → 에너지 절감·탄소 저감)</li>
+<li>통합 효과: <strong>에너지 사용 최적화 + 탄소 배출 저감 + 비용 절감·생산성 향상</strong></li>
+<li>미래 전망: <strong>스마트 기술 확대</strong>(AI·빅데이터), <strong>재생에너지 통합</strong>, <strong>초고효율 장비</strong>(초전도체), <strong>ESS 용량·효율 개선</strong>, <strong>정책적 지원 강화</strong>(당장 살기 힘든 기업은 미래 투자 어려움 → 정부가 지원하면 윈윈)</li>
+<li>요약: 건물·교통·산업 사례로 긍정적 효과 확인, <strong>스마트 기술·AI = 효율 혁신의 핵심</strong>, 통합적 접근으로 <strong>탄소 저감과 비용 절감 동시 달성</strong></li>
+</ul>
+<h2 id="6">6주차 — 에너지 시스템 효율화 해결책·최신 동향·미래 기술</h2>
+<h3 id="6-1">6-1 에너지 시스템의 효율성을 높이는 해결책</h3>
+<ul>
+<li><strong>에너지 시스템</strong> = 에너지의 <strong>생산 → 변환 → 전달 → 저장 → 소비</strong> 전 과정을 포함하는 <strong>통합적 체계</strong></li>
+<li>중요성: 에너지 자원 활용 최적화(어디서 낭비되는지 파악), 온실가스 저감(탄소중립), <strong>지속가능한(sustainability) 에너지 관리 시스템</strong> 구축</li>
+<li>핵심 목표: <strong>에너지 손실 최소화</strong>, <strong>효율적·안정적 에너지 공급</strong>(공급 불안정 시 과도한 구동으로 비용↑)</li>
+<li><strong>구성 요소</strong></li>
+<li>생산: <strong>발전소</strong>(안정적 생산, but CO2) + <strong>재생에너지</strong>(입지·환경 영향, 불안정하지만 청정) = 두 축</li>
+<li>변환: <strong>전력 변환</strong>(전압 변경, 직류↔교류; 고전압일수록 송전 손실↓), <strong>열교환(HX)</strong>(가스터빈 배기가스로 스팀 생성 → 스팀터빈, <strong>복합화력/열병합</strong> → 지역난방수까지)</li>
+<li>전달: <strong>전력망(그리드)</strong>(생산지와 소비지 연결, 실시간 모니터링), <strong>배관망</strong>(도시가스·메탄, 물, 스팀, 공업용 가스)</li>
+<li>소비: 산업, 교통, 주거</li>
+<li>시스템 중요성: 지속가능한 발전 기반, <strong>국가 에너지 안보 강화</strong>(한국은 에너지 자급 부족), 경제적 비용 절감·자원 절약</li>
+<li>효율 개선 필요성: <strong>에너지 손실 문제</strong>(생산·변환·전달·소비 4단계 모두에서 낭비 → 에너지 사용↓ = CO2↓), <strong>환경적</strong>(탄소 감축, 기후변화 대응), <strong>경제적</strong>(에너지 가격 파동 영향↓, 비용 절감, 산업 경쟁력), <strong>사회적</strong>(안정적 공급 → 생활수준, 대규모 정전 시 병원 등 치명적)</li>
+<li><strong>해결책 1: 스마트 그리드</strong> — ICT로 공급·수요 <strong>최적화</strong>하는 전력망. 핵심: <strong>스마트 미터링, 분산 에너지 관리 시스템, 실시간 에너지 모니터링</strong>. 장점: 에너지 손실 최소화, <strong>재생에너지 안정적 통합</strong>(간헐적·분산 유입 관리). 사례: <strong>제주 스마트그리드 실증단지</strong>(풍력·태양광)</li>
+<li><strong>해결책 2: ESS</strong> — 잉여 에너지 저장 후 필요 시 공급. <strong>리튬이온·플로우 배터리, 양수발전</strong>(남는 전기로 물을 끌어올렸다 떨어뜨려 발전). <strong>재생에너지와 연계는 필수</strong>, 전력 수요 관리·공급 안정화, 효율 증대·<strong>공급 유연성</strong>(바람·햇빛 없을 때). 사례: <strong>호주</strong></li>
+<li><strong>해결책 3: 폐열 회수 시스템</strong> — 산업 공정 폐열 회수·활용. 발생처: <strong>화력발전소, 철강(고로 1000~2000℃), 화학산업</strong>. 장점: 에너지 낭비 감소, <strong>운영비 절감</strong>, <strong>환경 보호</strong>(온배수 방류 → 용존산소↓·수생태계 파괴 방지). 사례: <strong>독일 철강, 일본 화력발전소</strong></li>
+<li><strong>해결책 4: 고효율 장비</strong> — <strong>모터, 펌프, 조명(LED), 터빈</strong> → 같은 연료로 더 많은 에너지(= CO2↓). 산업·상업 건물·교통. 장점: 에너지 비용 절감, <strong>시스템 수명 연장</strong>(LED는 백열전구보다 발열 적고 수명 김). 사례: <strong>에너지 스타(ENERGY STAR) 인증</strong> 제품 보급</li>
+<li><strong>해결책 5: 데이터 기반(Data-driven) 에너지 관리</strong> — AI·빅데이터로 소비 패턴 분석·최적화. 요소: <strong>실시간 사용 모니터링</strong>(데이터 축적 → 빅데이터), <strong>예측 분석</strong>(날씨 → 수요 예측), <strong>자동화 제어 시스템</strong>(예비율 기준 자동 차단 등). 장점: 비효율 감지·개선, 운영 효율 극대화. 사례: <strong>스마트 빌딩 EMS</strong></li>
+<li>도전과제: <strong>초기 투자비</strong>(센서·중앙 연결), <strong>기술적 통합 어려움</strong>(기존 시스템 호환), <strong>정책 지원 부족</strong>(인센티브·규제 미흡), <strong>사용자 인식 부족</strong></li>
+<li>요약: 에너지 시스템 효율 = <strong>자원 절약·탄소 감소의 핵심</strong>, 스마트 그리드·ESS·폐열 회수 등 활용, <strong>데이터 기반 관리 = 미래 기술</strong></li>
+</ul>
+<h3 id="6-2">6-2 최신 에너지 효율 기술 동향</h3>
+<ul>
+<li>최신 기술 중요성: 지속가능 에너지 관리의 혁신적 접근, <strong>기존 한계 극복</strong>(스팀터빈만 쓰다가 <strong>복합화력(Combined cycle)</strong>으로 효율 10~20%p 상승)</li>
+<li>핵심 분야 3가지: <strong>디지털화·AI 기반 관리</strong>, <strong>차세대 에너지 저장</strong>, <strong>분산 에너지 자원 통합</strong></li>
+<li><strong>① 스마트 에너지 관리 기술</strong> = <strong>IoT(사물인터넷) + AI</strong>로 에너지 데이터 실시간 수집·최적화</li>
+<li>기능: <strong>소비 패턴 분석·자동 조정</strong>(퇴근 시간 맞춰 미리 냉난방), <strong>예측 유지보수</strong>(장비 고장·내구도 사전 파악), <strong>분산 에너지 자원 통합 관리</strong></li>
+<li>활용: 스마트 빌딩, 산업 공정 최적화(열·습도 관리), <strong>스마트 도시</strong>. 사례: <strong>AI 기반 공장 에너지 관리 시스템</strong></li>
+<li><strong>② 고효율 전력 변환 기술</strong></li>
+<li><strong>차세대 전력 반도체(GaN 질화갈륨 등)</strong> — 휴대폰 고속충전기에 쓰임 → <strong>기존 실리콘 대비 에너지 손실↓</strong></li>
+<li><strong>초고효율 인버터</strong>: 태양광·풍력의 <strong>직류 → 교류</strong> 변환 최적화</li>
+<li><strong>직류(DC) 기반 전력망</strong>: 소규모 공간에서 AC↔DC 변환 손실 최소화</li>
+<li>동향: 차세대 반도체 소재(초전도체 등), <strong>데이터센터·고성능 컴퓨팅</strong> 적용 증가</li>
+<li>사례: <strong>GaN 기반 태양광 인버터</strong>(변환 손실 감소), 데이터센터 전력 관리(운영비·환경영향 감소), <strong>전기차 고속충전</strong>(손실 최소화)</li>
+<li><strong>③ 차세대 에너지 저장 기술</strong></li>
+<li><strong>플로우 배터리</strong>: <strong>대규모 전력 저장</strong>에 적합, 안정성·효율 향상</li>
+<li><strong>고체 상태(전고체) 배터리</strong>: 리튬이온 대비 <strong>에너지 밀도↑, 충전 속도·안정성 개선</strong></li>
+<li><strong>수소 저장 시스템</strong>: 재생에너지로 <strong>수전해 → 수소</strong>로 저장 → 재생에너지 활용 극대화(저장 비용이 과제)</li>
+<li>연구: 차세대 배터리 소재, 장기 저장 안정성</li>
+<li><strong>④ 분산 에너지 자원(DER) 관리</strong>: 소규모 재생에너지 발전을 전력망에 효율적 통합 — <strong>실시간 에너지 거래 시스템, 블록체인 기반 전력 분배</strong>, 자원 최적화 플랫폼. 사례: <strong>독일 태양광 공유 전력거래 플랫폼, 캘리포니아 분산 에너지 프로젝트</strong></li>
+<li><strong>⑤ AI 기반 최신 연구</strong>: 에너지 소비 <strong>예측 모델</strong>, <strong>머신러닝 기반 분배 알고리즘</strong> → 스마트 공장 예측 유지보수, AI 전력망 관리. 성과: <strong>에너지 소비 최대 20% 절감</strong>, 예기치 못한 시스템 중단 방지</li>
+<li><strong>⑥ 재생에너지 통합 연구</strong>: <strong>태양광 + ESS = 마이크로그리드</strong>, 풍력 + 고효율 전력 변환. 성과: <strong>에너지 손실 25% 감소</strong>, 재생에너지 활용 극대화. 적용: <strong>농촌·산간벽지·오지 전력망</strong>(자급자족 소규모 에너지원)</li>
+<li>도전과제: 초기 도입 비용, <strong>표준화 부족</strong>(상호 운용성), <strong>데이터 보안</strong>, <strong>사용자 교육 부족</strong></li>
+<li>요약: 스마트 에너지 관리·고효율 전력 변환·차세대 배터리로 효율↑, <strong>AI·빅데이터가 혁신 가속</strong>, <strong>재생에너지 + 효율 기술 통합 = 미래 에너지 관리의 필수</strong></li>
+</ul>
+<h3 id="6-3">6-3 에너지 효율 향상 및 탄소중립을 위한 미래 기술</h3>
+<ul>
+<li>미래기술 필요성: <strong>에너지 수요 증가(인구↑)·자원 고갈</strong> 해결, <strong>탄소중립 필수 기술</strong>(CCUS, <strong>DAC = Direct Air Capture</strong>, 공기 중 CO2 직접 포집)</li>
+<li>핵심 주제 2가지: <strong>차세대 에너지 효율 기술</strong>, <strong>탄소중립을 지원하는 통합적 기술 접근법</strong></li>
+<li><strong>① 디지털화·AI 기반 에너지 효율</strong></li>
+<li><strong>AI 에너지 관리</strong>: 소비 패턴 분석·예측(미래에 빠질 수 없는 기술)</li>
+<li><strong>실시간 에너지 최적화</strong>: 실시간 데이터 저장·분석 + 빠른 AI 모델</li>
+<li><strong>디지털 트윈(Digital Twin)</strong> = <strong>물리적 시스템을 가상세계에 디지털로 복제</strong> → 에너지 흐름 <strong>시뮬레이션·최적화</strong>(서울 전력망을 현실에선 함부로 못 바꾸지만 가상에선 발전소 배치 등 자유롭게 실험 → 최적안 도출)</li>
+<li>미래 방향: <strong>IoT + 5G(→6G)</strong> 결합 에너지 데이터 네트워크(대용량 실시간 송수신)</li>
+<li><strong>② 차세대 배터리</strong></li>
+<li><strong>고체 상태(전고체) 배터리</strong>: <strong>안정성 강화</strong>(리튬은 외부 충격에 약하고 화재 진압 어려움) + <strong>에너지 밀도 증가</strong> → 전기차, 재생에너지 저장</li>
+<li><strong>플로우 배터리</strong>: <strong>대규모 전력 저장에 적합한 안정적 시스템</strong> → 리튬 기반 ESS의 안정성 우려 대안</li>
+<li>연구 동향: <strong>배터리 수명 연장, 재활용 기술</strong>(리튬·금속 등 고부가가치 물질 회수)</li>
+<li><strong>③ 스마트 마이크로그리드</strong></li>
+<li><strong>마이크로그리드</strong> = <strong>지역 단위의 분산 에너지 시스템</strong>(주로 태양광·풍력 등 소규모 재생에너지)</li>
+<li>스마트 마이크로그리드: <strong>자율적 에너지 거래 플랫폼</strong>(남는 전기를 사용자·한전·발전사에 판매), <strong>블록체인 기반 에너지 분배 시스템</strong></li>
+<li>미래 전망: <strong>자급자족형 에너지 네트워크 확산</strong>(집·마을·동 단위로 서로 거래하며 자급자족, 부족분만 외부에서)</li>
+<li><strong>④ 탄소중립을 위한 촉매 기술</strong>: 고효율 촉매로 <strong>CO2 전환</strong>, 재생에너지 결합 <strong>합성연료(그린 메탄올)</strong>, <strong>광촉매</strong>(태양광으로 CO2 전환·수소 생산) → 촉매 안정성·수명·효율↑, 비용↓</li>
+<li><strong>⑤ 에너지 효율 기술 + 탄소중립 융합</strong>: 통합적 접근(<strong>재생에너지와 효율 기술의 조화</strong>, 효율 기반 탄소중립), <strong>시스템적 설계</strong>(저장·변환·소비 <strong>전주기 효율 극대화</strong>), <strong>산업·지역 맞춤형 에너지 솔루션</strong></li>
+<li><strong>⑥ 미래 CCU 기술</strong>: CO2 → <strong>고부가가치 제품</strong>(CaCO3, 메탄올), <strong>바이오매스 기반 CCU</strong> → 활용: <strong>플라스틱 생산·재자원화, 합성연료(바이오디젤·그린 연료), 건축자재(CaCO3·MgCO3)</strong> → 장기적으로 <strong>탄소중립의 핵심 기술</strong>(기존 공정에 덧붙이기 쉬움)</li>
+<li><strong>⑦ 국제협력·기술 정책</strong>: 글로벌 연구 컨소시엄, <strong>선진국→개도국 기술 이전</strong>, 정부 재정 지원, <strong>글로벌 탄소 가격제</strong>(배출권 → 다배출 기업 부담 → 자발적 감축)</li>
+<li>도전과제: <strong>초기 투자비, 데이터 보안(해킹)</strong> / 해결: <strong>공공·민간 협력, 국제 공동 연구</strong></li>
+<li>요약: <strong>AI·디지털 트윈·고체 배터리</strong> 등이 효율·탄소중립 달성에 활용, <strong>스마트 마이크로그리드·CCU = 지속가능성 핵심 기술</strong>, <strong>국제협력·정책 지원</strong>이 기술 현실화에 필수</li>
+</ul>
+<h2 id="7">7주차 — 재생에너지 기술(태양광·풍력·수소)</h2>
+<h3 id="7-1">7-1 태양광 에너지 기술</h3>
+<ul>
+<li><strong>태양광 에너지 기술</strong> = 태양의 <strong>빛 에너지를 전기(또는 열)로 변환</strong>(솔라셀, 태양광 패널)</li>
+<li>중요성: <strong>무한하고 청정한 에너지원</strong>, <strong>발전 중 온실가스 배출 없음</strong></li>
+<li><strong>기본 원리 = 광전효과</strong>: 빛이 <strong>반도체(N형·P형)</strong>에 닿으면 전자가 방출 → 전압·전류 생성</li>
+<li>구성: <strong>셀(Cell)</strong>(빛→전기, 주로 <strong>실리콘</strong>, 고분자 등) → <strong>모듈(Module)</strong>(셀 여러 개 연결) → <strong>어레이(Array)</strong>(모듈 결합)</li>
+<li>발전 과정: 태양광 → 셀에서 <strong>직류(DC)</strong> 생성 → <strong>인버터로 교류(AC) 변환</strong>(장거리 송전 위해) → 전력망 송전</li>
+<li><strong>최신 기술</strong></li>
+<li>고효율 셀: <strong>PERC 셀</strong>(효율 높인 단결정 실리콘), <strong>탠덤 셀</strong>(다층 구조로 효율 향상) → 같은 면적에 더 많은 전기</li>
+<li>차세대 소재: <strong>페로브스카이트 셀</strong>(<strong>비용 효율 + 효율성 동시 개선</strong>), <strong>유기 태양전지</strong>(<strong>유연성·경량화</strong>, 옷·창문, 반투명)</li>
+<li>기술 혁신: <strong>태양광 + ESS 통합 시스템</strong>, <strong>PVT(태양광·열 복합) 기술</strong> = 빛과 열을 동시에 활용</li>
+<li>장점: <strong>무한한 에너지</strong>, <strong>환경친화적</strong>(발전 시 탄소 배출 없음 — 단, <strong>패널 제조 과정의 CO2는 0이 아님</strong>), <strong>유지보수·운영비 낮음</strong>(패널 교체·청소), <strong>모듈식 설치</strong>(가정 지붕 ~ 대규모 사막 발전소, 마이크로그리드에 적합)</li>
+<li>단점: <strong>간헐성</strong>(밤·흐린 날 불가, 날씨·계절·<strong>남중고도</strong> 영향 — 수직으로 비출수록 단위면적당 에너지↑), <strong>초기 투자비</strong>(패널·분산 인프라), <strong>ESS 필요</strong>, <strong>토지 사용 문제</strong>(대규모 설치 시)</li>
+<li>사례</li>
+<li><strong>독일</strong>: 국가 전력 약 <strong>20%를 태양광</strong>으로 충당 목표 → 탄소 대폭 감소. 기술: <strong>고효율 셀 + ESS + 스마트 그리드 연계</strong></li>
+<li><strong>중국 세계 최대 태양광 발전단지</strong>: 연간 <strong>수백만 톤</strong> 탄소 절감, <strong>지역경제 활성화</strong>(관리·유지보수 인력). 기술: <strong>저비용 대량생산 패널 + ESS(야간 활용)</strong></li>
+<li>미래 방향: <strong>고효율 셀(효율 30% 이상 목표)</strong>, <strong>유연 태양광 패널</strong>(건물 외장재·자동차), <strong>태양광 + 수소 결합</strong>(태양광 전기로 <strong>물 전기분해 → 그린 수소</strong> = 생산 시 CO2 배출 없는 수소; cf. 그레이·블루 수소), <strong>소재 혁신</strong>(저비용·고안정성 페로브스카이트)</li>
+<li>도전과제: <strong>ESS 비용</strong>(패널은 싸도 ESS가 비쌈, <strong>2차전지 = 리튬</strong> 가격), <strong>폐패널 폐기물 관리·재활용</strong>, <strong>정책 지원</strong>, <strong>사회적 수용성</strong>(산림 훼손, 산사태 등 자연재해 우려 → 주민 반발)</li>
+<li>요약: 무한·청정 신재생에너지, <strong>기술 발전으로 효율성·경제성 개선 중</strong>, 가능성 확인</li>
+</ul>
+<h3 id="7-2">7-2 풍력 에너지 기술</h3>
+<ul>
+<li><strong>풍력</strong> = 바람의 <strong>운동에너지 → (블레이드 회전) → 전기에너지</strong>. 화력발전처럼 <strong>터빈을 돌려 발전</strong></li>
+<li>중요성: <strong>청정·무한 재생에너지</strong>(태양·자전이 있는 한), 발전 시 CO2 없음(설치 과정 CO2는 별개)</li>
+<li>원리: 바람 → 블레이드·터빈 회전 → 발전기 → 전기. <strong>풍력은 교류(AC)로 생성</strong>(태양광은 직류 → 인버터 필요)</li>
+<li><strong>구성 요소 4가지</strong>: <strong>블레이드</strong>(바람 운동에너지 → 회전운동), <strong>허브</strong>(블레이드-터빈 연결), <strong>발전기(터빈)</strong>(회전 → 전기), <strong>타워</strong>(높을수록 강한 바람 포착 + 안전)</li>
+<li>발전 방식: <strong>육상풍력</strong>(설치비↓, 바람 방향 불규칙; 강원도 고지대) vs <strong>해상풍력</strong>(해저부터 타워 → 설치·유지비↑, but <strong>일정한 강풍</strong>)</li>
+<li><strong>최신 기술</strong></li>
+<li>고효율 터빈: <strong>대형 터빈</strong>(<strong>블레이드 길이↑ → 더 많은 에너지</strong>), <strong>가변 피치 블레이드</strong>(바람 조건에 따라 블레이드 각도 조절)</li>
+<li><strong>부유식 해상풍력</strong>: 해저에 고정 대신 <strong>부유 플랫폼에 띄움</strong> → <strong>더 깊은 원양</strong>에 설치, 양질의 강풍 활용</li>
+<li><strong>소형 분산형 풍력</strong>: 주택·산간 지방(태양광보다 덜 보급 — 소음 때문)</li>
+<li><strong>스마트 풍력</strong>: <strong>AI 기반 바람 예측 + 발전 최적화</strong>(블레이드 방향 회전 시점 결정, 요(yaw) 제어)</li>
+<li>장점: <strong>무한한 에너지</strong>, <strong>환경친화적</strong>(온실가스·오염물질 없음), <strong>운영비 절감</strong>(연료 불필요), <strong>에너지 전환 속도</strong>(발전 단가·터빈 가격 급락 → 미래엔 화석연료보다 쌀 수 있음)</li>
+<li>단점: <strong>간헐성</strong>(바람 없으면 불가, 한국은 여름 남동풍·겨울 북서풍으로 방향 변화), <strong>소음·시각적 영향(경관 훼손)</strong> → 주거지·도심 설치 어려움, <strong>설치 위치 제약</strong>(강풍 지속 지역), <strong>조류·해양생태계 영향</strong></li>
+<li>사례</li>
+<li><strong>덴마크 해상풍력 단지</strong>: <strong>국가 전력의 40% 이상을 풍력</strong>으로 충당, <strong>해상풍력 글로벌 선도</strong>. 기술: <strong>대형 터빈 + 스마트 관리 시스템 + ESS 통합</strong></li>
+<li><strong>미국 텍사스</strong>: <strong>미국 내 풍력발전량 1위</strong>, 연간 수백만 톤 탄소 저감. 기술: <strong>고효율 터빈 + 분산형 발전 + 스마트 그리드 연계</strong>(넓은 땅 → 소음 문제 덜함)</li>
+<li>미래 방향: <strong>대형화·고효율화(15MW급 초대형 터빈)</strong>, <strong>부유식 해상풍력</strong>(글로벌 채택 증가), <strong>ESS 통합</strong>(간헐성 해결), <strong>AI 예측 시스템</strong></li>
+<li>도전과제: <strong>간헐성 극복</strong>(ESS, 타 재생에너지), <strong>사회적 수용성</strong>(소음·안전), <strong>환경적 고려</strong>(조류·생태계), <strong>경제성 확보</strong>(초기 투자·유지보수비↓)</li>
+<li>요약: 무한·청정 재생에너지, <strong>부유식 해상풍력·스마트 기술</strong>로 효율 향상 기대, 장단점 고려한 지속가능 발전 필요</li>
+</ul>
+<h3 id="7-3">7-3 수소 에너지 기술</h3>
+<ul>
+<li>수소에너지 대표 = <strong>연료전지</strong>: 수소 + 산소 → 물 + 에너지. 단순 연소가 아니라 <strong>전극·멤브레인 등 특수 장치로 비교적 저온에서 안정적으로 발전</strong></li>
+<li>중요성: <strong>무탄소 연료</strong>(탄화수소는 CO2 발생, 수소는 산화해도 <strong>물만</strong> 생성), <strong>에너지 전환·저장의 유연성</strong>(압축·변환 저장, 운송)</li>
+<li><strong>수소 연료전지 반응: 2H2 + O2 → 2H2O + 에너지(전기)</strong></li>
+<li><strong>에너지 밀도</strong>: <strong>무게 대비 매우 높음</strong>, 그러나 <strong>부피 대비 낮음</strong> → 운송·저장 효율이 낮은 이유</li>
+<li>활용: 전력 생산(연료전지), 열에너지, <strong>차량(수소차)·산업 연료</strong>(석유화학)</li>
+<li><strong>수소 생산 방법(색깔별) — 시험 단골!</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>생산 방법</th>
+<th>CO2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>그레이 수소</strong></td>
+<td>화석연료 개질, <strong>SMR(Steam Methane Reforming, 수증기 메탄 개질)</strong> — 현재 대부분</td>
+<td><strong>배출함</strong></td>
+</tr>
+<tr>
+<td><strong>블루 수소</strong></td>
+<td>그레이 수소 + <strong>CCUS로 CO2 포집</strong></td>
+<td>포집(탄소중립적), 단가↑</td>
+</tr>
+<tr>
+<td><strong>그린 수소</strong></td>
+<td><strong>재생에너지(태양광·풍력) 전기로 물 전기분해</strong> (연료전지의 역반응)</td>
+<td><strong>배출 없음</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>SMR 반응: <strong>CH4 + H2O → CO + 3H2</strong>, 이어서 <strong>수성가스 전환 CO + H2O → CO2 + H2</strong> → <strong>총: CH4 + 2H2O → CO2 + 4H2</strong></li>
+<li>연구 동향: <strong>효율적 전기분해 기술</strong>, <strong>태양광-수소 결합 시스템</strong>(남는 태양광 전기를 수소로 저장했다가 사용)</li>
+<li><strong>수소 저장 기술</strong></li>
+<li><strong>압축 수소</strong>: 고압 탱크 <strong>700 bar 이상</strong> → 불안정, 탱크 비용↑</li>
+<li><strong>액화 수소</strong>: <strong>−253℃(약 20K)</strong>까지 냉각 → 에너지 많이 듦</li>
+<li><strong>화학적 저장</strong>: <strong>암모니아(NH3), 메탄올, LOHC(액상 유기 수소 운반체)</strong> 형태로 저장·운송 후 필요 시 수소 회수 → 압축·액화의 비효율 대안</li>
+<li>도전과제: <strong>저장 비용·에너지 손실</strong></li>
+<li>활용 분야</li>
+<li><strong>수소 전기차(FCEV, Fuel Cell Electric Vehicle)</strong>, <strong>수소 발전소</strong>, <strong>가정용 연료전지</strong></li>
+<li><strong>수소 연소</strong>: 산업용 고온 열원, 발전(<strong>메탄 가스관에 수소 혼소</strong> → 탄소 비율↓), <strong>철강 = 코크스 대신 수소(수소환원제철)</strong>, 시멘트</li>
+<li><strong>화학산업</strong>: <strong>암모니아(하버-보슈법)·메탄올</strong> 생산</li>
+<li>미래: <strong>항공·해운</strong> 등 대규모 운송</li>
+<li>장점: <strong>연소 부산물이 물뿐(무탄소)</strong>, <strong>에너지 저장 용이</strong>(대규모 저장·장거리 운송 가능), <strong>재생에너지 연계</strong>(그린 수소), <strong>다양한 응용</strong>(차량·산업·발전)</li>
+<li>단점: <strong>높은 생산 비용</strong>(그린 수소는 비싼 재생전기 + 비싼 전기분해 → 그래서 대부분 그레이·블루), <strong>저장·운송 어려움</strong>(안전·비용), <strong>인프라 부족</strong>(수소충전소, 가정 공급망 → 정부 구축 필요), <strong>안전성</strong>(<strong>폭발 범위 넓음</strong>, 폭발 에너지 큼)</li>
+<li>사례</li>
+<li><strong>일본 수소사회 구현 계획</strong>: 수소연료전지차 대량 보급, <strong>도쿄올림픽 수소 인프라</strong>, 블루·그린 수소 활용, <strong>스마트 수소 도시</strong></li>
+<li><strong>한국 수소경제 로드맵</strong>: <strong>세계 최초 수소연료전지 발전소 상업 운영</strong>, <strong>수소 트램·대형 수소차</strong> 개발, 재생에너지 기반 그린 수소 생산, <strong>수소충전 인프라 확대</strong></li>
+<li>요약: 수소 = <strong>탄소중립의 유망한 대안</strong>, <strong>생산·저장·활용 기술의 지속적 혁신 필요</strong>(비싸므로), 성공 사례로 확장 가능성 확인 → 정부 투자·지원 필요</li>
+</ul>
+<h2 id="8">8주차 — 지속 가능한 공학 기술</h2>
+<h3 id="8-1">8-1 지속 가능한 공학 기술의 개념</h3>
+<ul>
+<li><strong>지속가능한 공학기술</strong> = <strong>환경적·경제적·사회적</strong> 측면을 고려한 공학적 접근 (공학에선 <strong>경제성</strong>을 절대 무시할 수 없음 + 시스템 주변의 환경적 수용성·사회적 용인까지)</li>
+<li>정의: <strong>에너지·자원·환경</strong> 세 가지를 고려해 기술을 <strong>설계·운영·관리</strong>하는 공학적 접근법</li>
+<li>왜 중요? <strong>자원 고갈·환경오염 해결</strong>(화석연료는 탐사 기술로 계속 발견되지만, 원료 <strong>순도↓·채굴 난이도↑</strong>), <strong>미래 세대를 위한 지속가능 발전 기반</strong>("좋은 약은 입에 쓰다")</li>
+<li>중요성 3가지: <strong>탄소중립·환경보호 핵심 전략</strong>(1.5℃~2℃ 이하, 넘으면 비가역), <strong>경제적 비용 절감·자원 효율성 증대</strong>(같은 목표에 석탄 절반 → CO2 절반), <strong>사회적 수용성 확보·공정한 자원 분배</strong></li>
+<li><strong>핵심 요소 3가지: 환경 보호, 경제적 효율성, 사회적 형평성</strong></li>
+<li><strong>원칙 5가지</strong>: <strong>자원 효율성</strong>(최소 자원으로 최대 효과), <strong>순환경제</strong>(재활용·폐기물 최소화·<strong>재자원화</strong>), <strong>환경 복원</strong>(생태계 보존·복원), <strong>에너지 전환</strong>(재생에너지), <strong>사회적 책임</strong>(기술 개발의 <strong>공정성·윤리성</strong> — 아동 노동·과도한 초과근무 금지)</li>
+<li><strong>평가 기준</strong></li>
+<li><strong>환경적 기준</strong>: <strong>온실가스 배출 감소</strong>(일부는 0 요구, <strong>전 과정 배출 → LCA(전과정평가)</strong>), <strong>자원 재활용·폐기물 관리</strong>(매립지 부족, 소각 시 CO2·유해물질)</li>
+<li><strong>경제적 기준</strong>: 기술의 <strong>비용·효율성·경제적 지속가능성</strong> — 비싼 기술이 나쁜 게 아님(자원효율↑·오염↓ 이유 있음) → <strong>케이스 스터디</strong>로 환경까지 고려해 최선 선택</li>
+<li><strong>사회적 기준</strong>: <strong>지역사회와의 조화, 기술의 사회적 수용성</strong></li>
+<li><strong>지표</strong>: <strong>생태 발자국</strong>(원료→수송→최종제품 전 과정 추적), <strong>에너지 효율</strong>, <strong>탄소 배출량</strong></li>
+<li>주요 분야: <strong>재생에너지</strong>(태양광·풍력·지열·수력), <strong>스마트 교통</strong>(전기차·하이브리드·대중교통), <strong>그린빌딩</strong>(단열·AI 공조), <strong>순환자원관리</strong>(폐기물에서 자원 회수, <strong>폐플라스틱 → 수소·오일·탄화수소</strong>)</li>
+<li>사례</li>
+<li><strong>덴마크 풍력</strong>: <strong>국가 전력 50% 이상 풍력</strong>(※ 7-2에선 "40% 이상"이라고 함), <strong>ESS 연계로 간헐성 해결</strong> → 온실가스↓, <strong>경제적 자립·에너지 수입 의존도 감소</strong></li>
+<li><strong>싱가포르 스마트 도시 프로젝트</strong>: EMS + 스마트 교통 → <strong>도시 에너지 소비 20% 절감</strong>, 대기오염·교통혼잡 완화</li>
+<li>도전과제: <strong>기술적</strong>(기존 시스템 통합, 첨단기술 초기비용), <strong>사회적</strong>(지역사회 갈등, 기술 수용성), <strong>환경적</strong>(자원 고갈, <strong>생태계 복원</strong> — 벌목·간척·온난화로 인한 파괴)</li>
+<li>미래 전망: <strong>기술 융합(AI·IoT·빅데이터)</strong>, <strong>재생자원 확대(순환경제)</strong>, <strong>정책·제도(국제협력 — 한 나라만 줄여선 소용없음, 기술 수출로 윈윈)</strong>, <strong>사회적 영향(지속가능 지표 개선, 글로벌 영향력)</strong></li>
+<li>요약: 환경·경제·사회의 <strong>균형</strong>(환경·사회는 최소 마이너스는 아니어야), 재생에너지·스마트 도시 등 <strong>모든 공학 분야에 적용 가능</strong>(석유화학·반도체·2차전지·고분자·국방까지), <strong>기술 개발 + 정책 지원</strong>(인센티브·벌금) 필요</li>
+</ul>
+<h3 id="8-2">8-2 재생 가능한 자원과 공학 기술</h3>
+<ul>
+<li><strong>재생 가능한 자원</strong> = <strong>자연적으로 재생되거나 지속가능한 방식으로 이용 가능한 자원</strong> — 태양광, 풍력, 지열, 바이오매스, 수력</li>
+<li>중요성: <strong>자원 고갈 해결</strong>(화석연료 대체), <strong>탄소중립 실현</strong>, <strong>지속가능 에너지·자원 활용의 기반</strong>(현재 전력망은 <strong>먼 곳의 대형 화력·원자력 중심</strong> → 재생에너지 확대 시 <strong>전력망 대개편 필요</strong>)</li>
+<li>자원별 특성</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>자원</th>
+<th>특성</th>
+<th>한계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>태양광</strong></td>
+<td>무한·청정·무공해</td>
+<td><strong>일사량에 따라 발전량 변동</strong>, 밤 불가</td>
+</tr>
+<tr>
+<td><strong>풍력</strong></td>
+<td>바람 운동에너지 → 전기</td>
+<td><strong>지리적·기후적 조건</strong>(풍향 변화)에 따라 성능 차이 큼</td>
+</tr>
+<tr>
+<td><strong>지열</strong></td>
+<td>지구 내부 열, <strong>항상 얻을 수 있는 안정적·지속가능</strong> 에너지</td>
+<td>효율 낮음, 굴착 비용</td>
+</tr>
+<tr>
+<td><strong>바이오매스</strong></td>
+<td>식물·유기물 등 생물자원(곡물 대신 <strong>옥수수대 등 농업 폐기물</strong>로)</td>
+<td>느린 반응, 가공 필요 → 관리 필요</td>
+</tr>
+<tr>
+<td><strong>수력</strong></td>
+<td>댐</td>
+<td><strong>대규모 시 생태계 영향</strong>, 댐 붕괴 위험 → 영향평가 필수. 잉여전기 저장(양수)에도 활용</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>공학 기술</li>
+<li>태양광: <strong>고효율 셀(PERC·탠덤·페로브스카이트)</strong> → 사례: <strong>독일 에너지 자립 주거단지, 인도 저비용 대량 발전</strong> → 온실가스↓, 지역경제 활성화</li>
+<li>풍력: <strong>대형화·고효율 터빈, 부유식 해상풍력</strong>(심해 설치로 소음·<strong>NIMBY</strong> 극복), <strong>스마트 터빈(AI 바람 예측)</strong> → 사례: <strong>덴마크(해상풍력+ESS), 미국 텍사스(국가 최대 풍력 공급)</strong> → 에너지 자립, 탄소↓</li>
+<li>지열: <strong>심부 지열 발전</strong>(깊이 파서 물 끓여 터빈), <strong>저온 지열 난방</strong>(얕게 파서 난방용) → 사례: <strong>아이슬란드 지열 발전소·지역난방</strong></li>
+<li>바이오매스: <strong>바이오연료(바이오에탄올·바이오디젤), 바이오가스(메탄)</strong> → 교통 연료. <strong>한국도 경유에 바이오디젤 일정 비율 혼합 의무화</strong>(예: 디젤 80 + 바이오디젤 20 개념) → 화석연료 대체</li>
+<li>수력: <strong>소규모 수력</strong>(생태계 영향 최소화, 산골마을 지역 전력 공급), <strong>양수발전</strong>(새벽 <strong>잉여전기</strong>를 싸게(예: $4) 사서 물을 끌어올렸다가 비쌀 때(예: $5) 발전) → 사례: <strong>노르웨이 소규모 수력(지역 전력망)</strong>, <strong>중국 싼샤댐(세계 최대 수력발전소)</strong> → 대규모·안정적 공급</li>
+<li>최신 연구: <strong>디지털 트윈</strong>(재생에너지 시스템 가상 시뮬레이션·최적화), <strong>AI·빅데이터</strong>(수급 예측, 잉여전기·실시간 전력 관리), <strong>탄소중립 융합(재생에너지 + CCUS)</strong> → 미래: <strong>효율성과 경제성 동시 강화</strong></li>
+<li>도전과제: <strong>기술적</strong>(간헐성, 저장·변환 기술), <strong>환경적</strong>(생태계 영향 → 환경영향평가), <strong>경제적</strong>(초기 투자비, 낮은 수익률), <strong>정책적</strong>(글로벌 협력·정부 지원 확대)</li>
+<li>요약: 재생 가능 자원 = <strong>지속가능한 공학기술의 핵심 자원</strong>, 다양한 공학기술로 활용 가능, 최신 연구는 <strong>효율성·경제성 향상</strong> 중심</li>
+</ul>
+<h3 id="8-3">8-3 지속 가능한 공학 기술의 적용 사례</h3>
+<ul>
+<li>목표: 실제 사례로 <strong>성공 요인과 도전과제 이해</strong>, 개선 방안·한국 적용 가능성 탐구</li>
+<li><strong>성공 사례 1 — 싱가포르 스마트 네이션 프로젝트</strong></li>
+<li>내용: <strong>재생에너지 기반 스마트 전력망</strong> 도입 + <strong>스마트 빌딩·EMS</strong> 구축</li>
+<li>성과: <strong>도시 에너지 소비 20% 감소, 탄소 배출 15% 감소</strong></li>
+<li>성공 요인: <strong>정부의 강력한 정책 지원</strong>(도시국가), <strong>기술 인프라(사회간접자본) + 데이터 활용</strong>(실시간 전력·기온·이용자·재생에너지 가격 데이터로 최적 운영)</li>
+<li>한국 적용: 서울은 재생에너지 전력망은 어려우니 스마트 빌딩·EMS만, 또는 <strong>제주</strong>(바람·일조량)에서 전체 사업</li>
+<li><strong>성공 사례 2 — 스웨덴 폐기물 에너지화(Waste-to-Energy)</strong></li>
+<li>재활용(병을 다시 병으로) vs <strong>재자원화</strong>(분해·고온고압 처리해 다른 자원으로) → 스웨덴은 재자원화 선택</li>
+<li>내용: <strong>폐기물 소각으로 에너지 생산</strong>, <strong>폐열을 지역난방</strong>에 활용, <strong>도시 폐기물의 99%</strong> 소각해 난방수 공급</li>
+<li>성과: <strong>온실가스 배출 대폭 감소</strong> — 왜? 어차피 매립·소각으로 CO2가 나오고 난방용 천연가스도 CO2를 내니, 폐기물로 난방해 <strong>천연가스 사용을 대체</strong> + CO2 포집·오염물질 처리 기술 발달</li>
+<li>성공 요인: <strong>순환경제 기반 정책</strong>, <strong>시민 참여·의식 제고</strong>(소각장은 대표적 <strong>NIMBY</strong> 시설 → 보조금·난방비 인하 등으로 설득)</li>
+<li><strong>성공 사례 3 — 일본 도쿄 수소에너지 기반 교통 시스템</strong></li>
+<li>내용: <strong>수소연료전지 버스·충전소</strong> 구축, <strong>도쿄올림픽 기간 지속가능한 교통</strong> 제공</li>
+<li>성과: <strong>수송 부문 탄소 배출 감소</strong>, <strong>대중(전 세계)의 수소 에너지 인식 제고</strong></li>
+<li>성공 요인: <strong>공공·민간 협력</strong>(충전소 = 민간 기업 → 정부 보조), <strong>기술 상용화·경제성 확보</strong>(일본의 수소차 기술 기반)</li>
+<li><strong>실패 사례 — 미국 해상풍력 단지 구축 계획</strong></li>
+<li><strong>주민 반발·환경적 우려로 중단</strong></li>
+<li>실패 원인: <strong>지역 주민과의 갈등</strong>(필요성 설득 부족), <strong>생태계 영향 고려 부족</strong>(소음·사전조사 부족), <strong>정책적 지원 미흡</strong>(행정명령·조례·보조금 부재)</li>
+<li>교훈: <strong>사회적 수용성과 환경평가의 중요성</strong></li>
+<li>종합 분석</li>
+<li><strong>성공 요인</strong>: ① <strong>정부 정책 지원·규제 완화</strong> ② <strong>기술 인프라·데이터 기반 관리</strong> ③ <strong>시민의 적극적 참여·인식 제고</strong></li>
+<li><strong>실패 요인</strong>: ① <strong>초기 비용 부담·경제성 부족</strong>(가장 큼) ② <strong>사회적 수용성 부족·지역 갈등</strong> ③ <strong>환경영향평가 부족</strong></li>
+<li>도전과제: <strong>기술적</strong>(상용화·효율성), <strong>사회적</strong>(수용성·시민참여 → 공청회·홍보), <strong>경제적</strong>(초기 투자 절감·경제성), <strong>환경적</strong>(사전 환경영향평가, 생태계 보전 — 재생에너지도 환경 악영향 지적 있음)</li>
+<li>미래 전망: <strong>AI·IoT·빅데이터 결합</strong>, <strong>재생에너지 통합</strong>(끊김 없는 양질 전기), <strong>순환경제 확대</strong>(재활용·재자원화), <strong>글로벌 협력</strong></li>
+<li>발전 방향: <strong>스마트 기술 확대</strong>, <strong>지역 맞춤형 기술</strong>(지역 특성 반영, 예: 북극에 태양광은 비효율), <strong>사회적 통합</strong>, <strong>정책적 지원</strong></li>
+<li>요약: 성공·실패 사례로 요인 이해, <strong>기술 융합 + 글로벌 협력 = 지속가능 발전의 핵심</strong>, <strong>기술 상용화와 사회적 수용성 강화</strong>가 중요</li>
+</ul></main></body></html>

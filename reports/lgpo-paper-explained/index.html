@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>LGPO 논문 해설</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column, same schematic language as the AWR, PPO and GRPO pages: teal = data (rollouts), rose = advantage / reward side, indigo = policy, orange = what LGPO adds or removes / my inference. The paper argues one thing (the ratio's job is the trust region, not the correction), so the page walks the argument in order and hangs the two interactive pieces on the two claims that need a feel: the gradient switch and Theorem 4.1. */
+  :root {
+    --bg: #f3f5f6;
+    --surface: #ffffff;
+    --ink: #17202b;
+    --muted: #5b6672;
+    --line: #c9d1d8;
+    --env: #0f766e;
+    --env-soft: #e3f2f0;
+    --value: #be185d;
+    --value-soft: #fbe7f0;
+    --policy: #3b4cca;
+    --policy-soft: #e8eafb;
+    --update: #c2410c;
+    --update-soft: #fcebe1;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --display: "IBM Plex Sans KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+      --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+      --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+      --good: #4ade80; --bad: #f87171; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+    --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+    --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+    --good: #4ade80; --bad: #f87171; color-scheme: dark;
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.75; }
+  .wrap { max-width: 920px; margin: 0 auto; padding-block: 40px 72px;
+          padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+          display: grid; gap: 52px; }
+  header { display: grid; gap: 14px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(30px, 5.5vw, 42px); line-height: 1.2; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1.35; margin: 0; text-wrap: balance; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  h2 .sec { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--policy); }
+  h3 { font-family: var(--display); font-weight: 600; font-size: 17px; line-height: 1.4; margin: 0; }
+  p { margin: 0; max-width: 70ch; }
+  .lede { font-size: 17px; }
+  .muted { color: var(--muted); }
+  .m { font-family: var(--mono); font-size: .9em; }
+  a { color: var(--policy); }
+  a:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--policy); outline-offset: 2px; border-radius: 3px; }
+  section { display: grid; gap: 16px; scroll-margin-top: 16px; }
+
+  nav.toc { display: flex; flex-wrap: wrap; gap: 6px 4px; align-items: center; font-size: 14px; }
+  nav.toc a { text-decoration: none; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; white-space: nowrap; }
+  nav.toc a:hover { border-color: var(--policy); color: var(--policy); }
+  nav.toc .arw { color: var(--muted); font-size: 12px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+  .sw.env { border-color: var(--env); background: var(--env-soft); }
+  .sw.value { border-color: var(--value); background: var(--value-soft); }
+  .sw.policy { border-color: var(--policy); background: var(--policy-soft); }
+  .sw.update { border-color: var(--update); background: var(--update-soft); }
+
+  .trio { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .trio > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .trio .k { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .trio .k.p { color: var(--bad); } .trio .k.i { color: var(--policy); } .trio .k.r { color: var(--good); }
+  .trio ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 15px; }
+
+  .abs { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; }
+  .abs ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+  .abs .en { font-family: var(--mono); font-size: 12.5px; color: var(--muted); display: block; line-height: 1.55; }
+
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .scroll { overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 760px; height: auto; color: var(--ink); font-family: var(--body); }
+  figure svg.chart { min-width: 0; max-width: 560px; }
+  .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .pair svg.chart { max-width: 100%; }
+  /* inline math (MathJax svg) inside a figure must not inherit the figure-wide svg sizing */
+  figure mjx-container svg { display: inline-block; width: unset; min-width: 0; max-width: none; height: unset; }
+  svg .pl-dead { stroke: var(--bad); stroke-width: 3; fill: none; }
+  svg .pl-band2 { fill: var(--policy-soft); }
+  svg .pl-block { fill: var(--update-soft); }
+  figcaption { font-size: 14.5px; color: var(--muted); max-width: 74ch; }
+  svg text { fill: currentColor; }
+  svg .t { font-size: 13px; font-weight: 700; }
+  svg .s { font-size: 11.5px; fill: var(--muted); }
+  svg .h { font-family: var(--display); font-size: 15px; font-weight: 700; }
+  svg .mono { font-family: var(--mono); font-size: 12px; }
+  svg .lbl { font-size: 12px; fill: var(--muted); }
+  svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  svg .env { fill: var(--env-soft); stroke: var(--env); stroke-width: 2; }
+  svg .val { fill: var(--value-soft); stroke: var(--value); stroke-width: 2; }
+  svg .policy { fill: var(--policy-soft); stroke: var(--policy); stroke-width: 2; }
+  svg .upd { fill: var(--update-soft); stroke: var(--update); stroke-width: 2; }
+  svg .ghost { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  svg .ar { stroke: currentColor; stroke-width: 1.6; fill: none; }
+  svg .pl-ax { stroke: var(--line); stroke-width: 1.5; fill: none; }
+  svg .pl-grid { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; fill: none; }
+  svg .pl-curve { stroke: var(--policy); stroke-width: 3; fill: none; stroke-linejoin: round; }
+  svg .pl-dot { fill: var(--update); stroke: var(--surface); stroke-width: 2; }
+
+  .tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--display); font-weight: 600; font-size: 13.5px; color: var(--muted); background: var(--bg); white-space: nowrap; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+  tbody th { font-weight: 500; white-space: nowrap; }
+  .sym { min-width: 720px; }
+  .sym td:first-child { white-space: nowrap; }
+  .wide { min-width: 640px; }
+  .num td, .num th { font-variant-numeric: tabular-nums; }
+  .num td { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  .num .best { color: var(--policy); font-weight: 600; }
+
+  .eqs { display: grid; gap: 14px; }
+  .eqc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 4px 12px; scroll-margin-top: 16px; }
+  .no { font-family: var(--mono); font-size: 13px; color: var(--policy); font-weight: 500; padding-top: 10px; }
+  .eqc .body { display: grid; gap: 8px; min-width: 0; }
+  .tex { overflow-x: auto; overflow-y: hidden; max-width: 100%; padding: 2px 0; }
+  .tag { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--muted); margin-right: 6px; white-space: nowrap; }
+  .tag.r { color: var(--policy); border-color: var(--policy); }
+  .tag.w { color: var(--env); border-color: var(--env); }
+  .tag.e { color: var(--update); border-color: var(--update); }
+  .eqc p { font-size: 15.5px; }
+  .ex { background: var(--bg); border-radius: 8px; padding: 10px 12px; font-size: 15px; display: grid; gap: 6px; }
+  .ex p { font-size: 15px; }
+
+  .call { border-left: 3px solid var(--policy); background: var(--policy-soft); border-radius: 0 10px 10px 0; padding: 12px 16px; display: grid; gap: 8px; }
+  .call.val { border-color: var(--value); background: var(--value-soft); }
+  .call.inf { border-color: var(--update); background: var(--update-soft); }
+  .call h3 { font-size: 16px; }
+  .call ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+  .mini { border-collapse: collapse; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; width: auto; background: var(--surface); border-radius: 6px; }
+  .mini td, .mini th { padding: 4px 12px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  .mini th { font-family: var(--body); font-weight: 500; color: var(--muted); }
+  .mini .hit { color: var(--value); font-weight: 600; }
+  .mini .ok { color: var(--good); font-weight: 600; }
+  .mini-wrap { overflow-x: auto; }
+
+  .ctl { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 18px; }
+  .ctl > div { display: grid; gap: 4px; min-width: 0; }
+  .ctl label { font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+  .ctl output { font-family: var(--mono); color: var(--ink); font-size: 13.5px; }
+  .ctl input[type=range] { width: 100%; accent-color: var(--policy); }
+  .ctl select { font-family: var(--mono); font-size: 14px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+  .read { background: var(--bg); border-radius: 8px; padding: 10px 14px; font-size: 15px; display: grid; gap: 4px; }
+  .read b.go { color: var(--good); } .read b.stop { color: var(--bad); }
+
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0; }
+  .nums div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 2px; }
+  .nums dt { font-size: 13px; color: var(--muted); }
+  .nums dd { margin: 0; font-family: var(--mono); font-size: 15.5px; font-variant-numeric: tabular-nums; }
+
+  pre.alg { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.7; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  pre.alg .c { color: var(--muted); }
+  pre.alg .n { color: var(--update); font-weight: 500; }
+
+  details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; }
+  details + details { margin-top: 8px; }
+  summary { cursor: pointer; font-weight: 500; }
+  details[open] summary { margin-bottom: 8px; color: var(--policy); }
+
+  footer { font-size: 13.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+  @media (max-width: 560px) {
+    .eqc { grid-template-columns: 1fr; }
+    .no { padding-top: 0; }
+  }
+
+  mjx-container { color: var(--ink); }
+  mjx-container[display="true"] { margin: 4px 0 !important; text-align: left !important; }
+  mjx-container[jax="SVG"][display="true"] { display: block; overflow-x: auto; overflow-y: hidden; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">RL Part2 준비 · Zhang, Kim, Kim, Cho · KRAFTON, UW–Madison · arXiv 2611.15404v1 (2026-11-11)</div>
+  <h1>LGPO 논문 해설</h1>
+  <p class="lede">논문 제목은 <b>Is the Importance Ratio Necessary for Stable Reinforcement Learning in LLMs?</b>예요. PPO·GRPO가 쓰는 <b>확률비 r = π_θ/π_old</b>가 하는 일을 둘로 쪼개서 "<b>정말로 필요한 건 신뢰구역(trust region)이고, 보정(correction)은 없어도 된다</b>"를 보이고, 옛 정책의 확률을 계산하지 않는 대안 <b>LGPO</b>를 내놓아요. 우리가 PPO·GRPO 해설에서 계속 물었던 "clip은 왜 있고, 업데이트가 한 번뿐이면 clip은 뭘 하나?"에 정면으로 답하는 논문이에요. 게재 정보: arXiv 페이지의 comments 칸에 <b>"Accepted at NeurIPS 2026"</b>이라고 적혀 있어요.</p>
+  <nav class="toc" aria-label="읽는 순서">
+    <a href="#s-sum">한 장 요약</a><span class="arw">→</span>
+    <a href="#s-sym">기호 사전</a><span class="arw">→</span>
+    <a href="#s-bg">§2 배경: 우리가 아는 것</a><span class="arw">→</span>
+    <a href="#s-31">§3.1 r의 두 역할</a><span class="arw">→</span>
+    <a href="#s-32">§3.2 on-policy의 함정</a><span class="arw">→</span>
+    <a href="#s-4">§4 LGPO</a><span class="arw">→</span>
+    <a href="#s-5">§5 실험</a><span class="arw">→</span>
+    <a href="#s-lim">한계·제 해석</a><span class="arw">→</span>
+    <a href="#s-quiz">점검 질문</a>
+  </nav>
+  <div class="legend">
+    <span><i class="sw env"></i>데이터 (rollout)</span>
+    <span><i class="sw value"></i>어드밴티지 쪽</span>
+    <span><i class="sw policy"></i>정책 π</span>
+    <span><i class="sw update"></i>LGPO가 더하거나 뺀 곳 · 논문 밖 추론</span>
+  </div>
+</header>
+
+<!-- ============ SUMMARY ============ -->
+<section id="s-sum">
+  <h2>한 장 요약 <span class="sec">Abstract · §1 · §7</span></h2>
+  <div class="trio">
+    <div>
+      <span class="k p">문제</span>
+      <ul>
+        <li>GRPO 같은 방법은 <b>옛 정책 π_old와 현재 정책 π_θ의 확률을 둘 다 계산</b>해서 확률비를 만들어요. 긴 답을 많이 쓰는 LLM RL에서는 이 계산이 가볍지 않아요. 예: 32B 모델로 길이 32K 토큰 시퀀스 128개의 확률을 구하는 데 약 4.06×10¹⁷ FLOPs(논문 수치).</li>
+        <li>그런데 확률비가 정말 필요한가? 업데이트를 <b>한 번만</b> 하면(fully on-policy) 확률비는 항상 1이라 clip이 <b>아무것도 못 해요.</b></li>
+      </ul>
+    </div>
+    <div>
+      <span class="k i">아이디어</span>
+      <ul>
+        <li>확률비의 두 역할을 분리해요: ① <b>보정(correction)</b> = 기울기에 곱해지는 r, ② <b>신뢰구역(clipping)</b> = 기울기를 끄는 스위치.</li>
+        <li>실험으로 보니 ①은 빼도 되고 ②가 핵심이에요.</li>
+        <li><b>LGPO:</b> r과 clip을 버리고, 대신 <b>현재 정책 하에서 샘플의 평균 로그 가능도 ℓ̄가 너무 높으면</b> 그 샘플의 기울기를 끄는 게이트를 써요. 옛 정책 확률이 필요 없어요.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k r">결과</span>
+      <ul>
+        <li>GRPO가 안정적인 설정에서 <b>비슷한 안정성과 성능</b>, 학습 시간은 약 <b>18% 빠르게</b>(3.37시간 → 2.85시간).</li>
+        <li><b>fully on-policy에서 GRPO는 무너지는데 LGPO는 안정적</b>이었어요.</li>
+        <li>KL 벌점(계수 0.001)을 GRPO에 더해도 on-policy 붕괴를 못 막았어요.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="abs">
+    <h3>Abstract 한 문장씩</h3>
+    <ol>
+      <li><b>배경.</b> RL은 LLM 사후학습의 핵심인데, GRPO 같은 방법은 <b>확률비를 만드느라 옛/현재 정책의 가능도를 둘 다 계산하는 오버헤드</b>가 있어요.
+        <span class="en">popular RL methods like GRPO incur non-negligible overhead by computing both old-policy and current-policy likelihoods to form importance sampling ratios</span></li>
+      <li><b>제안.</b> LGPO는 가능도 기반 게이팅으로 <b>부드러운 신뢰구역</b>을 만들어서 <b>옛 정책 가능도 계산을 없애요.</b>
+        <span class="en">LGPO, which enforces a soft trust region constraint via likelihood-based gating, eliminating the need to compute old-policy likelihoods</span></li>
+      <li><b>두 가지 실험 관찰.</b> 중요도 샘플링 <b>보정항</b>을 빼도 안정성은 해치지 않지만, <b>신뢰구역 장치</b>를 빼면 붕괴할 수 있어요.
+        <span class="en">removing the importance sampling correction term does not harm training stability, whereas removing the trust region mechanism can lead to collapse</span></li>
+      <li><b>구조적 실패.</b> fully on-policy 학습에서는 확률비가 1이라 <b>ratio 기반 신뢰구역이 절대 작동하지 않아요.</b>
+        <span class="en">ratio-based clipping can fail in fully on-policy training: the importance ratio stays at 1, so the ratio-based trust region constraint never activates</span></li>
+      <li><b>결과.</b> 표준 설정에서는 비슷한 안정성과 최고 성능에 학습 시간 약 18% 절감, fully on-policy에서는 GRPO가 실패하는 곳에서 안정적이에요.
+        <span class="en">comparable training stability and peak performance while reducing training time by ∼18% ... In fully on-policy training, where GRPO fails, LGPO remains stable</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ SYMBOLS ============ -->
+<section id="s-sym">
+  <h2>기호 사전 <span class="sec">식 읽기 전에</span></h2>
+  <p>PPO·GRPO 해설과 같은 글자를 쓰되 <b>LLM 표기(프롬프트 x, 응답 y)</b>예요. 노란 줄(★)이 이 논문에서 새로 나오거나 헷갈리기 쉬운 곳이에요.</p>
+  <div class="tbl">
+    <table class="sym">
+      <thead><tr><th>기호</th><th>이름</th><th>뜻</th><th>이전 페이지의 말로</th></tr></thead>
+      <tbody>
+        <tr><td>\(x,\ y,\ y_t\)</td><td>프롬프트, 응답, t번째 토큰</td><td>질문 하나, 그에 대한 답 한 편, 그 답의 토큰 하나</td><td>GRPO 해설의 q, o, o_t</td></tr>
+        <tr><td>\(A_t\)</td><td>어드밴티지</td><td>토큰 t의 어드밴티지. 이 논문 실험은 GRPO처럼 <b>그룹 상대 정규화</b>: \(A_i=(R_i-\mu)/\sigma\)</td><td>Â (그룹 평균 기준)</td></tr>
+        <tr><td>\(r_t(\theta)\)</td><td>중요도 비 (확률비)</td><td>\(\pi_\theta(y_t|x,y_{\lt t})/\pi_{\theta_{\text{old}}}(y_t|x,y_{\lt t})\)</td><td>PPO 해설의 r</td></tr>
+        <tr><td>\(\epsilon\)</td><td>엡실론</td><td>clip 폭</td><td>PPO·GRPO와 동일</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(\mathbb 1_{\text{clip}}\)</td><td>clip 지시함수</td><td>기울기를 <b>켜는(1) / 끄는(0) 스위치</b>. r이 허용 범위 안이면 1</td><td>PPO 해설의 "기울기 0이 되는 구간"</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(N_{\text{updates}}\)</td><td>롤아웃당 업데이트 횟수</td><td>한 번 뽑은 샘플로 몇 번 θ를 갱신하나. <b>1이면 fully on-policy</b></td><td>PPO의 K epoch, GRPO의 μ</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(\bar\ell_\theta(x,y)\)</td><td>평균 로그 가능도</td><td>응답 하나의 토큰별 \(\log\pi_\theta\)의 <b>평균</b>. 높을수록(0에 가까울수록) 모델이 그 응답을 매우 확신한다는 뜻</td><td>PPO·GRPO에는 없던 양</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(\tau\)</td><td>타우</td><td>게이트 임계값. 논문은 <b>−0.15</b>를 사용 (확률로는 \(e^{-0.15}\approx0.86\))</td><td>없음</td></tr>
+        <tr style="background:var(--update-soft)"><td>★ \(c_\theta(x,y)\)</td><td>게이트 마스크</td><td>\(\mathbb 1(\bar\ell_\theta\le\tau)\). 1이면 학습에 쓰고, 0이면 그 샘플의 기울기를 끔 (stop-gradient)</td><td>"기울기 스위치"의 새 버전</td></tr>
+        <tr><td>\(\delta\)</td><td>델타</td><td>TRPO 목적함수에서는 KL 한도, §4의 정리에서는 <b>확률 변화량</b>. 문맥에 따라 달라요</td><td>PPO 해설의 δ와 같은 주의사항</td></tr>
+        <tr><td>\(G\)</td><td>그룹 크기</td><td>질문당 응답 개수. 이 논문 실험은 <b>8</b></td><td>GRPO 해설의 G (거기선 64)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ BACKGROUND ============ -->
+<section id="s-bg">
+  <h2>§2 배경: 우리가 이미 아는 것 <span class="sec">PPO · GRPO · TRPO 복습</span></h2>
+  <p>이 논문의 배경 절은 우리가 앞서 본 내용의 요약이에요. 이 논문이 쓰는 표현만 짚을게요.</p>
+  <div class="eqs">
+    <div class="eqc" id="e1">
+      <div class="no">(1)</div>
+      <div class="body">
+        <div class="tex">\[\mathbb E_{x\sim\mathcal D,\ y\sim\pi_{\theta_{\text{old}}}(\cdot|x)}\Big[\sum_{t=1}^{T}\min\big(r_t(\theta)A_t,\ \mathrm{clip}(r_t(\theta),1-\epsilon,1+\epsilon)A_t\big)\Big]\]</div>
+        <p><span class="tag r">읽기</span>PPO의 목적함수(PPO 해설 식 7)를 LLM 표기로 쓴 거예요. 논문은 이 clip이 <b>두 가지 목적</b>을 겸한다고 정리해요. ① 옛 정책에서 멀어지는 업데이트를 막는 <b>부드러운 신뢰구역</b>, ② 확률비가 큰 샘플을 안 써서 기울기의 <b>분산을 줄이는 것</b>.</p>
+      </div>
+    </div>
+  </div>
+  <ul class="plain">
+    <li><b>REINFORCE:</b> "fully on-policy"를 <b>"데이터가 항상 지금 학습 중인 정책에서 나온 경우"</b>로 정의해요. 이때 gradient는 \(\sum_t A_{i,t}\nabla\log\pi_\theta\)이고 확률비가 필요 없어요.</li>
+    <li><b>TRPO:</b> 같은 데이터로 여러 번 업데이트하려고 옛 정책과의 KL을 한도 \(\delta\) 이하로 묶는 <b>하드 제약</b>을 써요(PPO 해설과 같은 내용이에요).</li>
+    <li><b>GRPO:</b> V 모델 없이 그룹 평균·표준편차로 어드밴티지를 만들고, PPO의 식 (1)을 그대로 최적화해요. 이 논문은 <b>참조 모델 KL 벌점을 쓰지 않아요</b>(복잡한 추론 학습은 초기 모델에서 크게 벗어나야 해서라고 설명하고, KL 벌점을 넣은 변형은 §5.1에서 비교용으로만 써요).</li>
+  </ul>
+  <div class="call">
+    <h3>논문이 던지는 질문</h3>
+    <p>실제 LLM RL에서는 롤아웃당 업데이트 횟수가 작아요(예: 4번). 그렇다면 비싼 <b>확률비를 없애고도 안정적으로</b> 학습할 수 있을까? 이게 §3부터 답하는 질문이에요.</p>
+  </div>
+</section>
+
+<!-- ============ §3.1 ============ -->
+<section id="s-31">
+  <h2>§3.1 확률비의 두 역할을 쪼개 보기 <span class="sec">식 (2) · Appendix A</span></h2>
+  <div class="eqs">
+    <div class="eqc" id="e2">
+      <div class="no">(2)</div>
+      <div class="body">
+        <div class="tex">\[\nabla_\theta L_t(\theta)=\underbrace{\mathbb 1_{\text{clip}}}_{\text{clipping}}\cdot A_t\cdot\underbrace{r_t(\theta)}_{\text{correction}}\cdot\nabla_\theta\log\pi_\theta(y_t|x,y_{\lt t})\]</div>
+        <div class="tex">\[\mathbb 1_{\text{clip}}=\mathbb 1\big[(A_t\gt0\wedge r_t\le1+\epsilon)\ \vee\ (A_t\lt0\wedge r_t\ge1-\epsilon)\big]\]</div>
+        <p><span class="tag r">읽기</span>PPO·GRPO 목적함수를 토큰 하나에 대해 미분하면 이렇게 <b>네 조각의 곱</b>이 나와요(Appendix A에서 min의 두 경우를 나눠서 유도해요). 앞서 우리가 "정책을 민다"고 부르던 그 기울기예요.</p>
+        <div class="tbl"><table class="wide">
+          <thead><tr><th>조각</th><th>역할</th><th>우리 말로</th></tr></thead>
+          <tbody>
+            <tr><td>\(\nabla\log\pi_\theta\)</td><td>방향</td><td>"이 토큰의 확률을 올리는 방향"</td></tr>
+            <tr><td>\(A_t\)</td><td>세기와 부호</td><td>좋았으면 +, 나빴으면 −</td></tr>
+            <tr><td>\(r_t(\theta)\)</td><td><b>보정(correction)</b></td><td>옛 정책으로 뽑은 샘플을 현재 정책 기준으로 고치는 가중치</td></tr>
+            <tr><td>\(\mathbb 1_{\text{clip}}\)</td><td><b>스위치 (신뢰구역)</b></td><td>"이미 충분히 멀리 갔으면 0으로 끄기"</td></tr>
+          </tbody>
+        </table></div>
+        <p><span class="tag w">연결</span>PPO 해설에서 본 "구간 밖에서 기울기가 0이 된다"는 규칙이 바로 \(\mathbb 1_{\text{clip}}\)이고, 우리가 장난감 예제로 계산한 기울기 \(\frac{A}{\pi_{\text{old}}}\sigma'(\theta)\)가 바로 \(A\cdot r\cdot\nabla\log\pi\)(r = 1일 때 \(A\nabla\log\pi\))예요(제 연결이에요).</p>
+        <p><span class="tag e">주의</span>논문은 보정항 r이 샘플을 <b>불편(unbiased) 추정</b>으로 만들어 주기 때문에 빼면 gradient에 편향이 생긴다는 점을 인정해요(Appendix B). 그래서 주장이 통계적인 게 아니라 <b>"실험적으로 안정성에 문제 없다"</b>라고 한정해요. 클립된 목적함수도 이미 편향되어 있다는 점을 근거로 들어요.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>실험: 하나씩 빼 보기 (§3.1, Figure 1)</h3>
+  <dl class="nums">
+    <div><dt>모델</dt><dd>Qwen2.5-3B-Instruct</dd></div>
+    <div><dt>과제</dt><dd>Countdown</dd></div>
+    <div><dt>기준 알고리즘</dt><dd>GRPO</dd></div>
+    <div><dt>\(N_{\text{updates}}\)</dt><dd>2</dd></div>
+    <div><dt>학습 길이</dt><dd>300 step</dd></div>
+  </dl>
+  <p><b>Countdown</b>은 숫자 몇 개를 사칙연산으로 조합해서 목표 숫자를 만드는, 정답을 자동으로 확인할 수 있는 과제예요.</p>
+  <div class="tbl">
+    <table class="wide">
+      <thead><tr><th>제거한 것</th><th>이름</th><th>결과 (논문 설명)</th></tr></thead>
+      <tbody>
+        <tr><td>보정 r (기울기 크기에서 r을 1로)</td><td>w/o correction</td><td>안정성에 <b>거의 영향 없음</b>, 스케일링이 아주 조금 나빠짐</td></tr>
+        <tr><td>clip 스위치</td><td>w/o clipping</td><td><b>크게 불안정</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="plain">
+    <li><b>DAPO, GSPO</b>(GRPO의 변형들)에서도 같은 결과: 보정만 빼는 건 해가 안 돼요(Appendix E.1).</li>
+    <li><b>Dr. GRPO</b>(표준편차로 안 나누는 변형)는 clip을 빼도 300 step 안에서는 안 무너졌어요. 논문은 샘플당 업데이트가 작기 때문이라고 설명해요(Appendix F.1).</li>
+    <li><b>GPG 스타일</b>(비율도 clip도 없는 목적함수)은 이 설정에서 <b>충분히 강한 KL 벌점이 없으면 붕괴</b>했어요(Appendix F.2).</li>
+    <li>종합: "신뢰구역 없이도 안정한 설정은 있지만 <b>항상 그런 건 아니다</b>"라고 논문이 스스로 단서를 달아요.</li>
+  </ul>
+  <div class="call">
+    <h3>이 절의 결론 (논문)</h3>
+    <p>보정 역할이 빠지면 큰 r이 만드는 <b>분산 증폭</b>도 같이 사라져서, clip은 <b>순수하게 신뢰구역만</b> 맡게 돼요. 그러니 필요한 건 "신뢰구역 장치"이고, 꼭 확률비로 만들 필요는 없다는 거예요. 문제는 다음 절이에요.</p>
+  </div>
+</section>
+
+<!-- ============ §3.2 ============ -->
+<section id="s-32">
+  <h2>§3.2 fully on-policy에서는 clip이 아무것도 못 해요 <span class="sec">Figure 2 · §5.1</span></h2>
+  <p><b>fully on-policy = \(N_{\text{updates}}=1\)</b>, 즉 현재 정책으로 롤아웃을 뽑고 <b>딱 한 번만</b> 업데이트하는 경우예요. 이때는 옛 정책 \(\pi_{\theta_{\text{old}}}\)가 현재 정책 \(\pi_\theta\)와 <b>항상 같아서</b> 모든 토큰에서 \(r_t(\theta)=1\)이에요.</p>
+  <div class="tbl">
+    <table class="wide">
+      <thead><tr><th>\(N_{\text{updates}}\)</th><th>업데이트 시점의 r</th><th>\(\mathbb 1_{\text{clip}}\)</th><th>신뢰구역</th></tr></thead>
+      <tbody>
+        <tr><td>1 (fully on-policy)</td><td><b>정확히 1</b></td><td>항상 1 (r이 범위 안이라서)</td><td><b>작동 안 함</b></td></tr>
+        <tr><td>2 이상</td><td>둘째 업데이트부터 1에서 벗어남</td><td>멀어지면 0</td><td>작동함</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="call">
+    <h3>논문이 확인한 것 (Figure 2, §5.1)</h3>
+    <ul>
+      <li>같은 설정에서 GRPO를 \(N_{\text{updates}}=1\)로 돌리면 <b>초기에 잘 오르다가 붕괴</b>하고, 참조 정책에서 KL이 크게 벌어져요(800 step까지 학습, 붕괴가 더 늦게 나타나서 길게 돌렸어요).</li>
+      <li>이때 GRPO는 사실상 <b>신뢰구역 없는 vanilla policy gradient</b>로 되돌아간 거예요.</li>
+      <li><b>KL 벌점(계수 0.001)을 더해도</b> 붕괴를 못 막았어요. 보상이 약 step 900 즈음 0으로 추락했어요.</li>
+    </ul>
+  </div>
+  <div class="call val">
+    <h3>이게 우리 GRPO 해설의 해석과 어떻게 이어지나</h3>
+    <p>GRPO 해설에서 "논문 실험은 탐색 한 번당 업데이트가 1번(μ = 1)이라 clip이 걸리지 않는다"를 <b>제 해석</b>으로 적었어요. 이 논문은 <b>같은 현상을 실험으로 다룬 연구</b>예요: \(N_{\text{updates}}=1\)에서 확률비가 1이라 clip이 안 걸리고, 그 설정에서 학습이 무너진다는 거예요. 다만 이 논문이 DeepSeekMath의 μ = 1 설정을 직접 언급하거나 재현한 부분은 제가 읽은 범위에서 못 봤어요. 자기들 설정(Qwen2.5, Countdown·수학)에서 보인 결과예요.</p>
+  </div>
+  <p>그래서 ratio 기반 clip에는 두 가지 약점이 있다고 논문이 정리해요: <b>(1) 옛 정책 가능도를 다시 계산하는 비용</b>, <b>(2) fully on-policy에서는 제약이 전혀 없다는 점.</b></p>
+</section>
+
+<!-- ============ §4 ============ -->
+<section id="s-4">
+  <h2>§4 가능도 게이팅으로 신뢰구역 만들기 <span class="sec">정리 4.1 · LGPO · Algorithm 1</span></h2>
+
+  <h3>먼저 직관: 확률이 극단일수록 같은 변화가 정책을 더 크게 바꿔요</h3>
+  <div class="eqs">
+    <div class="eqc" id="eth">
+      <div class="no">정리 4.1</div>
+      <div class="body">
+        <p>유한한 결과 \(\{1,\dots,K\}\) 위의 분포 \(p\)가 있고, 결과 \(k\)의 확률만 \(\delta\)만큼 바꾸고 싶어요(나머지는 합이 1이 되게 자유롭게 조정). 그때 가능한 <b>가장 작은 KL</b>은:</p>
+        <div class="tex">\[\inf_{\Delta p_k=\delta,\ \sum_i\Delta p_i=0}\mathrm{KL}\big(p\,\|\,q\big)=\frac{\delta^2}{2\,p_k(1-p_k)}+o(\delta^2)\quad(|\delta|\to0)\]</div>
+        <p><span class="tag r">읽기</span>같은 크기의 확률 변화 \(|\delta|\)라도 <b>\(p_k\)가 0이나 1에 가까울수록 KL이 커져요</b>(분모 \(p_k(1-p_k)\)가 작아지니까요). 증명은 Appendix C에 있고 저는 그 증명은 읽지 않았어요.</p>
+        <p><span class="tag w">토큰·시퀀스</span>이 정리는 결과 공간이 임의라서, 다음 토큰 분포(토큰 수준)에도, 응답 전체의 분포(시퀀스 수준, 응답 길이가 유한하니 분포도 유한)에도 적용된다고 논문이 말해요. LLM RL에서 샘플로 배운다는 건 그 샘플의 가능도를 올리거나 내리는 것이니, <b>"확률이 극단인 샘플의 업데이트가 정책을 가장 크게 흔든다"</b>가 결론이에요.</p>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <h3>직접 만져 보기: 확률 p에서 같은 변화 δ의 KL 비용</h3>
+    <div class="ctl">
+      <div><label for="thP">결과의 확률 p <output id="thPo"></output></label>
+        <input type="range" id="thP" min="0.01" max="0.99" step="0.01" value="0.5"></div>
+      <div><label for="thD">확률 변화 δ (고정) <output id="thDo"></output></label>
+        <select id="thD"><option value="0.005">0.005</option><option value="0.01" selected>0.01</option><option value="0.02">0.02</option></select></div>
+    </div>
+    <svg class="chart" id="thSvg" viewBox="0 0 560 270" role="img" aria-label="확률 p에 따른 KL 비용의 상대 배수 곡선. p가 0.5일 때 1배로 가장 낮고, p가 0이나 1에 가까워지면 급격히 커진다. 주황 점이 지금 p."></svg>
+    <div class="read" id="thRead" aria-live="polite"></div>
+    <figcaption>곡선은 \(1/(4p(1-p))\), 즉 <b>p = 0.5일 때의 KL 대비 몇 배인가</b>예요(δ에 상관없이 같은 모양이에요). 가로축 p, 세로축은 로그 눈금이에요. 정리는 δ가 작을 때의 근사이니, δ가 p에 비해 클 때는 숫자가 맞지 않아요(위젯이 경고해요). 예: δ = 0.01이면 p = 0.5에서 KL ≈ 2.0×10⁻⁴, p = 0.9에서 5.6×10⁻⁴예요. p = 0.99에서는 δ = 0.01이면 확률이 1에 닿아 불가능하니 δ = 0.005로 보면 p = 0.5에서 5.0×10⁻⁵, p = 0.99에서 1.3×10⁻³이에요(제가 식으로 계산한 값).</figcaption>
+  </figure>
+
+  <h3>그래서 LGPO는 이렇게 만들어요</h3>
+  <p>정리의 결론 "확률이 극단인 샘플이 위험하다"를 그대로 써서, <b>확률이 너무 높은 샘플은 학습에서 빼요.</b> 어떤 양으로 잴지는 세 가지 고려로 정했다고 논문이 설명해요.</p>
+  <ul class="plain">
+    <li><b>(i)</b> 정리 4.1이 말하는 "극단적 가능도 = 민감도 신호"를 쓰고,</li>
+    <li><b>(ii)</b> 검증 가능한 보상에서는 어드밴티지가 <b>시퀀스 단위</b>로 붙으니 게이트도 <b>시퀀스 단위</b>로 걸어서 학습 단위와 맞추고,</li>
+    <li><b>(iii)</b> 토큰 로그 가능도의 <b>평균</b>(= 기하평균의 로그)을 써서 길이에 상관없이 한 임계값으로 비교해요.</li>
+  </ul>
+  <div class="eqs">
+    <div class="eqc" id="elg">
+      <div class="no">LGPO</div>
+      <div class="body">
+        <div class="tex">\[\bar\ell_\theta(x,y):=\frac1T\sum_{t=1}^{T}\log\pi_\theta(y_t|x,y_{\lt t}),\qquad c_\theta(x,y):=\mathbb 1\big(\bar\ell_\theta(x,y)\le\tau\big)\]</div>
+        <div class="tex">\[\mathcal L_{LGPO}(\theta)=\mathbb E_{x\sim\mathcal D,\ y\sim\pi_{\theta_{\text{old}}}(\cdot|x)}\Big[c_\theta(x,y)\sum_{t=1}^{T}A_t\log\pi_\theta(y_t|x,y_{\lt t})\Big]\]</div>
+        <p><span class="tag r">읽기</span>① 응답의 평균 로그 가능도 \(\bar\ell\)를 구하고, ② <b>\(\bar\ell\)가 임계값 \(\tau\) 이하일 때만 \(c=1\)</b>(학습에 씀), 임계값을 넘으면 \(c=0\)(그 응답의 기울기를 끔)이에요. \(c_\theta\)는 stop-gradient 마스크예요. ③ 나머지는 <b>기본 policy gradient \(A_t\log\pi_\theta\)</b>예요. 확률비 r도, clip도, 옛 정책 확률도 식에 없어요.</p>
+        <p><span class="tag w">왜 높은 쪽만?</span>시퀀스 평균에서 \(\bar\ell\)가 낮다는 건 보통 <b>중간 확률의 토큰이 많다</b>는 뜻이라 민감도 \(\delta^2/(2p_k(1-p_k))\)가 작고, 그런 시퀀스는 거의 관찰되지도 않아요(Appendix E.2). 그쪽까지 게이팅해도 이득이 없었어요(Appendix F.5).</p>
+        <p><span class="tag e">임계값</span>실험에서 \(\tau=-0.15\)(평균 가능도 \(e^{-0.15}\approx0.86\)). 논문은 <b>샘플된 응답의 평균 가능도 분포에서 상위 10~20% 분위수 근처로 잡기를 권하고</b>, 모델과 과제가 달라도 같은 \(\tau\)를 썼어요(민감도 분석은 Appendix F.6).</p>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <h3>직접 만져 보기: 이 응답은 게이트를 통과하나?</h3>
+    <div class="ctl">
+      <div><label for="gQ">응답의 평균 가능도 exp(ℓ̄) <output id="gQo"></output></label>
+        <input type="range" id="gQ" min="0.30" max="1.00" step="0.01" value="0.90"></div>
+      <div><label for="gT">임계값 τ</label>
+        <select id="gT"><option value="-0.05">−0.05 (엄격)</option><option value="-0.15" selected>−0.15 (논문)</option><option value="-0.3">−0.30 (느슨)</option></select></div>
+    </div>
+    <div class="read" id="gRead" aria-live="polite"></div>
+    <figcaption>exp(ℓ̄)는 "토큰 확률들의 기하평균"이에요. 1에 가까울수록 모델이 그 응답을 거의 확신하며 뽑았다는 뜻이에요. 논문의 τ = −0.15를 고르면 기하평균 확률이 약 0.86을 넘는 응답이 게이트에 막혀요.</figcaption>
+  </figure>
+
+  <div class="ex" style="max-width:720px">
+    <p><span class="tag e">예시</span>토큰이 4개인 응답 두 개(설명용 숫자예요, τ = −0.15):</p>
+    <div class="mini-wrap"><table class="mini">
+      <thead><tr><th>응답</th><th>토큰 확률</th><th>ℓ̄ (평균 log)</th><th>exp(ℓ̄)</th><th>c</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>0.99, 0.98, 0.97, 0.95</td><td>−0.028</td><td>0.972</td><td class="hit">0 (막힘)</td></tr>
+        <tr><td>B</td><td>0.99, 0.95, 0.90, 0.60</td><td>−0.169</td><td>0.844</td><td class="ok">1 (통과)</td></tr>
+      </tbody>
+    </table></div>
+    <p>A는 모든 토큰을 거의 확신하며 뽑은 응답이라 \(\bar\ell\)가 0에 가까워서 막혀요. B는 확신이 덜한 토큰(0.60)이 섞여 있어서 통과해요.</p>
+  </div>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 960 260" role="img" aria-label="GRPO는 옛 정책 확률을 추가로 계산해 확률비를 만들고 clip 스위치로 기울기를 켜고 끈다. LGPO는 현재 정책 확률만으로 평균 로그 가능도를 구하고 게이트로 기울기를 켜고 끈다.">
+        <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <text class="h" x="16" y="20">GRPO (ratio 기반)</text>
+        <rect class="env" x="16" y="30" width="124" height="56" rx="8"/><text class="t" x="78" y="54" text-anchor="middle">rollout</text><text class="s" x="78" y="72" text-anchor="middle">y ~ π_old</text>
+        <rect class="upd" x="164" y="30" width="124" height="56" rx="8"/><text class="t" x="226" y="54" text-anchor="middle">π_old 확률</text><text class="s" x="226" y="72" text-anchor="middle">추가 forward (비용)</text>
+        <rect class="policy" x="312" y="30" width="124" height="56" rx="8"/><text class="t" x="374" y="54" text-anchor="middle">π_θ 확률</text><text class="s" x="374" y="72" text-anchor="middle">현재 정책</text>
+        <rect class="box" x="460" y="30" width="124" height="56" rx="8"/><text class="t" x="522" y="54" text-anchor="middle">확률비 r</text><text class="s" x="522" y="72" text-anchor="middle">π_θ / π_old</text>
+        <rect class="box" x="608" y="30" width="124" height="56" rx="8"/><text class="t" x="670" y="54" text-anchor="middle">clip 스위치</text><text class="s" x="670" y="72" text-anchor="middle">1_clip ∈ {0, 1}</text>
+        <rect class="policy" x="756" y="30" width="124" height="56" rx="8"/><text class="t" x="818" y="54" text-anchor="middle">A · r · ∇logπ</text><text class="s" x="818" y="72" text-anchor="middle">gradient</text>
+        <line class="ar" x1="140" y1="58" x2="162" y2="58" marker-end="url(#ah3)"/>
+        <line class="ar" x1="288" y1="58" x2="310" y2="58" marker-end="url(#ah3)"/>
+        <line class="ar" x1="436" y1="58" x2="458" y2="58" marker-end="url(#ah3)"/>
+        <line class="ar" x1="584" y1="58" x2="606" y2="58" marker-end="url(#ah3)"/>
+        <line class="ar" x1="732" y1="58" x2="754" y2="58" marker-end="url(#ah3)"/>
+        <text class="s" x="16" y="108">N_updates = 1이면 π_old = π_θ라서 r ≡ 1, 스위치는 항상 켜짐 → 신뢰구역 없음</text>
+
+        <text class="h" x="16" y="152">LGPO (가능도 게이트)</text>
+        <rect class="env" x="16" y="162" width="124" height="56" rx="8"/><text class="t" x="78" y="186" text-anchor="middle">rollout</text><text class="s" x="78" y="204" text-anchor="middle">y ~ π_old</text>
+        <rect class="policy" x="164" y="162" width="124" height="56" rx="8"/><text class="t" x="226" y="186" text-anchor="middle">π_θ 확률만</text><text class="s" x="226" y="204" text-anchor="middle">현재 정책</text>
+        <rect class="box" x="312" y="162" width="124" height="56" rx="8"/><text class="t" x="374" y="186" text-anchor="middle">평균 log 가능도</text><text class="s" x="374" y="204" text-anchor="middle">ℓ̄ = mean log π_θ</text>
+        <rect class="upd" x="460" y="162" width="124" height="56" rx="8"/><text class="t" x="522" y="186" text-anchor="middle">게이트</text><text class="s" x="522" y="204" text-anchor="middle">c = 1(ℓ̄ ≤ τ)</text>
+        <rect class="policy" x="608" y="162" width="124" height="56" rx="8"/><text class="t" x="670" y="186" text-anchor="middle">A · ∇logπ</text><text class="s" x="670" y="204" text-anchor="middle">gradient (r 없음)</text>
+        <line class="ar" x1="140" y1="190" x2="162" y2="190" marker-end="url(#ah3)"/>
+        <line class="ar" x1="288" y1="190" x2="310" y2="190" marker-end="url(#ah3)"/>
+        <line class="ar" x1="436" y1="190" x2="458" y2="190" marker-end="url(#ah3)"/>
+        <line class="ar" x1="584" y1="190" x2="606" y2="190" marker-end="url(#ah3)"/>
+        <text class="s" x="16" y="240">옛 정책 확률 계산이 없어요. 현재 정책의 확률만으로 샘플을 걸러요 (참조 정책 확률도 필요 없어요)</text>
+      </svg>
+    </div>
+    <figcaption>두 방법의 계산 흐름이에요. 주황 상자가 달라지는 곳이에요: GRPO의 "옛 정책 확률" 추가 계산이 LGPO에는 없고, "clip 스위치"가 "가능도 게이트"로 바뀌어요. 논문의 그림이 아니라 제가 본문 설명으로 그린 거예요.</figcaption>
+  </figure>
+
+  <figure>
+    <h3>직접 만져 보기: r이 사라지면 "기울기 그래프"는 어떻게 되나</h3>
+    <p class="muted">PPO 해설의 clip 놀이터는 가로축이 <b>r</b>이었어요. LGPO에는 r이 식에 없으니 같은 그래프를 그릴 수 없고, <b>가로축이 그 장치가 실제로 보는 값</b>으로 바뀌어요. 아래는 두 방법이 \(\nabla\log\pi\)에 곱하는 <b>계수</b>(0이면 꺼짐)를 비교한 거예요.</p>
+    <div class="ctl">
+      <div><label for="cA">Â (어드밴티지) <output id="cAo"></output></label>
+        <input type="range" id="cA" min="-3" max="3" step="0.5" value="2"></div>
+      <div><label for="cE">GRPO의 ε</label>
+        <select id="cE"><option value="0.1">0.1</option><option value="0.2" selected>0.2</option><option value="0.3">0.3</option></select></div>
+      <div><label for="cT">LGPO의 τ</label>
+        <select id="cT"><option value="-0.05">−0.05</option><option value="-0.15" selected>−0.15 (논문)</option><option value="-0.3">−0.30</option></select></div>
+      <div><label for="cR">GRPO 샘플의 r <output id="cRo"></output></label>
+        <input type="range" id="cR" min="0" max="2" step="0.05" value="1.5"></div>
+      <div><label for="cQ">LGPO 응답의 exp(ℓ̄) <output id="cQo"></output></label>
+        <input type="range" id="cQ" min="0.30" max="1.00" step="0.01" value="0.90"></div>
+    </div>
+    <div class="pair">
+      <svg class="chart" id="cSvgL" viewBox="0 0 420 284" role="img" aria-label="GRPO의 기울기 계수를 r의 함수로 그린 그래프. Â가 양수이면 r이 1+ε를 넘는 곳부터 0이 된다."></svg>
+      <svg class="chart" id="cSvgR" viewBox="0 0 420 284" role="img" aria-label="LGPO의 기울기 계수를 토큰 확률의 기하평균의 함수로 그린 그래프. 기하평균이 e의 타우 제곱을 넘으면 0이 된다. r과는 무관하다."></svg>
+    </div>
+    <div class="read" id="cRead" aria-live="polite"></div>
+    <figcaption>세로축은 <b>\(\nabla\log\pi\)에 곱해지는 계수</b>예요(점수 L이 아니에요). <b>왼쪽 GRPO</b>: 계수 = \(\mathbb 1_{\text{clip}}\cdot\hat A\cdot r\)이라 r의 함수이고, 회색 점선은 clip이 없을 때의 \(\hat A\cdot r\), 빨간 선이 계수가 0인 구간이에요. 파란 띠는 clip이 안 걸리는 [1−ε, 1+ε]. <b>오른쪽 LGPO</b>: 계수 = \(c\cdot\hat A\)이고 \(c\)는 평균 가능도 \(\bar\ell\)만 봐서 정해져요. <b>r과는 아무 상관이 없어서</b> 가로축을 응답의 토큰 확률 기하평균 \(e^{\bar\ell}\)로 바꿨고, 주황 띠가 게이트에 막히는 구간이에요. 두 그래프의 점 위치는 서로 독립이에요. 왼쪽은 논문 식 (2), 오른쪽은 LGPO 목적함수에서 제가 그린 거예요.</figcaption>
+  </figure>
+
+  <h3>Algorithm 1 (Appendix D)</h3>
+  <pre class="alg"><span class="n"> 1</span> for 각 rollout 배치:
+<span class="n"> 2</span>     y ~ π_θold 로 응답 뽑고, 어드밴티지 {A_t} 계산 → 버퍼 B
+<span class="n"> 3</span>     B를 N_updates 개의 서로 겹치지 않는 미니배치로 나눔
+<span class="n"> 4</span>     for n = 1 … N_updates:
+<span class="n"> 5</span>         L ← 0
+<span class="n"> 6</span>         for 미니배치의 각 (x, y, {A_t}):
+<span class="n"> 7</span>             ℓ̄ ← (1/T) Σ_t log π_θ(y_t | x, y_&lt;t)
+<span class="n"> 8</span>             c ← 1(ℓ̄ ≤ τ)               <span class="c"># stop-gradient</span>
+<span class="n"> 9</span>             L ← L − c · Σ_t A_t log π_θ(y_t | x, y_&lt;t)
+<span class="n">10</span>         ∇_θ L 로 θ 갱신</pre>
+  <p>핵심은 7~9행이에요. <b>r도 clip도 π_old 확률도 없고</b>, 현재 정책 \(\pi_\theta\)의 로그 확률만 써요. 샘플을 롤아웃 엔진(vLLM 등)이 아니라 학습 엔진으로 다시 계산해야 하는 "옛 정책 확률 재계산"이 사라지는 게 속도 이득의 출처예요(§5.1).</p>
+</section>
+
+<!-- ============ §5 ============ -->
+<section id="s-5">
+  <h2>§5 실험 <span class="sec">Table 1 · Figure 3~8 · Appendix D–F</span></h2>
+
+  <h3>설정</h3>
+  <dl class="nums">
+    <div><dt>모델</dt><dd>Qwen2.5-Math-1.5B, Qwen2.5-3B-Instruct</dd></div>
+    <div><dt>과제</dt><dd>Countdown, 수학 추론</dd></div>
+    <div><dt>수학 학습 데이터</dt><dd>Huan 외(2025)의 큐레이션 데이터</dd></div>
+    <div><dt>프레임워크</dt><dd>verl</dd></div>
+    <div><dt>옵티마이저·학습률</dt><dd>AdamW · 1e-6</dd></div>
+    <div><dt>미니배치</dt><dd>64</dd></div>
+    <div><dt>프롬프트 배치 · N_updates</dt><dd>Countdown 128 · 2 / 수학 256 · 4</dd></div>
+    <div><dt>그룹 크기 G</dt><dd>8</dd></div>
+    <div><dt>LGPO 임계값 τ</dt><dd>−0.15 (모든 설정 동일)</dd></div>
+    <div><dt>KL 벌점</dt><dd>없음 (KL 비교군만 0.001)</dd></div>
+  </dl>
+  <p>비교 대상은 <b>GRPO</b>와 <b>GRPO w/o correction & clipping</b>(§3.1에서 만든, 보정도 clip도 뺀 버전)이에요. 모든 방법이 같은 하이퍼파라미터를 써요. 평가는 MATH500, OlympiadBench, AIME24·25의 평균 Pass@1(응답 8개)이에요.</p>
+
+  <h3>5.1 주요 결과</h3>
+  <div class="call">
+    <h3>안정성과 성능 (Figure 3, Table 1)</h3>
+    <ul>
+      <li>보정과 clip을 둘 다 뺀 GRPO는 불안정한데, <b>가능도 게이팅을 더한 LGPO는 안정</b>해요. 최고 보상은 GRPO와 비교해 <b>미미한 차이</b>(논문 표현: negligible drop)예요.</li>
+    </ul>
+  </div>
+  <div class="tbl">
+    <table class="wide num">
+      <thead><tr><th>모델 · 벤치마크</th><th>GRPO</th><th>LGPO</th></tr></thead>
+      <tbody>
+        <tr><th>Qwen2.5-3B-Instruct · MATH500</th><td>64.4</td><td class="best">65.2</td></tr>
+        <tr><th>· OlympiadBench</th><td>29.2</td><td class="best">30.7</td></tr>
+        <tr><th>· AIME24</th><td class="best">5.0</td><td>4.2</td></tr>
+        <tr><th>· AIME25</th><td>3.3</td><td class="best">3.7</td></tr>
+        <tr><th>· 평균</th><td>25.5</td><td class="best">26.0</td></tr>
+        <tr><th>Qwen2.5-Math-1.5B · MATH500</th><td>73.0</td><td class="best">73.6</td></tr>
+        <tr><th>· OlympiadBench</th><td class="best">38.2</td><td>35.0</td></tr>
+        <tr><th>· AIME24</th><td>12.1</td><td class="best">17.9</td></tr>
+        <tr><th>· AIME25</th><td>8.8</td><td class="best">9.6</td></tr>
+        <tr><th>· 평균</th><td>33.0</td><td class="best">34.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">논문 Table 1의 숫자예요(평균 Pass@1, 응답 8개). 평균은 제가 다시 계산해서 표의 평균과 맞는 것을 확인했어요(3B: 25.475 / 25.95, 1.5B: 33.025 / 34.025). <b>LGPO가 항목마다 앞서는 건 아니에요.</b> 3B의 AIME24와 1.5B의 OlympiadBench에서는 GRPO가 더 높아요. 표에는 표준편차나 시드 수가 적혀 있지 않아서, 이 정도 차이가 의미 있는지는 이 표만으로는 판단할 수 없어요(제 지적이에요).</p>
+
+  <div class="call">
+    <h3>속도 (2 × H100, Qwen2.5-3B-Instruct, 약 7.5K 학습 데이터)</h3>
+    <ul>
+      <li>GRPO는 한 epoch에 <b>3.37시간</b>, LGPO는 <b>2.85시간</b>. 논문은 이를 <b>약 18% speedup</b>이라고 표현해요. 계산해 보면 속도로는 3.37 ÷ 2.85 ≈ 1.18배이고, 시간 단축률로는 약 15.4%예요(제 계산). 논문은 별도로 "이 forward pass를 없애서 스텝당 연산을 대략 15% 아낀다"고도 적어요.</li>
+      <li><b>비교 기준이 "표준 verl 레시피"</b>예요. 그 레시피는 롤아웃 엔진(vLLM)이 돌려준 확률이 수치적으로 학습 엔진과 달라서, 학습 엔진으로 옛 정책 확률을 <b>다시 계산</b>해요. 롤아웃 확률을 재사용하고 불일치를 처리하는 기법(truncated importance sampling 등)과 비교하면 차이가 더 작아질 거라고 논문이 스스로 밝혀요.</li>
+    </ul>
+  </div>
+
+  <div class="call val">
+    <h3>fully on-policy (N_updates = 1, 미니배치 128 = 프롬프트 배치)</h3>
+    <ul>
+      <li><b>GRPO는 붕괴, LGPO는 안정</b>(Figure 4). 이유로 논문은 "게이트가 현재 정책의 가능도에만 의존해서, 확률비가 1이어도 큰 업데이트를 만드는 높은 가능도 샘플을 거른다"를 들어요.</li>
+      <li>GRPO에 <b>참조 정책 KL 벌점(0.001)</b>을 더해도 붕괴를 막지 못했어요. 논문의 설명: KL 벌점은 <b>평균적인 이탈</b>을 억누를 뿐, 정리 4.1이 보여 주는 <b>샘플 하나하나의 민감한 업데이트</b>는 못 막는다.</li>
+      <li>Qwen2.5-Math-1.5B 수학 과제에서도 같은 패턴이에요(Appendix F.7).</li>
+    </ul>
+  </div>
+
+  <h3>5.2 어떤 샘플을 막아서 안정해지나 (ablation)</h3>
+  <div class="tbl">
+    <table class="wide">
+      <thead><tr><th>질문</th><th>실험</th><th>결과 (논문)</th></tr></thead>
+      <tbody>
+        <tr><td>엔트로피는?</td><td>학습 중 생성 엔트로피</td><td>LGPO가 GRPO보다 <b>엔트로피를 높게 유지</b>. 이미 높은 확률의 샘플의 업데이트를 막으니 정책이 너무 빨리 결정적이 되지 않아요.</td></tr>
+        <tr><td>"높은 가능도 샘플"이라서 효과가 있나?</td><td>같은 비율로 <b>가능도와 상관없이 무작위로</b> 샘플을 버림</td><td><b>100 step 안에 붕괴.</b> 단순히 샘플 수를 줄여서가 아니라, 높은 가능도 샘플을 골라서 막는 게 핵심이에요.</td></tr>
+        <tr><td>음의 어드밴티지 샘플은 안전하지 않나?</td><td>높은 가능도 + <b>양의</b> 어드밴티지 샘플만 게이팅</td><td>그래도 <b>붕괴</b>. 음의 어드밴티지의 높은 가능도 샘플도 막아야 안정해요.</td></tr>
+        <tr><td>절충점이 있나?</td><td>게이트를 <b>확률적으로만</b> 적용</td><td>"절충점은 없다". 높은 가능도 샘플이 조금만 섞여도 붕괴하고, 게이팅 확률이 낮을수록 더 일찍 무너져요.</td></tr>
+        <tr><td>쓸 만한 신호를 버리나?</td><td>GSPO(시퀀스 단위 clip 변형)와 토큰 통계 비교</td><td>LGPO는 Countdown에서 학습 토큰의 <b>24.7%</b>를 막음(GSPO는 1.6%). 막힌 토큰의 <b>48.9%는 어드밴티지 0, 45.1%는 음수, 6.1%만 양수</b>. 성공한 궤적에서 버리는 건 전체 토큰의 약 1.5%뿐이에요.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">마지막 줄의 "약 1.5%"는 논문 문장이고, 24.7% × 6.1% ≈ 1.5%라서 제가 다시 계산해도 맞아요. 막힌 샘플이 많아도 <b>어드밴티지가 0인 샘플은 어차피 gradient에 기여하지 않아서</b>, 실제로 gradient에 기여하는 샘플 비율은 GSPO와 비슷하게 유지된다고 논문이 설명해요(Figure 8).</p>
+
+  <div class="call">
+    <h3>음의 어드밴티지 샘플을 막아야 하는 이유: 논문의 가설 두 가지</h3>
+    <ul>
+      <li><b>정리 4.1은 변화 방향에 대칭</b>이에요. 포화된 토큰(p → 1)에서는 원래 기울기는 작지만 <b>Adam이 업데이트 크기를 기울기 스케일에 거의 상관없이 만들어서</b>, 확률이 여전히 움직일 수 있고 그 이동은 단위당 KL 비용이 가장 커요.</li>
+      <li>시퀀스 단위로 음의 어드밴티지를 주면 <b>틀린 응답의 모든 토큰에 벌</b>이 가요. 이미 확신하는 맞는 토큰까지 벌을 받아서 정책이 가진 능력이 깎일 수 있어요(논문이 인용한 "false penalty" 관점).</li>
+    </ul>
+    <p class="muted">논문이 "가설(hypothesize)"이라고 쓴 부분이고, 실험으로 증명한 것이 아니에요.</p>
+  </div>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section id="s-lim">
+  <h2>한계와 제 해석 <span class="sec">논문의 한계 · 제 해석</span></h2>
+
+  <div class="call">
+    <h3>논문이 스스로 적은 한계 (§8)</h3>
+    <ul>
+      <li><b>모델 크기·과제:</b> 검증은 <b>1.5B~3B 모델</b>, <b>정답을 검증할 수 있는 추론 과제</b>뿐이에요. 더 큰 모델로의 일반화는 확인하지 않았어요(논문은 clip의 fully on-policy 실패는 구조적이고 정리 4.1은 모델 크기와 무관하다고 말하지만, 전이는 "확인이 필요"하다고 적어요).</li>
+      <li><b>\(N_{\text{updates}}\)가 크면:</b> 테스트한 범위(최대 16)에서는 안정적이었지만, 롤아웃을 더 재사용할수록 보정의 역할이 커지니 충분히 큰 값에서는 성능이 떨어질 거라고 예상해요. 그런 경우는 KL 정규화 계열(TBA 등)이 더 적절하다고 봐요.</li>
+      <li><b>속도 이득의 기준:</b> "옛 확률을 다시 계산하는 표준 레시피"와 비교한 거예요. KL 비교군도 계수가 하나(0.001)뿐이에요.</li>
+      <li><b>앞으로:</b> 시퀀스 안에서 더 세밀한 게이팅, 롤아웃을 재사용할 때 게이팅과 ratio clip을 <b>같이 쓰기</b>(예비 결과는 서로 보완적), 어차피 막힐 샘플을 아예 생성하지 않는 디코딩 단계의 개입.</li>
+    </ul>
+  </div>
+
+  <div class="call inf">
+    <h3>제 지적·해석 (논문 밖)</h3>
+    <ul>
+      <li>Table 1에는 <b>시드 수나 오차가 적혀 있지 않아요.</b> 평균 +0.5, +1.0 정도의 차이를 "더 낫다"고 읽기는 어려워요. 논문의 주장도 "<b>비슷한 성능</b>"에 가까워요.</li>
+      <li>이 논문의 이론(정리 4.1)은 <b>유한한 이산 분포</b>(토큰, 시퀀스)에 대한 거예요. 로봇 정책처럼 <b>연속 행동을 쓰는 정책</b>(가우시안, flow-matching)에서 "확률이 1에 가깝다"가 무슨 뜻인지는 이 논문이 다루지 않아요.</li>
+    </ul>
+  </div>
+
+  <div class="trio">
+    <div>
+      <span class="k r">다른 해설과 닿는 점</span>
+      <ul>
+        <li><b>PPO·GRPO 해설과 한 줄로 이어져요.</b> 식 (2)가 "기울기 = 스위치 × Â × r × ∇logπ"로 분해돼서, 우리가 물었던 "정책을 민다", "구간 밖에서 기울기 0", "r은 확률비"가 한 식에 모두 있어요.</li>
+        <li><b>업데이트 1번(μ = 1) 설정</b>에서는 clip이 의미가 없다는 점이 "GRPO 해설"의 해석과 맞닿아 있어요. 우리가 on-policy RL을 가볍게 돌릴 때 그대로 걸릴 수 있는 문제예요.</li>
+        <li><b>엔트로피 붕괴</b>(정책이 너무 빨리 결정적이 됨)는 로봇 RL의 탐색에도 중요한 주제예요(제 연결).</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k p">조심할 점</span>
+      <ul>
+        <li><b>LLM 토큰 확률 기반</b>이라 SmolVLA의 연속 행동 생성(flow-matching)에는 게이트에 쓸 "평균 로그 가능도"를 어떻게 정의할지 별도 문제예요(제 판단이고 이 논문에 없어요).</li>
+        <li>속도 이득은 "옛 정책 확률을 다시 계산하는 비용"인데, <b>SmolVLA 같은 작은 모델</b>(0.45B)에서는 절대적인 이득이 작을 수 있어요(추측이에요).</li>
+        <li>검증 규모가 1.5B~3B, 정답 검증 과제라서 로봇 과제와는 거리가 있어요.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="k i">발표에 쓴다면</span>
+      <ul>
+        <li>PPO → GRPO 다음에 <b>"clip은 정말 필요한가?"</b> 한 장으로 넣을 수 있어요: 식 (2)의 두 역할 분리 + fully on-policy 붕괴.</li>
+        <li>"최신 연구는 GRPO의 구성요소를 이렇게 해부한다"는 사례로 좋아요(2026년 11월 11일 제출, NeurIPS 2026 채택).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section id="s-quiz">
+  <h2>점검 질문 <span class="sec">답은 눌러서 확인</span></h2>
+  <div>
+    <details><summary>Q1. PPO/GRPO 기울기를 이루는 네 조각과 그중 "보정"과 "신뢰구역"은 어느 것인가요?</summary>
+      <p>\(\nabla L_t=\mathbb 1_{\text{clip}}\cdot A_t\cdot r_t\cdot\nabla\log\pi\) (식 2). <b>보정</b>은 기울기에 곱해지는 \(r_t\), <b>신뢰구역</b>은 기울기를 0으로 끄는 스위치 \(\mathbb 1_{\text{clip}}\)이에요. 논문은 보정은 빼도 안정성에 문제가 없고 스위치를 빼면 불안정해진다고 보여요.</p></details>
+    <details><summary>Q2. \(N_{\text{updates}}=1\)이면 왜 clip이 아무것도 못 하나요?</summary>
+      <p>롤아웃을 뽑은 정책과 업데이트하는 정책이 같아서 \(r_t=1\)이 항상 성립해요. clip은 r이 \([1-\epsilon,1+\epsilon]\)를 벗어날 때만 작동하니 <b>절대 작동하지 않고</b>, 알고리즘은 신뢰구역 없는 vanilla policy gradient가 돼요.</p></details>
+    <details><summary>Q3. 정리 4.1에서 같은 확률 변화 δ가 p = 0.5와 p = 0.99에서 KL에 주는 비용은 몇 배 차이인가요?</summary>
+      <p>\(\delta^2/(2p(1-p))\)에서 p = 0.5는 분모가 0.5, p = 0.99는 0.0198이라서 <b>약 25.3배</b>예요(\(1/(4p(1-p))\)로 p = 0.99이면 25.25). 이건 제가 식에 대입한 값이고 δ가 충분히 작을 때의 근사예요.</p></details>
+    <details><summary>Q4. 게이트는 왜 토큰이 아니라 시퀀스 단위이고, 왜 평균을 쓰나요?</summary>
+      <p>검증 가능한 보상에서는 어드밴티지가 <b>응답 단위</b>로 붙으니 학습 단위와 맞추려고 시퀀스 단위로 걸어요. 평균 로그 가능도(기하평균의 로그)를 쓰면 <b>길이에 상관없이</b> 한 임계값으로 비교할 수 있어요.</p></details>
+    <details><summary>Q5. 게이트가 "높은 가능도"만 막고 "낮은 가능도"는 막지 않는 이유는?</summary>
+      <p>시퀀스 평균에서 가능도가 낮다는 건 보통 중간 확률 토큰이 많다는 뜻이라 민감도가 작고, 그런 시퀀스는 거의 안 나와요. 게이팅해도 이득이 없었다고 논문이 Appendix F.5에서 말해요.</p></details>
+    <details><summary>Q6. 같은 비율로 무작위로 샘플을 버리면 되지 않나요? (논문의 ablation)</summary>
+      <p>안 돼요. 가능도와 상관없이 같은 비율로 버리면 <b>100 step 안에 붕괴</b>했어요. 높은 가능도의 샘플을 골라서 막는 것이 안정성의 이유이고, 단순히 샘플 수를 줄여서가 아니에요.</p></details>
+    <details><summary>Q7. GRPO에 KL 벌점을 더하면 on-policy 붕괴가 해결되나요?</summary>
+      <p>논문 실험에서는 아니에요. 계수 0.001로 시험했는데 보상이 약 step 900에서 0으로 추락했어요. 논문의 설명은 KL 벌점이 <b>평균적인 이탈</b>은 제어하지만 <b>샘플별로 민감한 업데이트</b>는 못 막는다는 거예요. 단, KL 계수가 하나뿐이라는 한계도 논문이 인정해요.</p></details>
+  </div>
+</section>
+
+<footer>
+  <p>출처: Shuibai Zhang, Junhyuck Kim, Gyeongman Kim, Jaewoong Cho (KRAFTON, University of Wisconsin–Madison), "Is the Importance Ratio Necessary for Stable Reinforcement Learning in LLMs?", <a href="https://arxiv.org/abs/2611.15404">arXiv 2611.15404v1</a> (2026-11-11), arXiv 페이지 comments 칸: "21 pages, 11 figures, 5 tables. Accepted at NeurIPS 2026". 본문 §1~8, Appendix A·D·E.1~E.3, B의 앞부분을 논문 PDF에서 텍스트로 추출해 읽었어요.</p>
+  <p>읽지 않은 것: Appendix B의 분산·편향 유도 뒷부분, Appendix C의 정리 4.1 증명, Appendix F(F.1~F.8)의 세부 실험, 그림 1~11의 곡선(옮기지 않았어요). 이 부분의 결과는 <b>본문이 요약한 문장</b>만 옮겼어요. 비교 그림 2개(GRPO vs LGPO 계산 흐름, 정리 4.1 곡선)는 논문 그림이 아니라 제가 설명을 위해 그린 거예요.</p>
+  <p>설명용 예시: 응답 A·B의 토큰 확률 표, 확률 변화 δ에 따른 KL 숫자, 위젯의 p·δ·τ 값. 제가 계산한 값: 3.37/2.85 속도비와 15.4%, 24.7%×6.1%, 표 평균, 25배 비율(node로 확인). 주황색 상자와 "제 해석/제 지적"이라고 표시한 문장은 논문에 없는 내용이에요. 앞선 정리: <a href="/reports/ppo-paper-explained/" target="_top">PPO 논문 해설</a>, <a href="/reports/grpo-paper-explained/" target="_top">GRPO 논문 해설</a>, <a href="/reports/awr-paper-explained/" target="_top">AWR 논문 해설</a>.</p>
+</footer>
+
+</div>
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+    svg: { fontCache: 'global' },
+    options: { enableMenu: false }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js" async></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  function sci(v) { var e = Math.floor(Math.log10(v)); var m = v / Math.pow(10, e); return m.toFixed(2) + '×10<sup>' + (e < 0 ? '−' : '') + Math.abs(e) + '</sup>'; }
+
+  /* ---- Theorem 4.1: factor 1/(4p(1-p)) relative to p = 0.5, log y-axis 1..100 ---- */
+  var W = 560, H = 270, X0 = 56, XW = 480, Y0 = 232, YH = 200;
+  function X(p) { return X0 + p * XW; }
+  function Y(f) { return Y0 - (Math.log(f) / Math.log(100)) * YH; }
+  function fac(p) { return 1 / (4 * p * (1 - p)); }
+
+  function drawTheorem() {
+    var p = parseFloat($('thP').value), d = parseFloat($('thD').value);
+    $('thPo').textContent = p.toFixed(2);
+    $('thDo').textContent = d.toFixed(3);
+    var s = '';
+    [1, 10, 100].forEach(function (f) {
+      s += '<line class="pl-grid" x1="' + X0 + '" x2="' + (X0 + XW) + '" y1="' + Y(f) + '" y2="' + Y(f) + '"/>';
+      s += '<text class="lbl" x="' + (X0 - 8) + '" y="' + (Y(f) + 4) + '" text-anchor="end">' + f + '×</text>';
+    });
+    s += '<line class="pl-ax" x1="' + X0 + '" x2="' + (X0 + XW) + '" y1="' + Y0 + '" y2="' + Y0 + '"/>';
+    s += '<line class="pl-ax" x1="' + X0 + '" x2="' + X0 + '" y1="' + (Y0 - YH - 8) + '" y2="' + Y0 + '"/>';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
+      s += '<text class="lbl" x="' + X(t) + '" y="' + (Y0 + 20) + '" text-anchor="middle">' + t + '</text>';
+    });
+    s += '<text class="lbl" x="' + (X0 + XW) + '" y="' + (Y0 + 38) + '" text-anchor="end">p (결과의 확률)</text>';
+    s += '<text class="lbl" x="' + (X0 + 6) + '" y="22">p = 0.5 대비 KL 비용 배수</text>';
+    var path = '';
+    for (var i = 0; i <= 196; i++) {
+      var q = 0.01 + i * 0.005;
+      path += (i ? 'L' : 'M') + X(q).toFixed(1) + ' ' + Y(Math.min(fac(q), 100)).toFixed(1);
+    }
+    s += '<path class="pl-curve" d="' + path + '"/>';
+    s += '<circle class="pl-dot" cx="' + X(p) + '" cy="' + Y(fac(p)) + '" r="7"/>';
+    $('thSvg').innerHTML = s;
+
+    var kl = d * d / (2 * p * (1 - p));
+    var msg = '<div>p = ' + p.toFixed(2) + ' → p = 0.5일 때의 <b>' + fac(p).toFixed(2) + '배</b>의 KL 비용이에요.</div>' +
+      '<div>δ = ' + d.toFixed(3) + '이면 KL ≈ δ² / (2p(1−p)) = <b>' + sci(kl) + '</b></div>';
+    if (p + d >= 1) msg += '<div><b class="stop">p + δ ≥ 1이라 이 변화는 불가능해요</b> (확률이 1을 넘어요).</div>';
+    else if (d > p / 3) msg += '<div><b class="stop">δ가 p에 비해 너무 커요.</b> 정리는 δ가 작을 때의 근사라서 이 숫자는 믿기 어려워요.</div>';
+    else msg += '<div>양 끝(p가 0이나 1에 가까움)으로 갈수록 같은 δ가 훨씬 큰 KL을 만들어요.</div>';
+    $('thRead').innerHTML = msg;
+  }
+  ['thP', 'thD'].forEach(function (id) { $(id).addEventListener('input', drawTheorem); });
+  drawTheorem();
+
+  /* ---- LGPO gate ---- */
+  function drawGate() {
+    var q = parseFloat($('gQ').value), tau = parseFloat($('gT').value);
+    $('gQo').textContent = q.toFixed(2);
+    var ell = Math.log(q), thr = Math.exp(tau);
+    var pass = ell <= tau;
+    var msg = '<div>ℓ̄ = ln(' + q.toFixed(2) + ') = <b>' + ell.toFixed(3) + '</b>, 임계값 τ = <b>' + tau.toFixed(2) + '</b> (확률로는 ' + thr.toFixed(3) + ')</div>';
+    if (pass) msg += '<div>ℓ̄ ≤ τ → <b class="go">c = 1, 학습에 써요.</b> 이 응답의 A·∇logπ 기울기가 그대로 반영돼요.</div>';
+    else msg += '<div>ℓ̄ &gt; τ → <b class="stop">c = 0, 기울기를 꺼요.</b> 모델이 이미 매우 확신하는 응답이라 업데이트가 정책을 크게 흔들 수 있어서 막아요.</div>';
+    $('gRead').innerHTML = msg;
+  }
+  ['gQ', 'gT'].forEach(function (id) { $(id).addEventListener('input', drawGate); });
+  drawGate();
+
+  /* ---- gradient coefficient: GRPO (function of r) vs LGPO (function of q = exp(l-bar)) ---- */
+  function f2(v) { return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(2); }
+  function drawCoef() {
+    var A = parseFloat($('cA').value), e = parseFloat($('cE').value), tau = parseFloat($('cT').value);
+    var r = parseFloat($('cR').value), q = parseFloat($('cQ').value);
+    $('cAo').textContent = (A > 0 ? '+' : '') + A.toFixed(1);
+    $('cRo').textContent = r.toFixed(2);
+    $('cQo').textContent = q.toFixed(2);
+    var lo = 1 - e, hi = 1 + e, qt = Math.exp(tau);
+    var YC = 130, YS = 100 / 6;
+    var Y = function (v) { return YC - v * YS; };
+    var XL = function (x) { return 48 + x / 2 * 350; };
+    var XR = function (x) { return 48 + (x - 0.3) / 0.7 * 350; };
+    function yAxis() {
+      var s = '';
+      [-6, -3, 3, 6].forEach(function (g) {
+        s += '<line class="pl-grid" x1="48" x2="398" y1="' + Y(g) + '" y2="' + Y(g) + '"/>';
+        s += '<text class="lbl" x="40" y="' + (Y(g) + 4) + '" text-anchor="end">' + g + '</text>';
+      });
+      s += '<line class="pl-ax" x1="48" x2="398" y1="' + Y(0) + '" y2="' + Y(0) + '"/>';
+      s += '<text class="lbl" x="40" y="' + (Y(0) + 4) + '" text-anchor="end">0</text>';
+      s += '<line class="pl-ax" x1="48" x2="48" y1="22" y2="238"/>';
+      s += '<text class="lbl" x="54" y="18">계수</text>';
+      return s;
+    }
+    function seg(cls, x1, y1, x2, y2) { return '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>'; }
+
+    /* left: GRPO coefficient = 1_clip * A * r */
+    var coefR = A > 0 ? (r <= hi ? A * r : 0) : (A < 0 ? (r >= lo ? A * r : 0) : 0);
+    var s = '<rect class="pl-band2" x="' + XL(lo) + '" y="22" width="' + (XL(hi) - XL(lo)) + '" height="216"/>' + yAxis();
+    s += seg('pl-grid', XL(0), Y(0), XL(2), Y(2 * A));
+    if (A > 0) {
+      s += seg('pl-curve', XL(0), Y(0), XL(hi), Y(A * hi));
+      s += seg('pl-grid', XL(hi), Y(A * hi), XL(hi), Y(0));
+      s += seg('pl-dead', XL(hi), Y(0), XL(2), Y(0));
+    } else if (A < 0) {
+      s += seg('pl-dead', XL(0), Y(0), XL(lo), Y(0));
+      s += seg('pl-grid', XL(lo), Y(0), XL(lo), Y(A * lo));
+      s += seg('pl-curve', XL(lo), Y(A * lo), XL(2), Y(2 * A));
+    } else {
+      s += seg('pl-dead', XL(0), Y(0), XL(2), Y(0));
+    }
+    [[0, '0'], [lo, '1−ε'], [1, '1'], [hi, '1+ε'], [2, '2']].forEach(function (t) {
+      s += '<text class="lbl" x="' + XL(t[0]) + '" y="256" text-anchor="middle">' + t[1] + '</text>';
+    });
+    s += '<text class="s" x="398" y="280" text-anchor="end">r = π_θ / π_old</text>';
+    s += '<text class="t" x="204" y="14" text-anchor="middle">GRPO: 계수 = 1_clip · Â · r</text>';
+    s += '<circle class="pl-dot" cx="' + XL(r) + '" cy="' + Y(coefR) + '" r="7"/>';
+    $('cSvgL').innerHTML = s;
+
+    /* right: LGPO coefficient = c * A, c = 1(ln q <= tau) */
+    var pass = Math.log(q) <= tau;
+    var coefQ = pass ? A : 0;
+    var s2 = '<rect class="pl-block" x="' + XR(qt) + '" y="22" width="' + (XR(1) - XR(qt)) + '" height="216"/>' + yAxis();
+    s2 += seg('pl-curve', XR(0.3), Y(A), XR(qt), Y(A));
+    s2 += seg('pl-grid', XR(qt), Y(A), XR(qt), Y(0));
+    s2 += seg('pl-dead', XR(qt), Y(0), XR(1), Y(0));
+    [0.3, 0.5, 0.7, 0.9, 1].forEach(function (t) {
+      s2 += '<text class="lbl" x="' + XR(t) + '" y="256" text-anchor="middle">' + t + '</text>';
+    });
+    s2 += '<text class="s" x="' + XR(qt) + '" y="' + (Y(-6) - 6) + '" text-anchor="middle">e^τ = ' + qt.toFixed(2) + '</text>';
+    s2 += '<text class="s" x="398" y="280" text-anchor="end">exp(ℓ̄) = 토큰 확률의 기하평균</text>';
+    s2 += '<text class="t" x="204" y="14" text-anchor="middle">LGPO: 계수 = c · Â (r 없음)</text>';
+    s2 += '<circle class="pl-dot" cx="' + XR(q) + '" cy="' + Y(coefQ) + '" r="7"/>';
+    $('cSvgR').innerHTML = s2;
+
+    var gMsg = coefR === 0 && A !== 0 ? '<b class="stop">꺼짐 → 계수 0</b>' : '<b class="go">켜짐 → 계수 ' + f2(coefR) + '</b>';
+    if (A === 0) gMsg = '<b class="stop">Â = 0이라 계수 0</b>';
+    var lMsg = pass ? '<b class="go">c = 1 → 계수 ' + f2(coefQ) + '</b>' : '<b class="stop">c = 0 → 계수 0</b>';
+    $('cRead').innerHTML =
+      '<div>왼쪽 GRPO: r = ' + r.toFixed(2) + ', 허용 범위 [' + lo.toFixed(2) + ', ' + hi.toFixed(2) + '] → ' + gMsg + ' (Â · r = ' + f2(A * r) + ')</div>' +
+      '<div>오른쪽 LGPO: exp(ℓ̄) = ' + q.toFixed(2) + ' (ℓ̄ = ' + Math.log(q).toFixed(3) + '), τ = ' + tau.toFixed(2) + ' → ' + lMsg + '</div>' +
+      '<div>두 장치는 <b>보는 값이 달라요</b>: GRPO는 r(옛 정책 대비 변화)을, LGPO는 가능도(모델의 확신)를 봐요.</div>';
+  }
+  ['cA', 'cE', 'cT', 'cR', 'cQ'].forEach(function (id) { $(id).addEventListener('input', drawCoef); });
+  drawCoef();
+})();
+</script>
+
+</body>
+</html>

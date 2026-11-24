@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>AWR 흐름 지도</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@500;600;700&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one reading column, same schematic language as "SmolVLA 정책 지도": teal = data, rose = value(V), indigo = policy, orange = where θ changes */
+  :root {
+    --bg: #f3f5f6;
+    --surface: #ffffff;
+    --ink: #17202b;
+    --muted: #5b6672;
+    --line: #c9d1d8;
+    --env: #0f766e;
+    --env-soft: #e3f2f0;
+    --value: #be185d;
+    --value-soft: #fbe7f0;
+    --policy: #3b4cca;
+    --policy-soft: #e8eafb;
+    --update: #c2410c;
+    --update-soft: #fcebe1;
+    --good: #15803d;
+    --bad: #b91c1c;
+    --display: "IBM Plex Sans KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+      --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+      --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+      --good: #4ade80; --bad: #f87171; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1418; --surface: #161d23; --ink: #e6ebef; --muted: #96a2ad; --line: #2e3842;
+    --env: #3cc4b4; --env-soft: #11302d; --value: #f472b6; --value-soft: #3a1529;
+    --policy: #8e9bff; --policy-soft: #1d2246; --update: #fb923c; --update-soft: #3a2113;
+    --good: #4ade80; --bad: #f87171; color-scheme: dark;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.7; }
+  .wrap { max-width: 900px; margin: 0 auto; padding-block: 40px 64px;
+          padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+          display: grid; gap: 44px; }
+  header { display: grid; gap: 14px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(28px, 5vw, 40px); line-height: 1.2; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: 21px; line-height: 1.35; margin: 0; text-wrap: balance; }
+  h3 { font-family: var(--display); font-weight: 600; font-size: 16.5px; line-height: 1.4; margin: 0; }
+  p { margin: 0; max-width: 68ch; }
+  .lede { font-size: 17px; }
+  code, .m { font-family: var(--mono); font-size: .9em; }
+  .theta { color: var(--update); font-weight: 700; }
+  .muted { color: var(--muted); }
+
+  .oneline { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; display: grid; gap: 6px; }
+  .oneline .m { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; }
+  .sw.env { border-color: var(--env); background: var(--env-soft); }
+  .sw.value { border-color: var(--value); background: var(--value-soft); }
+  .sw.policy { border-color: var(--policy); background: var(--policy-soft); }
+  .sw.update { border-color: var(--update); background: var(--update-soft); }
+  .sw.dash { border-style: dashed; border-color: var(--muted); background: transparent; }
+
+  section { display: grid; gap: 14px; }
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .scroll { overflow-x: auto; }
+  figure svg { display: block; width: 100%; min-width: 660px; height: auto; color: var(--ink); font-family: var(--body); }
+  figcaption { font-size: 14.5px; color: var(--muted); max-width: 72ch; }
+
+  svg text { fill: currentColor; }
+  svg .t { font-size: 14px; font-weight: 700; }
+  svg .s { font-size: 11.5px; fill: var(--muted); }
+  svg .h { font-family: var(--display); font-size: 15px; font-weight: 700; }
+  svg .mono { font-family: var(--mono); font-size: 12px; }
+  svg .lbl { font-size: 12px; fill: var(--muted); }
+  svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+  svg .env { fill: var(--env-soft); stroke: var(--env); stroke-width: 2; }
+  svg .val { fill: var(--value-soft); stroke: var(--value); stroke-width: 2; }
+  svg .policy { fill: var(--policy-soft); stroke: var(--policy); stroke-width: 2; }
+  svg .dash { stroke-dasharray: 6 4; }
+  svg .c-upd { fill: var(--update); font-weight: 700; }
+  svg .c-val { fill: var(--value); font-weight: 700; }
+  svg .ar { stroke: currentColor; stroke-width: 1.6; fill: none; }
+  svg .ar-d { stroke: var(--muted); stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; }
+  svg .head { fill: currentColor; }
+  svg .head-d { fill: var(--muted); }
+
+  /* β explorer */
+  .beta { display: grid; gap: 14px; }
+  .ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+  .ctrl label { font-weight: 500; }
+  .ctrl input[type=range] { width: min(320px, 100%); accent-color: var(--policy); }
+  .ctrl output { font-family: var(--mono); font-size: 15px; color: var(--policy); font-weight: 500; min-width: 7ch; }
+  .chk { display: inline-flex; gap: 8px; align-items: center; font-size: 14.5px; color: var(--muted); font-weight: 400 !important; }
+  input:focus-visible { outline: 2px solid var(--policy); outline-offset: 2px; }
+  .ticks { display: flex; justify-content: space-between; width: min(320px, 100%); font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .rows { display: grid; gap: 10px; }
+  .row { display: grid; grid-template-columns: 104px minmax(0, 1fr) 62px 84px; gap: 10px; align-items: center; font-variant-numeric: tabular-nums; }
+  .act { display: flex; gap: 8px; align-items: center; }
+  .an { font-family: var(--mono); font-weight: 500; }
+  .chip { font-family: var(--mono); font-size: 11.5px; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line); white-space: nowrap; }
+  .chip.pos { color: var(--good); border-color: var(--good); }
+  .chip.neg { color: var(--bad); border-color: var(--bad); }
+  .track { display: grid; gap: 3px; min-width: 0; }
+  .mu { height: 4px; background: var(--line); border-radius: 2px; }
+  .pi { height: 14px; background: var(--policy); border-radius: 3px; transition: width .25s ease; min-width: 1px; }
+  .pct { font-family: var(--mono); font-size: 14px; text-align: right; }
+  .w { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  .keyline { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+  .keyline i { display: inline-block; width: 18px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+  .note { padding: 10px 14px; border-left: 3px solid var(--policy); background: var(--policy-soft); border-radius: 0 8px 8px 0; font-size: 15px; }
+  @media (prefers-reduced-motion: reduce) { .pi { transition: none; } }
+  @media (max-width: 520px) { .row { grid-template-columns: 92px minmax(0, 1fr) 56px; } .w { display: none; } }
+
+  /* derivation ladder */
+  ol.ladder { list-style: none; margin: 0; padding: 0; display: grid; }
+  ol.ladder li { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 14px; position: relative; padding-bottom: 22px; }
+  ol.ladder li:not(:last-child)::before { content: ""; position: absolute; left: 34px; top: 32px; bottom: 0; width: 2px; background: var(--line); }
+  .eq { font-family: var(--mono); font-size: 12px; height: 28px; display: grid; place-items: center; border: 1.5px solid var(--policy); color: var(--policy); background: var(--policy-soft); border-radius: 6px; position: relative; z-index: 1; white-space: nowrap; }
+  .eq.alt { border-color: var(--muted); color: var(--muted); background: var(--surface); }
+  .rung { display: grid; gap: 6px; min-width: 0; }
+  .f { font-family: var(--mono); font-size: 13.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; overflow-x: auto; white-space: nowrap; }
+
+  /* tables */
+  .tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-family: var(--display); font-weight: 600; font-size: 14px; background: var(--bg); }
+  tbody th { font-weight: 500; color: var(--muted); font-size: 13.5px; white-space: nowrap; }
+  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+  .hl { background: var(--policy-soft); }
+  thead th.hl { color: var(--policy); }
+  td .m { white-space: nowrap; }
+
+  .nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 0; }
+  .nums div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; display: grid; gap: 2px; }
+  .nums dt { font-size: 13px; color: var(--muted); }
+  .nums dd { margin: 0; font-family: var(--mono); font-size: 16px; font-variant-numeric: tabular-nums; }
+  ul.res { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 72ch; }
+  footer { font-size: 13.5px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 18px; }
+  a { color: var(--policy); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">RL Part2 준비 · 논문 1 · Peng, Kumar, Zhang, Levine (UC Berkeley, 2019)</div>
+    <h1>AWR 흐름 지도</h1>
+    <p class="lede"><b>형광펜 비유.</b> 학생들의 풀이 노트(데이터)를 쌓아 놓고, <b>평균보다 잘 푼 풀이일수록 형광펜을 진하게</b> 칠한 다음, 진하게 칠한 곳 위주로 따라 쓰기 연습을 해요. 이 따라 쓰기가 BC(Behavior Cloning, 행동 복제)예요. 형광펜 굵기가 <span class="m">ω = exp(A/β)</span>예요.</p>
+    <div class="oneline">
+      <p><b>AWR = 회귀 두 번.</b> ① V를 실제 점수 R에 맞추고(MSE) ② 데이터 행동을 ω만큼 따라 해요(가중치 BC).</p>
+      <p class="m">V ← argmin E[(R − V(s))²]   →   π ← argmax E[ log π(a|s) · exp((R − V(s))/β) ]</p>
+    </div>
+    <div class="legend">
+      <span><i class="sw env"></i>데이터·환경</span>
+      <span><i class="sw value"></i>V (점수 매기는 쪽)</span>
+      <span><i class="sw policy"></i>정책 π = SmolVLA(θ)</span>
+      <span><i class="sw update"></i>θ가 바뀌는 곳</span>
+    </div>
+  </header>
+
+  <!-- 1. whole loop -->
+  <section>
+    <h2>1. 한 바퀴 전체 그림</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 960 350" role="img" aria-label="AWR 한 바퀴: 데이터 D에서 R을 받아 V를 맞추고, A를 계산하고, ω로 바꾼 뒤, 데이터 행동을 ω만큼 따라 하는 가중치 BC로 정책 θ를 업데이트한다. 온라인이면 새 정책으로 판을 더 모아 D에 넣는다.">
+          <defs>
+            <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head"/></marker>
+            <marker id="m1d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="head-d"/></marker>
+          </defs>
+
+          <!-- top: actions come from data -->
+          <path d="M90,120 V72 H855 V117" class="ar"  marker-end="url(#m1)"/>
+          <text x="472" y="62" text-anchor="middle" class="lbl">(s, a) 그대로 전달 — 정책은 데이터에 있는 행동만 따라 해요</text>
+
+          <!-- boxes -->
+          <rect x="20"  y="120" width="140" height="120" rx="8" class="env"/>
+          <text x="90" y="152" text-anchor="middle" class="h">데이터 D</text>
+          <text x="90" y="176" text-anchor="middle" class="s">판마다 (s, a, r)</text>
+          <text x="90" y="222" text-anchor="middle" class="s">고정 데이터 or 버퍼</text>
+
+          <rect x="200" y="120" width="160" height="120" rx="8" class="val"/>
+          <text x="280" y="152" text-anchor="middle" class="t">① V 맞추기</text>
+          <text x="280" y="176" text-anchor="middle" class="mono">min (R − V)²</text>
+          <text x="280" y="200" text-anchor="middle" class="s">→ V(s) = R의 평균</text>
+          <text x="280" y="222" text-anchor="middle" class="s c-val">회귀 #1 · V망 학습</text>
+
+          <rect x="400" y="120" width="140" height="120" rx="8" class="box"/>
+          <text x="470" y="152" text-anchor="middle" class="t">② 판정</text>
+          <text x="470" y="176" text-anchor="middle" class="mono">A = R − V(s)</text>
+          <text x="470" y="200" text-anchor="middle" class="s">평균보다 잘했나?</text>
+          <text x="470" y="222" text-anchor="middle" class="s">+ 잘함 · − 못함</text>
+
+          <rect x="580" y="120" width="150" height="120" rx="8" class="box"/>
+          <text x="655" y="152" text-anchor="middle" class="t">③ 형광펜 굵기</text>
+          <text x="655" y="176" text-anchor="middle" class="mono">ω = exp(A/β)</text>
+          <text x="655" y="200" text-anchor="middle" class="s">항상 0보다 큼</text>
+          <text x="655" y="222" text-anchor="middle" class="s">20에서 자름</text>
+
+          <rect x="770" y="120" width="170" height="120" rx="8" class="policy"/>
+          <text x="855" y="152" text-anchor="middle" class="t">④ 가중치 BC</text>
+          <text x="855" y="176" text-anchor="middle" class="mono">max Σ ω·log π(a|s)</text>
+          <text x="855" y="200" text-anchor="middle" class="s">진한 판을 더 따라 함</text>
+          <text x="855" y="222" text-anchor="middle" class="s c-upd">회귀 #2 · θ 업데이트</text>
+
+          <!-- chain arrows -->
+          <line x1="160" y1="180" x2="197" y2="180" class="ar" marker-end="url(#m1)"/>
+          <text x="179" y="170" text-anchor="middle" class="lbl">R</text>
+          <line x1="360" y1="180" x2="397" y2="180" class="ar" marker-end="url(#m1)"/>
+          <text x="379" y="170" text-anchor="middle" class="lbl">V</text>
+          <line x1="540" y1="180" x2="577" y2="180" class="ar" marker-end="url(#m1)"/>
+          <text x="559" y="170" text-anchor="middle" class="lbl">A</text>
+          <line x1="730" y1="180" x2="767" y2="180" class="ar" marker-end="url(#m1)"/>
+          <text x="749" y="170" text-anchor="middle" class="lbl">ω</text>
+
+          <!-- bottom loop -->
+          <path d="M855,240 V292 H90 V244" class="ar-d" marker-end="url(#m1d)"/>
+          <text x="472" y="316" text-anchor="middle" class="lbl">온라인이면: 새 π로 판을 더 모아 D에 추가 → 다시 ①부터</text>
+          <text x="472" y="336" text-anchor="middle" class="lbl">오프라인이면: 이 화살표 없음 · 같은 D로 ①~④ 반복</text>
+        </svg>
+      </div>
+      <figcaption>θ가 바뀌는 곳은 ④ 하나뿐이에요(①에서는 V망만 바뀌어요). 위쪽 화살표가 핵심이에요. 정책은 언제나 <b>데이터에 실제로 있는 행동 a</b>만 따라 하고, 형광펜 굵기만 달라져요.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 2. beta explorer -->
+  <section>
+    <h2>2. β 하나로 BC ↔ 욕심쟁이 사이를 오가요</h2>
+    <p>같은 상태 s에서 데이터에 행동 5개가 <b>20%씩</b> 있다고 해요(회색 선). 슬라이더로 β를 바꾸면 식 8의 새 정책 <span class="m">π* ∝ μ · exp(A/β)</span>이 각 행동을 몇 %로 고를지(남색 막대) 바로 보여요.</p>
+    <figure>
+      <div class="beta">
+        <div class="ctrl">
+          <label for="beta">β (온도 = 목줄 길이)</label>
+          <div style="display:grid; gap:2px; width:min(320px,100%)">
+            <input type="range" id="beta" min="0" max="7" step="1" value="1" aria-describedby="betaNote">
+            <div class="ticks" aria-hidden="true"><span>0.02</span><span>0.05</span><span>0.1</span><span>0.2</span><span>0.5</span><span>1</span><span>2</span><span>∞</span></div>
+          </div>
+          <output id="betaOut" for="beta" aria-live="polite">0.05</output>
+          <label class="chk" for="clip"><input type="checkbox" id="clip" checked> ω를 20에서 자르기 (논문 설정)</label>
+        </div>
+        <div class="keyline"><span><i style="height:4px;background:var(--line)"></i>μ: 데이터 속 비율 (20%)</span><span><i style="height:10px;background:var(--policy)"></i>π*: 새 정책이 고를 비율</span><span class="m">ω = 형광펜 굵기</span></div>
+        <div class="rows" id="rows"></div>
+        <p class="note" id="betaNote"></p>
+      </div>
+      <figcaption>A 값(−0.3 … +0.3)은 설명용 예시예요. β = 0.05가 논문 값이에요. 이때 클립을 끄면 a₅ 하나가 거의 전부를 가져가요. 한 판에 과적합되는 걸 막으려고 ω를 20에서 잘라요.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 3. derivation ladder -->
+  <section>
+    <h2>3. 식이 어떻게 이어지나 (논문 식 번호 그대로)</h2>
+    <p>위에서 아래로 한 줄씩 내려가면 알고리즘이 나와요. 내일 논문 읽을 때 이 순서대로 따라가면 돼요.</p>
+    <ol class="ladder">
+      <li>
+        <div class="eq alt">식 2</div>
+        <div class="rung">
+          <h3>출발점: RWR (조상)</h3>
+          <div class="f">π_{k+1} = argmax E[ log π(a|s) · exp(R / β) ]</div>
+          <p>점수 R 자체를 형광펜으로 써요. 모든 판 점수가 양수면 <b>못한 판도 꽤 진하게</b> 칠해져요. baseline이 없어서 그래요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq">식 3</div>
+        <div class="rung">
+          <h3>목표: 데이터 정책보다 얼마나 나아지나</h3>
+          <div class="f">η(π) = J(π) − J(μ) = E_{s∼d_π, a∼π}[ A^μ(s, a) ]</div>
+          <p>μ = 데이터를 만든 정책이에요. "점수 최대화" 대신 <b>"μ 대비 개선"</b>을 목표로 잡으면 A(= R − V)가 자연스럽게 들어와요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq">식 4</div>
+        <div class="rung">
+          <h3>근사: 새 정책이 갈 상태는 모르니 데이터 상태로 잰다</h3>
+          <div class="f">η̂(π) = E_{s∼d_μ, a∼π}[ R^μ(s, a) − V^μ(s) ]</div>
+          <p>d_π(새 정책이 방문할 상태)는 직접 돌려 봐야 알 수 있어요. 그래서 데이터에 있는 상태 d_μ로 바꿔요. <b>π가 μ와 가까울 때만</b> 맞는 근사예요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq">식 5·6</div>
+        <div class="rung">
+          <h3>목줄: 데이터에서 너무 멀어지지 마</h3>
+          <div class="f">max η̂(π)   s.t.   E_{s∼d_μ}[ KL( π(·|s) ‖ μ(·|s) ) ] ≤ ε</div>
+          <p>KL = 두 분포가 얼마나 다른지 재는 거리예요. <b>PPO의 clip(0.8~1.2)과 같은 역할</b>(trust region)이라 Part2에서 PPO로 넘어가는 다리가 돼요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq">식 7·8</div>
+        <div class="rung">
+          <h3>정답: 데이터 분포에 형광펜을 곱해 다시 줄 세우기</h3>
+          <div class="f">π*(a|s) = μ(a|s) · exp( A(s, a) / β ) / Z(s)</div>
+          <p>라그랑주 승수법으로 풀면 이 꼴이 나와요. β가 라그랑주 승수 = 목줄 길이예요. Z는 합을 1로 맞추는 값이에요. <b>2번 슬라이더가 바로 이 식</b>이에요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq">식 9·10</div>
+        <div class="rung">
+          <h3>신경망으로 옮기면 = 가중치 BC</h3>
+          <div class="f">argmin E[ KL(π* ‖ π) ]  =  argmax E_{(s,a)∼D}[ log π(a|s) · exp(A / β) ]</div>
+          <p>π*를 신경망에 그대로 넣을 수는 없어요. 그래서 가장 가까운 π를 찾는데, 풀어 보면 <b>"데이터 행동의 log 확률 × ω"</b>만 남아요. 이게 알고리즘 6번 줄(④)이에요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq">식 15·16</div>
+        <div class="rung">
+          <h3>여러 정책 데이터가 섞여도 V 하나면 된다</h3>
+          <div class="f">V̄ = argmin_V E_D[ (R − V(s))² ]   →   섞인 정책들 V의 가중 평균</div>
+          <p>버퍼에는 과거 정책 π₁…π_k의 판이 섞여 있어요. V를 정책마다 따로 두지 않고 하나만 MSE로 맞춰요. <b>MSE 최솟값 = 평균</b>이라서, 필요한 가중 평균 baseline이 자동으로 나와요. 알고리즘 5번 줄(①)이에요.</p>
+        </div>
+      </li>
+      <li>
+        <div class="eq alt">3.3절</div>
+        <div class="rung">
+          <h3>실전 손질</h3>
+          <div class="f">R: MC → TD(λ = 0.95)   ·   β = 0.05 고정   ·   ω ≤ 20   ·   상태는 버퍼에서 균일 샘플</div>
+          <p>MC는 분산이 커서 TD(λ)로 바꿨어요(MC도 되지만 조금 나빴어요). β는 따로 조절하지 않고 고정해도 됐어요. ω가 폭발하면 gradient도 폭발해서 20에서 잘라요.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 4. spectrum -->
+  <section>
+    <h2>4. BC · AWR · PG/PPO: 같은 "따라 하기", 다른 형광펜</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th></th><th>BC</th><th class="hl">AWR</th><th>PG / PPO (Part1·Part2)</th></tr></thead>
+        <tbody>
+          <tr><th>형광펜(가중치)</th><td>모든 판 1</td><td class="hl"><span class="m">exp(A/β)</span> · 항상 양수</td><td><span class="m">A</span> · 음수도 됨</td></tr>
+          <tr><th>못한 행동은?</th><td>잘한 행동과 똑같이 따라 함</td><td class="hl"><b>덜 따라 할 뿐</b>, 밀어내지 않음</td><td>그 행동에서 <b>밀어냄</b></td></tr>
+          <tr><th>데이터</th><td>고정 데이터 OK</td><td class="hl">고정 데이터 OK (5.4절)</td><td>지금 정책으로 직접 rollout</td></tr>
+          <tr><th>점수(보상) 필요?</th><td>필요 없음</td><td class="hl">필요 (R → V → A)</td><td>필요</td></tr>
+          <tr><th>데이터 밖으로 튈 위험</th><td>낮음</td><td class="hl">낮음 (데이터 행동만 학습)</td><td>있음 → PPO가 clip으로 막음</td></tr>
+          <tr><th>식</th><td><span class="m">max Σ log π(a|s)</span></td><td class="hl"><span class="m">max Σ ω·log π(a|s)</span></td><td><span class="m">Σ A·∇log π(a|s)</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">β → ∞이면 AWR = BC예요. 그래서 AWR은 "BC에서 한 걸음 RL 쪽으로" 간 방법이에요. Part2 발표에서 PPO 바로 앞에 두면 흐름이 자연스러워요.</p>
+  </section>
+
+  <!-- 5. numbers & results -->
+  <section>
+    <h2>5. 논문 숫자 메모</h2>
+    <dl class="nums">
+      <div><dt>β (온도)</dt><dd>0.05 고정</dd></div>
+      <div><dt>TD(λ)</dt><dd>λ = 0.95</dd></div>
+      <div><dt>ω 상한</dt><dd>20</dd></div>
+      <div><dt>학습률 π / V</dt><dd>5e-5 / 1e-4</dd></div>
+      <div><dt>버퍼 / 배치</dt><dd>50k / 256</dd></div>
+      <div><dt>반복당 스텝 V / π</dt><dd>200 / 1000</dd></div>
+    </dl>
+    <ul class="res">
+      <li><b>Gym (시드 5개):</b> PPO·TRPO보다 확실히 좋고, 최종 성능은 SAC·TD3급이에요. Humanoid는 SAC에 밀려요(4996 vs 8048). 샘플 효율도 SAC·TD3보다 낮아요.</li>
+      <li><b>Ablation:</b> experience replay와 baseline이 핵심이에요. baseline을 빼면(RWR 가중치) 크게 떨어져요. 버퍼가 크면 안정적이지만 느려요.</li>
+      <li><b>5.4절 고정 데이터:</b> SAC 데모 100만 스텝(보상 포함)만으로 학습했어요. <b>데모 정책과 같거나 더 좋았고</b>, BCQ·BEAR급이었어요. PPO는 나빴고, 그냥 BC가 TD3·SAC보다 나은 경우가 많았어요.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>출처: Peng, Kumar, Zhang, Levine, "Advantage-Weighted Regression: Simple and Scalable Off-Policy Reinforcement Learning" (2019), <a href="https://arxiv.org/abs/1910.00177">arXiv 1910.00177</a>. 식 번호는 논문 기준이에요.</p>
+    <p>2번의 A 값은 설명용 예시예요.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var betas = [0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, Infinity];
+  var acts = [
+    { n: 'a₁', A: -0.3 }, { n: 'a₂', A: -0.1 }, { n: 'a₃', A: 0 }, { n: 'a₄', A: 0.1 }, { n: 'a₅', A: 0.3 }
+  ];
+  var W_MAX = 20, MU = 0.2;
+  var slider = document.getElementById('beta');
+  var out = document.getElementById('betaOut');
+  var clip = document.getElementById('clip');
+  var rows = document.getElementById('rows');
+  var note = document.getElementById('betaNote');
+
+  function weights(b, useClip) {
+    return acts.map(function (a) {
+      var w = b === Infinity ? 1 : Math.exp(a.A / b);
+      return useClip ? Math.min(w, W_MAX) : w;
+    });
+  }
+  function fw(w) {
+    if (w >= 1000) return w.toExponential(1).replace('e+', 'e');
+    if (w >= 10) return w.toFixed(1);
+    if (w >= 0.01) return w.toFixed(2);
+    return w.toExponential(0).replace('e-', 'e-');
+  }
+  function fp(p) { return p < 0.1 ? '<0.1%' : p.toFixed(1) + '%'; }
+  function chip(A) {
+    var cls = A > 0 ? 'pos' : (A < 0 ? 'neg' : '');
+    var s = (A > 0 ? '+' : '') + A.toFixed(1);
+    return '<span class="chip ' + cls + '">A ' + s + '</span>';
+  }
+  function message(b) {
+    if (b === Infinity) return '모든 행동 가중치가 1이에요. 데이터 비율 그대로(20%씩) 따라 해요. 이게 그냥 BC예요.';
+    if (b <= 0.05) return '점수에 아주 민감해요. 잘한 행동(a₄, a₅)에 거의 다 몰고, 못한 행동(a₁, a₂)은 사실상 버려요.';
+    if (b <= 0.2) return '잘한 쪽으로 확실히 기울이되, 평범한 행동(a₃)도 조금 남겨요.';
+    if (b <= 1) return '살짝 기울이는 정도예요. 점수를 반쯤만 믿어요.';
+    return '거의 BC예요. 점수를 거의 안 믿고 데이터 비율을 따라가요.';
+  }
+  function render() {
+    var b = betas[+slider.value];
+    var ws = weights(b, clip.checked);
+    var Z = ws.reduce(function (s, w) { return s + w * MU; }, 0);
+    out.textContent = b === Infinity ? '∞ (= BC)' : String(b);
+    rows.innerHTML = acts.map(function (a, i) {
+      var p = ws[i] * MU / Z * 100;
+      return '<div class="row">' +
+        '<div class="act"><span class="an">' + a.n + '</span>' + chip(a.A) + '</div>' +
+        '<div class="track"><div class="mu" style="width:' + (MU * 100) + '%"></div><div class="pi" style="width:' + p.toFixed(2) + '%"></div></div>' +
+        '<div class="pct">' + fp(p) + '</div>' +
+        '<div class="w">ω ' + fw(ws[i]) + '</div>' +
+        '</div>';
+    }).join('');
+    note.textContent = message(b);
+  }
+  slider.addEventListener('input', render);
+  clip.addEventListener('change', render);
+  render();
+})();
+</script>
+
+</body>
+</html>
